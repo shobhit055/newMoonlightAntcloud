@@ -1,0 +1,332 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#101010"
+    tools:context=".ui.AppView">
+
+    <FrameLayout
+        android:id="@+id/appFragmentContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="invisible"
+        android:id="@+id/loadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#000000">
+
+        <ImageView
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_gravity="center"
+            android:id="@+id/spinnerImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@drawable/spinner" />
+
+
+
+
+        <TextView
+            android:layout_marginBottom="150dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_gravity="center"
+            android:id="@+id/loadingText"
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:textColor="#FFFFFF"
+            android:textSize="20dp"
+            android:maxLines="2"
+            android:text="Loading...ebvebeb" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:id="@+id/socketTimer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="There was an issue starting your PC.\nKindly try the following points to troubleshoot your issue:"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/bulletText" />
+
+        <TextView
+            android:id="@+id/bulletText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp"
+            android:text="@string/vm_connection_issue_msg"
+            app:layout_constraintTop_toBottomOf="@id/titleText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/contactButton"/>
+
+
+        <Button
+            android:padding="4dp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_bg"
+            android:layout_marginTop="30dp"
+            android:id="@+id/backBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go Back"
+            android:textAllCaps="false"
+            app:layout_constraintTop_toBottomOf="@+id/bulletText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/contactButton" />
+
+        <Button
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_bg"
+            android:layout_marginTop="30dp"
+            android:id="@+id/contactButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact Support"
+            app:layout_constraintTop_toBottomOf="@+id/bulletText"
+            app:layout_constraintStart_toEndOf="@id/backBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:visibility="invisible"
+        android:id="@+id/resolutionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_centerVertical="true"
+        android:clipToOutline="true"
+        android:elevation="4dp"
+        android:backgroundTint="@android:color/darker_gray"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <TextView
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:id="@+id/textResolution"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select Resolution"
+                android:padding="12dp"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:background="@drawable/spinner_background" />
+
+            <Spinner
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:id="@+id/resolution_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <TextView
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:id="@+id/textfps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select FPS"
+                android:padding="12dp"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:background="@drawable/spinner_background" />
+
+            <Spinner
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:id="@+id/fps_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+        <TextView
+            android:id="@+id/bitrate_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_weight="0.8"
+            android:text="@string/title_seekbar_bitrate"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"/>
+
+
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:id="@+id/bitrate_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:layout_gravity="center"/>
+
+        <SeekBar
+            android:progressBackgroundTint="@color/blue_gradient"
+            android:progressTint="@color/white"
+            android:thumbTint="@color/white"
+            android:id="@+id/bitrateSeekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:max="150000"
+            android:progress="5000" />
+
+        <CheckBox
+            android:textColor="@color/white"
+           android:buttonTint="@color/white"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:text="OnScreen Controller"
+            android:id="@+id/cbController"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp">
+
+            <Button
+                android:id="@+id/start_vm_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.42"
+                android:text="Launch PC"
+                android:textColor="@android:color/black"
+                android:backgroundTint="@android:color/white"/>
+
+            <Button
+                android:id="@+id/shutdown_vm_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.42"
+                android:text="Shutdown VM"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="10dp"
+                android:backgroundTint="@color/pink_gradient"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:id="@+id/connection_error_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/one_min_issue_msg"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/error_backBtn" />
+
+
+
+
+        <Button
+            android:padding="4dp"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_bg"
+            android:layout_marginTop="30dp"
+            android:id="@+id/error_backBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go Back"
+            android:textAllCaps="false"
+            app:layout_constraintTop_toBottomOf="@+id/errorText"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/progressBar"
+        android:layout_centerInParent="true"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+
+
+
+
+</RelativeLayout>

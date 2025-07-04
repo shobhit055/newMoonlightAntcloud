@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AntCloudNewFlow" parent="android:Theme.Material.Light.NoActionBar" >
+    <item name="windowSplashScreenBackground">@color/black</item>
+    <item name="windowSplashScreenAnimatedIcon">@drawable/logo_text</item>
+    <item name="postSplashScreenTheme">@style/Theme.AppCompat.NoActionBar</item>
+    </style>
+
+    <style name="Theme.AntCloudNewFlow_App" parent="Theme.AppCompat.NoActionBar" />
+
+<!--    <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>-->
+    <style name="Theme.Antcloud_App.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.AppCompat.NoActionBar</item>
+    </style>
+
+    <style name="Theme.Antcloud_App" parent="Theme.AppCompat.NoActionBar" />
+
+    <style name="Theme.MyApp" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+</resources>
+
+

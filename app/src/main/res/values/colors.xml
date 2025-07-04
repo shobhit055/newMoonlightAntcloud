@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primaryPurpleLight">#ffD697FF</color>
+    <color name="accentPurpleLight">#ff323050</color>
+    <color name="primaryPurpleDark">#ffD697FF</color>
+    <color name="accentPurpleDark">#ff323050</color>
+    <color name="bgColorLight">#FFF5F5F5</color>
+    <color name="bgColorDark">#ff101010</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#ff101010</color>
+    <color name="blue_gradient">#2EDBD0</color>
+    <color name="pink_gradient">#F93DDF</color>
+</resources>
