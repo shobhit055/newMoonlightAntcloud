@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -69,13 +71,14 @@ fun Drawer(
     val userData = remember {
         mutableStateOf(viewModel.userData)
     }
-    Column(modifier.fillMaxWidth().fillMaxHeight().padding(top = 10.dp).background(Black),
+    Column(modifier.fillMaxWidth()
+        .fillMaxHeight()
+        .padding(top = 0.dp).background(Black),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
             modifier = Modifier.weight(.8f).padding(top = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)){
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)){
                 Image(
                     modifier = Modifier.size(60.dp).align(Alignment.Center),
                     painter = painterResource(id = R.drawable.ant_cloud_white_icon),
@@ -101,106 +104,104 @@ fun Drawer(
                 }
             }
 
-            screens.forEachIndexed { _, screen ->
-                //  if (!(screen.route == DrawerScreens.Terms.route || screen.route == DrawerScreens.Policy.route || screen.route == DrawerScreens.Onboarding.route)) {
-                val gradientBrush = Brush.linearGradient(colors = gradientColors)
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(Color.Transparent)
-                    .clickable {
-                        onDestinationClicked(screen.route)
-                    }
-                    .padding(vertical = 15.dp, horizontal = 5.dp)) {
-                    var myStyle: TextStyle? = null
-                    myStyle = if (current == screen.route) {
-                        TextStyle(
-                            brush = gradientBrush,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold)
-                    }
-                    else
-                        subtitle.copy(fontSize = 22.sp)
-                    Text(
-                        style = myStyle,
-                        modifier = Modifier.fillMaxWidth(),
-                        text = screen.title,
-                        textAlign = TextAlign.Center)
-                }
-            }
+          Column (Modifier.verticalScroll(state = rememberScrollState())){
+              screens.forEachIndexed { _, screen ->
+                  //  if (!(screen.route == DrawerScreens.Terms.route || screen.route == DrawerScreens.Policy.route || screen.route == DrawerScreens.Onboarding.route)) {
+                  val gradientBrush = Brush.linearGradient(colors = gradientColors)
+                  Row(modifier = Modifier
+                      .fillMaxWidth()
+                      .align(Alignment.CenterHorizontally)
+                      .clip(RoundedCornerShape(5.dp))
+                      .background(Color.Transparent)
+                      .clickable {
+                          onDestinationClicked(screen.route)
+                      }
+                      .padding(vertical = 15.dp, horizontal = 5.dp)) {
+                      var myStyle: TextStyle? = null
+                      myStyle = if (current == screen.route) {
+                          TextStyle(
+                              brush = gradientBrush,
+                              fontSize = 22.sp,
+                              fontWeight = FontWeight.Bold)
+                      }
+                      else
+                          subtitle.copy(fontSize = 22.sp)
+                      Text(style = myStyle,
+                          modifier = Modifier.fillMaxWidth(),
+                          text = screen.title,
+                          textAlign = TextAlign.Center)
+                  }
+              }
+          }
+
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier
-                .weight(.2f)
-                .wrapContentWidth()
-                .padding(16.dp)){
-            Text(
-                text = "Time Remaining",
-                style = TextStyle(
-                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
-                    color = White, textAlign = TextAlign.Center
-                ),
-                modifier = Modifier.padding(bottom = 16.dp))
-
-
-            val gradientColors = listOf(White, PinkGradient, BlueGradient)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .padding(bottom = 16.dp)
-                    .background(
-                        brush = Brush.horizontalGradient(colors = gradientColors),
-                        shape = RoundedCornerShape(16.dp)
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(.5f)
-                        .fillMaxHeight()
-                        .padding(top = 0.dp)
-                        .background(White, shape = RoundedCornerShape(16.dp))
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Text(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = userData.value.currentPlan,
-                        style = TextStyle(
-                            fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Black,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                }
-                val timeLeft : Int
-                var timeLeftString  = ""
-                if(userData.value.currentPlan!="Basic") {
-                    timeLeft = if(userData.value.totalTimeMonth != 0) userData.value.totalTimeMonth - userData.value.timeUsedMonth else 0
-                    timeLeftString = "${timeLeft/60} hrs. ${timeLeft.absoluteValue%60} mins."
-                }
-                else{
-                    timeLeftString = "0 mins"
-                }
-
-                Text(
-                    modifier = Modifier
-                        .weight(.5f)
-                        .padding()
-                        .wrapContentHeight(),
-
-                    text = timeLeftString,
-                    style = TextStyle(
-                        fontSize = 12.sp, fontWeight = FontWeight.Medium, color = White,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-        }
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Bottom,
+//            modifier = Modifier
+//                .weight(.2f)
+//                .wrapContentWidth()
+//                .padding(16.dp)){
+//            Text(
+//                text = "Time Remaining",
+//                style = TextStyle(
+//                    fontSize = 18.sp, fontWeight = FontWeight.Bold,
+//                    color = White, textAlign = TextAlign.Center
+//                ), modifier = Modifier.padding(bottom = 16.dp))
+//            val gradientColors = listOf(White, PinkGradient, BlueGradient)
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(45.dp)
+//                    .padding(bottom = 16.dp)
+//                    .background(
+//                        brush = Brush.horizontalGradient(colors = gradientColors),
+//                        shape = RoundedCornerShape(16.dp)
+//                    ),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.Center) {
+//                Box(
+//                    modifier = Modifier
+//                        .weight(.5f)
+//                        .fillMaxHeight()
+//                        .padding(top = 0.dp)
+//                        .background(White, shape = RoundedCornerShape(16.dp))
+//                        .align(Alignment.CenterVertically)
+//                ) {
+//                    Text(
+//                        modifier = Modifier.align(Alignment.Center),
+//                        text = userData.value.currentPlan,
+//                        style = TextStyle(
+//                            fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Black,
+//                            textAlign = TextAlign.Center
+//                        )
+//                    )
+//                }
+//                val timeLeft : Int
+//                var timeLeftString  = ""
+//                if(userData.value.currentPlan!="Basic") {
+//                    timeLeft = if(userData.value.totalTimeMonth != 0) userData.value.totalTimeMonth - userData.value.timeUsedMonth else 0
+//                    timeLeftString = "${timeLeft/60} hrs. ${timeLeft.absoluteValue%60} mins."
+//                }
+//                else{
+//                    timeLeftString = "0 mins"
+//                }
+//
+//                Text(
+//                    modifier = Modifier
+//                        .weight(.5f)
+//                        .padding()
+//                        .wrapContentHeight(),
+//
+//                    text = timeLeftString,
+//                    style = TextStyle(
+//                        fontSize = 12.sp, fontWeight = FontWeight.Medium, color = White,
+//                        textAlign = TextAlign.Center
+//                    )
+//                )
+//            }
+//        }
     }
 }
 

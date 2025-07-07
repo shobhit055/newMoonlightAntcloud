@@ -1,11 +1,16 @@
 package com.limelight.screen.auth
 
 
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
+import android.util.DisplayMetrics
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,11 +35,15 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.MaterialTheme.shapes
 import androidx.compose.material.MaterialTheme.typography
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -54,15 +63,22 @@ import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
@@ -98,7 +114,12 @@ import com.limelight.activity.SignupActivity
 import com.limelight.common.AppUtils.Companion.gradientColors
 import com.limelight.common.AppUtils.Companion.navigateNavScreen
 import com.limelight.Theme
+import com.limelight.activity.LoginActivity
 import com.limelight.common.AppUtils.Companion.navigateSplashActivity
+import com.limelight.components.CustomDialog
+import com.limelight.components.Play
+import com.limelight.screen.account.globalInstance
+import com.limelight.theme.heading
 
 
 private lateinit var oAuthLogic: OAuthLogic
@@ -114,6 +135,7 @@ private lateinit var user : UserSignUp
 
 @Composable
 fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, emailMobileValue: String) {
+
     oAuthLogic = OAuthLogic(
         activity = activity,
         onSuccess = { _, _ -> },
@@ -144,6 +166,9 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
 
     viewModel.subSignUpStateText = {
         state = it
+    }
+    val showMaintenanceDialog = remember {
+        mutableStateOf(false)
     }
 
     when (signupState.success) {
@@ -260,28 +285,371 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
         }
     }
 
-    Column(
-        modifier = Modifier.padding().fillMaxSize()
-            .background(brush = Brush.horizontalGradient(colors = gradientColors)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        Image(
-            modifier = Modifier.wrapContentWidth().padding(top=20.dp),
-            painter = painterResource(id = R.drawable.ant_cloud_white_icon),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds)
+    showMaintenanceDialog.value = if(globalInstance.remoteAppMessage.isNotEmpty()) globalInstance.remoteAppMessage[0].showDialog else false
 
-        Text(modifier = Modifier, text = "Create an Account", style = titleText.copy(fontSize = 16.sp))
+    val displayMetrics: DisplayMetrics = activity.resources.displayMetrics
+    val screenWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+    val landscape = screenWidth >= 600
+    if(showMaintenanceDialog.value) {
+        CustomDialog(openDialogCustom = showMaintenanceDialog.value, onDismiss = { /*TODO*/ }) {
+            Card(
+                modifier = Modifier
+                    .padding(start = 5.dp, top = 10.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Black)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .background(MaterialTheme.colors.surface)
+                ) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 20.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        Text(
+                            text = globalInstance.remoteAppMessage[0].dialogTitle,
+                            style = heading.copy(fontFamily = Play, textDecoration = TextDecoration.Underline)
+                        )
+                    }
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    if(globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
+                        val annotatedString = buildAnnotatedString {
+                            globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
+                                if(annotatedMessage.isClickable) {
+                                    pushStringAnnotation(tag = index.toString(), annotation = annotatedMessage.url)
+                                    withStyle(style = SpanStyle(color = Color.Yellow, textDecoration = TextDecoration.Underline)) {
+                                        append(annotatedMessage.message)
+                                    }
+                                    pop()
+                                } else {
+                                    withStyle(style = SpanStyle(color = Color.White)) {
+                                        append(annotatedMessage.message)
+                                    }
+                                }
+                                append(" ")
+                            }
+                        }
 
-        when (state) {
-            "loading" -> Column(modifier = Modifier.size((LocalConfiguration.current.screenWidthDp).dp)) {
-                Loading(loadingText, landscape = false)
+                        androidx.compose.material.Text(
+                            text = annotatedString,
+                            modifier = Modifier
+                                .pointerInput(Unit) {
+                                    detectTapGestures { offset ->
+                                        val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                        val position = layoutResult.getOffsetForPosition(offset)
+                                        annotatedString.getStringAnnotations(start = position, end = position).forEach { annotation ->
+                                            if(annotation.tag.isNotEmpty()) {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                                currentActivity.startActivity(intent)
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(horizontal = 10.dp),
+                            style = subtitle.copy(
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Light
+                            ),
+                            onTextLayout = {result ->
+                                textLayoutResult = result
+                            }
+                        )
+                    }
+                    else {
+                        Text(
+                            text = globalInstance.remoteAppMessage[0].messageText,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            color = MaterialTheme.colors.secondary,
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                    if(globalInstance.remoteAppMessage[0].isDialogDismissible){
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp)
+                                .background(MaterialTheme.colors.primary.copy(alpha = 0.5f)),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(onClick = {
+                                /*currentAct.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://play.google.com/store/apps/details?id=com.antcloud.app")
+                                    )
+                                )*/
+                                showMaintenanceDialog.value = false
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colors.secondary,
+                                )
+                                Spacer(modifier = Modifier.size(5.dp))
+                                androidx.compose.material.Text(
+                                    text = "OK ",
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colors.secondary,
+                                    style = subtitle,
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(Modifier.size(25.dp))
+                    }
+                }
             }
-            "email" -> EnterInfo(emailMobileValue, activity = activity, showPassword = true, viewModel = viewModel, landscape = false)
-            "otp" -> EnterOTP(activity, viewModel = viewModel, landscape = false)
         }
     }
-    Spacer(modifier = Modifier.size(10.dp))
+
+    if(!landscape) {
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        Column(
+            modifier = Modifier.padding().fillMaxSize()
+                .background(brush = Brush.horizontalGradient(colors = gradientColors)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Black)
+                ) {
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
+                        val annotatedString = buildAnnotatedString {
+                            globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
+                                if (annotatedMessage.isClickable) {
+                                    pushStringAnnotation(
+                                        tag = index.toString(),
+                                        annotation = annotatedMessage.url
+                                    )
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = Color.Yellow,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append(annotatedMessage.message)
+                                    }
+                                    pop()
+                                } else {
+                                    withStyle(style = SpanStyle(color = Color.White)) {
+                                        append(annotatedMessage.message)
+                                    }
+                                }
+                                append(" ")
+                            }
+                        }
+
+                        androidx.compose.material.Text(
+                            text = annotatedString,
+                            modifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                    val position = layoutResult.getOffsetForPosition(offset)
+                                    annotatedString.getStringAnnotations(
+                                        start = position,
+                                        end = position
+                                    ).forEach { annotation ->
+                                        if (annotation.tag.isNotEmpty()) {
+                                            val intent = Intent(
+                                                Intent.ACTION_VIEW,
+                                                Uri.parse(annotation.item)
+                                            )
+                                            currentActivity.startActivity(intent)
+                                        }
+                                    }
+                                }
+                            },
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center
+                            ),
+                            onTextLayout = { result ->
+                                textLayoutResult = result
+                            }
+                        )
+                    } else {
+                        Text(
+                            text = globalInstance.remoteAppMessage[0].messageText,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter)
+                                .padding(top = 5.dp),
+                            color = MaterialTheme.colors.secondary,
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    modifier = Modifier.wrapContentWidth().padding(top = 20.dp),
+                    painter = painterResource(id = R.drawable.ant_cloud_white_icon),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+
+                Text(
+                    modifier = Modifier,
+                    text = "Create an Account",
+                    style = titleText.copy(fontSize = 16.sp)
+                )
+
+                when (state) {
+                    "loading" -> Column(modifier = Modifier.size((LocalConfiguration.current.screenWidthDp).dp)) {
+                        Loading(loadingText, landscape = false)
+                    }
+
+                    "email" -> EnterInfo(
+                        emailMobileValue,
+                        activity = activity,
+                        showPassword = true,
+                        viewModel = viewModel,
+                        landscape = false
+                    )
+
+                    "otp" -> EnterOTP(activity, viewModel = viewModel, landscape = false)
+                }
+            }
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+    }
+    else{
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        Column(
+            modifier = Modifier.padding().fillMaxSize().verticalScroll(rememberScrollState())
+                .background(brush = Brush.horizontalGradient(colors = gradientColors)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Black)
+                ) {
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
+                        val annotatedString = buildAnnotatedString {
+                            globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
+                                if (annotatedMessage.isClickable) {
+                                    pushStringAnnotation(
+                                        tag = index.toString(),
+                                        annotation = annotatedMessage.url
+                                    )
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = Color.Yellow,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append(annotatedMessage.message)
+                                    }
+                                    pop()
+                                } else {
+                                    withStyle(style = SpanStyle(color = Color.White)) {
+                                        append(annotatedMessage.message)
+                                    }
+                                }
+                                append(" ")
+                            }
+                        }
+
+                        androidx.compose.material.Text(
+                            text = annotatedString,
+                            modifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                    val position = layoutResult.getOffsetForPosition(offset)
+                                    annotatedString.getStringAnnotations(
+                                        start = position,
+                                        end = position
+                                    ).forEach { annotation ->
+                                        if (annotation.tag.isNotEmpty()) {
+                                            val intent = Intent(
+                                                Intent.ACTION_VIEW,
+                                                Uri.parse(annotation.item)
+                                            )
+                                            currentActivity.startActivity(intent)
+                                        }
+                                    }
+                                }
+                            },
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center
+                            ),
+                            onTextLayout = { result ->
+                                textLayoutResult = result
+                            }
+                        )
+                    } else {
+                        Text(
+                            text = globalInstance.remoteAppMessage[0].messageText,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter)
+                                .padding(top = 5.dp),
+                            color = MaterialTheme.colors.secondary,
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                }
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    modifier = Modifier.wrapContentWidth().padding(top = 10.dp),
+                    painter = painterResource(id = R.drawable.ant_cloud_white_icon),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+
+                Text(
+                    modifier = Modifier,
+                    text = "Create an Account",
+                    style = titleText.copy(fontSize = 16.sp)
+                )
+
+                when (state) {
+                    "loading" -> Column(modifier = Modifier.size((LocalConfiguration.current.screenWidthDp).dp)) {
+                        Loading(loadingText, landscape = false)
+                    }
+
+                    "email" -> EnterInfo(
+                        emailMobileValue,
+                        activity = activity,
+                        showPassword = true,
+                        viewModel = viewModel,
+                        landscape = false
+                    )
+
+                    "otp" -> EnterOTP(activity, viewModel = viewModel, landscape = false)
+                }
+            }
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+    }
 }
 
 
@@ -344,8 +712,7 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
     var isErrorDate by remember { mutableStateOf(false) }
     var isErrorPassword by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(top = 30.dp)
-        .verticalScroll(state = rememberScrollState()),
+    Column(modifier = Modifier.fillMaxSize().padding(top = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
 
         val nameColor = if(isErrorName || signupError == SignupErrors.USERNAME_TAKEN) Red else White
@@ -525,12 +892,12 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
                         innerTextField()
                     }
                     Icon(
+                        tint = White,
                         imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password",
                         modifier = Modifier
                             .clickable { isPasswordVisible = !isPasswordVisible }
-                            .padding(start = 8.dp)
-                    )
+                            .padding(start = 8.dp))
                 }
             }
         )

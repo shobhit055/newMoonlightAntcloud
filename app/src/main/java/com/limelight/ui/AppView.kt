@@ -269,6 +269,7 @@ class AppView : AppCompatActivity() {
         setContentView(R.layout.activity_app_view)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         prefs = PreferenceManager.getDefaultSharedPreferences(this@AppView)
+        prefs!!.edit().putBoolean(PreferenceConfiguration.ONSCREEN_CONTROLLER_PREF_STRING,false).apply();
         val viewModel: StreamViewModel by viewModels()
         val userViewModel: UserViewModel by viewModels()
         getVmipState = viewModel.getVMIPState.value

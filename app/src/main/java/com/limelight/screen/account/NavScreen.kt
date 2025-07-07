@@ -67,16 +67,6 @@ fun NavScreen(activity: NavActivity, navigationRoute: String, viewModel: GameVie
         viewModel.subToolbarState={
             toolbarVisible= it
         }
-
-//        var navigationRoute by remember {
-//            mutableStateOf(userViewModel.navRoute)
-//        }
-//        userViewModel.subNavRoute={
-//            navigationRoute= it
-//        }
-//        val toggleToolbar: ((Boolean) -> Unit) = {
-//            toolbarVisible = it
-//        }
         var toolbarText by remember {
             mutableStateOf("")
         }
@@ -90,7 +80,6 @@ fun NavScreen(activity: NavActivity, navigationRoute: String, viewModel: GameVie
             current = "${dest.route}"
         }
 
-  Log.i("test" , "cvwvcwv")
         val navigate: ((String) -> Unit) = { uri: String -> navController.navigate(uri)}
         ModalDrawer(scrimColor = Color.Transparent,
             drawerShape = RoundedCornerShape(15.dp),
@@ -118,16 +107,10 @@ fun NavScreen(activity: NavActivity, navigationRoute: String, viewModel: GameVie
                     }, screens = listOf(
                           DrawerScreens.Library,
                           DrawerScreens.Pricing,
-//                          DrawerScreens.OrderHistory,
                           DrawerScreens.Support,
                           DrawerScreens.Account,
                           DrawerScreens.FAQs,
-//                          DrawerScreens.Product,
-//                          DrawerScreens.EarnGames,
-//                        DrawerScreens.Policy,
-//                        DrawerScreens.Terms,
-//                        DrawerScreens.Tutorials,
-//                        DrawerScreens.PingTest
+
                     ), activity = activity)
             }) {
             Box {
@@ -147,13 +130,9 @@ fun NavScreen(activity: NavActivity, navigationRoute: String, viewModel: GameVie
                         startDestination = navigationRoute) {
                           libraryNav(this, activity, updateToolbar, navigate)
                           pricingNav(this, activity, updateToolbar,navigate)
-//                          orderHistoryNav(this, activity, updateToolbar,navigate)
                           supportNav(this, activity, updateToolbar, navigate)
                           accountNav(this, activity, updateToolbar, navigate)
                           reportNav(this, activity, updateToolbar)
-//                          productNav(this, activity, updateToolbar , navigate) { openDrawer() }
-//                          earnGemsNav(this, activity, updateToolbar,navigate,navController){ openDrawer() }
-//                          earnGamesHistoryNav(this, activity, updateToolbar){ openDrawer() }
                           FAQNav(this, activity, updateToolbar,navigate)
                           PrivacyNav(this, activity, updateToolbar)
                           termsNav(this, activity, updateToolbar)

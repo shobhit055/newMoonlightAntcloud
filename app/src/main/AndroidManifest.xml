@@ -118,9 +118,11 @@
             android:exported="false">
         </activity>
 
+
         <activity
             android:name=".activity.LoginActivity"
-            android:exported="true">
+            android:launchMode="singleTop"
+            android:exported="false">
         </activity>
 
         <activity

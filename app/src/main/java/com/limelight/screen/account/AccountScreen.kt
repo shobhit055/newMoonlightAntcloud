@@ -31,6 +31,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
@@ -429,8 +430,8 @@ fun AccountScreen(
     val landscape = screenWidth >= 600
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-//            .verticalScroll(state = scrollState),
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
+            .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.size(20.dp))
         Row(
@@ -572,8 +573,7 @@ fun AccountScreen(
 
                         },
                         shape = RoundedCornerShape(5.dp),
-                        modifier = if (landscape) Modifier.fillMaxWidth(0.4f) else Modifier.weight(
-                            1f),
+                        modifier = if (landscape) Modifier.fillMaxWidth(0.4f) else Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = PinkGradient)) {
                         Text(

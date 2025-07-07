@@ -234,7 +234,8 @@ fun GameDetailsScreen(
     val screenWidth = (displayMetrics.widthPixels / displayMetrics.density.toInt())
     val landscape = screenWidth >= 600
 
-    val bannerHeight = if(landscape) (LocalConfiguration.current.screenHeightDp / 2).dp else (LocalConfiguration.current.screenWidthDp / 1.777).dp
+    val bannerHeight = if(landscape) (LocalConfiguration.current.screenHeightDp / 2).dp
+    else (LocalConfiguration.current.screenWidthDp / 1.777).dp
     val globalInstance = GlobalData.getInstance()
 
     /*viewModel.subFavoriteListState = {

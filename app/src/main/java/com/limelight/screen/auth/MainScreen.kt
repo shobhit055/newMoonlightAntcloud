@@ -265,11 +265,11 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
                 }
                 else {
                     if(emailMobile.isEmailValid()) {
-//                        AppUtils.navigateLoginScreen(activity, emailMobile, "email")
-                        viewModel.updateLoginLoadingText("please wait ....")
-                        progressBarVisible = true
-                        val dataModel = CheckUserInDB(emailMobile.trim(), "")
-                        viewModel.checkUserInDB(dataModel)
+                        AppUtils.navigateLoginScreen(activity, emailMobile, "email")
+//                        viewModel.updateLoginLoadingText("please wait ....")
+//                        progressBarVisible = true
+//                        val dataModel = CheckUserInDB(emailMobile.trim(), "")
+//                        viewModel.checkUserInDB(dataModel)
                     }
                     else
                         activity.makeToast("Please enter a valid Email")
