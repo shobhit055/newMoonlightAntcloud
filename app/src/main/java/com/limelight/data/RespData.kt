@@ -80,7 +80,6 @@ data class Genre(@SerializedName("genre") var genre :String = "")
 
 data class Popular(@SerializedName("popular") var popular :String = "")
 
-data class AppMessage(@SerializedName("showMessage") var showMessage: Boolean, @SerializedName("messageText") var messageText: String)
 
 class Service(@SerializedName("name") val name: String = "", @SerializedName("code") val code: String = "", @SerializedName("message") val message: String = "")
 
@@ -92,4 +91,12 @@ data class CheckConnectionStatusResp(@SerializedName("message") var connected :B
 data class PinVerifyResponse(@SerializedName("message") var message :String , @SerializedName("data") var verifyData : PinVerifyData)
 
 data class PinVerifyData(@SerializedName("status") var status : String)
+data class GamesMaintenance(@SerializedName("showGames") var showGames: Boolean, @SerializedName("maintenance") var maintenance: Boolean, @SerializedName("maintenanceText") var maintenanceText: String)
+data class AnnotatedMessage(
+    @SerializedName("message") var message: String,
+    @SerializedName("isClickable") var isClickable: Boolean,
+    @SerializedName("url") var url: String
+)
+data class AppMessage(@SerializedName("showMessage") var showMessage: Boolean, @SerializedName("messageText") var messageText: String, @SerializedName("useAnnotation") var useAnnotation: Boolean, @SerializedName("annotatedMessage") var annotatedMessage: List<AnnotatedMessage>, @SerializedName("showDialog") var showDialog: Boolean, @SerializedName("dialogTitle") var dialogTitle: String, @SerializedName("isDialogDismissible") var isDialogDismissible: Boolean)
+
 

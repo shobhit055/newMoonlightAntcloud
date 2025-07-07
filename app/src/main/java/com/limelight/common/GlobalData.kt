@@ -3,6 +3,7 @@ package com.limelight.common
 import com.limelight.data.AppMessage
 import com.limelight.data.DocumentListData
 import com.limelight.data.FAQCard
+import com.limelight.data.GamesMaintenance
 import com.limelight.data.MobileGames
 import com.limelight.data.PolicyListResp
 import com.limelight.data.PricingGroups
@@ -47,6 +48,8 @@ class GlobalData {
     var gemsHistoryFlag : Int = 0
     var vmIP : String = ""
     lateinit  var socket: Socket
+    var remoteGamesMaintenance: List<GamesMaintenance> = listOf()
+
 
     var purchasePlan : Boolean = false
 

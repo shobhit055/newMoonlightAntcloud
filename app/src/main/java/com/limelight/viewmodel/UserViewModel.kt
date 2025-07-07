@@ -105,6 +105,11 @@ class UserViewModel @Inject constructor(private val checkUserUseCase: CheckUserL
     var subCurrentRes : ((String) -> Unit)? = null
     var userData = GlobalData.getInstance().accountData
     var subUserData: ((User) -> Unit)? = null
+    var subShowMaintenanceDialog: ((Boolean) -> Unit)? = null
+
+    fun updateShowMaintenanceDialog(res: Boolean) {
+        subShowMaintenanceDialog?.invoke(res)
+    }
 
     var toggle: Boolean = false
     var subToggle: ((Boolean) -> Unit)? = null

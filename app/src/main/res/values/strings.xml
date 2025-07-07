@@ -328,5 +328,10 @@
     <string name ="goback">Go Back</string>
 
     <string name ="one_min_issue_msg">Your seem to be unable to start a video with PC. Please check your internet connection once and try again</string>
+    <string name="plan">Plan</string>
+    <string name="plan_hold_text">Your payment is on hold!</string>
+    <string name="basic_banner_text">Want to start playing?</string>
+    <string name="plan_hold_button">Contact Support</string>
+    <string name="update_app">An update for the app is currently available. Please update your app</string>
 
 </resources>

@@ -21,6 +21,7 @@ import com.google.firebase.remoteconfig.get
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.google.gson.Gson
+import com.limelight.data.GamesMaintenance
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -140,6 +141,14 @@ class MyApplication: Application() {
                 globalInstance.remoteShowIntroPlans = false
                 val showIntroPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
                 globalInstance.remoteShowIntroPlans = showIntroPlans
+            }
+
+            if(key.contains("gamesMaintenance")) {
+                globalInstance.remoteGamesMaintenance = listOf()
+                val gamesMaintenance: Array<GamesMaintenance> = Gson().fromJson(dataJson, Array<GamesMaintenance>::class.java)
+                for (gamesMaintenanceData  in gamesMaintenance) {
+                    globalInstance.remoteGamesMaintenance += listOf(gamesMaintenanceData)
+                }
             }
         }
     }

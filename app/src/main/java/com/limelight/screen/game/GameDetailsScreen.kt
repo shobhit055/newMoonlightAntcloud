@@ -106,7 +106,7 @@ enum class Images(val image: Int) {
 }
 
 enum class DialogState {
-    LOADING, INFO, STORE, COMPLETE, PAIDGAME  //, REGIONS
+    LOADING, INFO, STORE, COMPLETE, PAIDGAME,MAINTENANCE //, REGIONS
 }
 
 fun gameDetailNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: ((String) -> Unit), navigate: ((String) -> Unit)) {
@@ -264,7 +264,10 @@ fun GameDetailsScreen(
                         Loading()
                     }
 
-                    DialogState.INFO -> InfoDialog(onClick = {
+                    DialogState.INFO -> InfoDialog(
+                        textToShow = "Please make sure you own the game you want to play via the appropriate store. For more details, please check out the FAQs.",
+
+                        onClick = {
                             openDialogCustom.value = false
                             /*onEventHandler(GameDetailsEvent.OnPlayClick)
                             delayClose()
@@ -286,6 +289,12 @@ fun GameDetailsScreen(
                             .clip(RoundedCornerShape(10.dp))) {
                         Loading("Starting your game ...")
                     }
+                    DialogState.MAINTENANCE -> InfoDialog(
+                        textToShow = globalInstance.remoteGamesMaintenance[0].maintenanceText,
+                        onClick = {
+                            openDialogCustom.value = false
+                        }
+                    )
                 }
             }
 
@@ -810,6 +819,7 @@ fun StoreDialog(
 
 @Composable
 fun InfoDialog(
+    textToShow: String,
     onClick: () -> Unit,
 ) {
     Card(
@@ -821,7 +831,8 @@ fun InfoDialog(
                 .background(MaterialTheme.colors.surface)
         ) {
             Text(
-                text = "Please make sure you own the game you want to play via the appropriate store. For more details, please check out the FAQs.",
+//                text = "Please make sure you own the game you want to play via the appropriate store. For more details, please check out the FAQs.",
+                text = textToShow,
                 color = MaterialTheme.colors.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(vertical = 15.dp, horizontal = 10.dp)
@@ -830,7 +841,7 @@ fun InfoDialog(
                 Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp)
-                    .clickable { onClick() }
+                    .clickable { onClick()  }
                     .background(MaterialTheme.colors.primary.copy(alpha = 0.5f)),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically

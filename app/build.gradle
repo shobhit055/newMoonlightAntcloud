@@ -28,6 +28,10 @@ android {
         jvmTarget = "11"
     }
 
+    firebaseCrashlytics {
+        mappingFileUploadEnabled false
+    }
+
     flavorDimensions.add("root")
     buildFeatures {
         buildConfig = true
@@ -188,4 +192,5 @@ dependencies {
     implementation("io.socket:socket.io-client:2.0.1") {
         exclude group: 'org.json', module: 'json'
     }
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.0'
 }
