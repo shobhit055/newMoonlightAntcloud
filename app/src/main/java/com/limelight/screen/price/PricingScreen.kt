@@ -1,8 +1,5 @@
 package com.limelight.screen.price
 
-
-
-
 import android.content.Intent
 import android.util.DisplayMetrics
 import androidx.compose.foundation.BorderStroke
@@ -106,7 +103,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-
 val globalInstance  =  GlobalData.getInstance()
 enum class PricingImages(val id: Int) {
     H_1(R.drawable.pricing_1),
@@ -120,6 +116,7 @@ enum class PricingImages(val id: Int) {
 lateinit var coroutineScope : CoroutineScope
 lateinit var currentActivity : NavActivity
 var pagerState: PagerState? = null
+
 
 @OptIn(ExperimentalFoundationApi::class)
 fun pricingNav(t: NavGraphBuilder, activity: NavActivity, updateToolbar: ((String) -> Unit), navigate: ((String) -> Unit)) {
@@ -669,6 +666,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                     }
                 }
             }
+
+
             CustomDialog(
                 openDialogCustom = showWaitList,
                 label = "Join WaitList",
@@ -1128,18 +1127,18 @@ fun PricingItem(viewModel: PricingViewModel ,pricingData: List<PricingGroups>, t
         } else {
             Row {
                 val mod = Modifier
-                    .weight(0.5f)
+                    .weight(0.4f)
                     .size((LocalConfiguration.current.screenWidthDp / 2.5).dp)
                 image(mod)
                 Spacer(modifier = Modifier.weight(0.05f))
                 Box(modifier = Modifier
-                    .weight(0.3f)
+                    .weight(0.5f)
                     .padding(start = 5.dp)
                     .align(Alignment.CenterVertically)
                 ) {
                     itemCard()
                 }
-                Spacer(modifier = Modifier.weight(0.15f))
+                Spacer(modifier = Modifier.weight(0.05f))
             }
         }
     }

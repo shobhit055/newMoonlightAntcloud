@@ -610,13 +610,15 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
             currentAct.requestedOrientation= ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             PortraitLayoutLibrary(imageHeight = imageHeight, navigate = navigate, handlePcClick = handlePcClick, profileCard)
         } else {
-            val modifierRow = Modifier.weight(if(screenHeight < 1200) 0.5f else 0.55f, true).height(300.dp)
+            val modifierRow = Modifier.weight(if(screenHeight < 1200) 0.5f else 0.55f, true)
             val modifierCard = Modifier.weight(if(screenHeight < 1200) 0.5f else 0.45f, true)
             currentAct.requestedOrientation= ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             LandscapeLayoutLibrary(modifierRow = modifierRow, modifierCard = modifierCard,
                 navigate = navigate, handlePcClick = handlePcClick, profileCard)
         }
     }
+
+
 
 
 //        Column(
@@ -1120,68 +1122,6 @@ fun GameTile(game: Game, modifier: Modifier, expand: Boolean = false, orientatio
 @Composable
 fun PortraitLayoutLibrary(imageHeight: Double, navigate: (String) -> Unit, handlePcClick: () -> Unit, profileCard: @Composable (Boolean) -> Unit) {
     //imageHeight = (LocalConfiguration.current.screenWidthDp / 1.5)
-    if(globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage){
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .background(androidx.compose.material.MaterialTheme.colors.background)
-        ){
-            var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-            if(globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
-                val annotatedString = buildAnnotatedString {
-                    globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
-                        if(annotatedMessage.isClickable) {
-                            pushStringAnnotation(tag = index.toString(), annotation = annotatedMessage.url)
-                            withStyle(style = SpanStyle(color = Color.Yellow, textDecoration = TextDecoration.Underline)) {
-                                append(annotatedMessage.message)
-                            }
-                            pop()
-                        } else {
-                            withStyle(style = SpanStyle(color = Color.White)) {
-                                append(annotatedMessage.message)
-                            }
-                        }
-                        append(" ")
-                    }
-                }
-
-                androidx.compose.material.Text(
-                    text = annotatedString,
-                    modifier = Modifier.pointerInput(Unit) {
-                        detectTapGestures { offset ->
-                            val layoutResult = textLayoutResult ?: return@detectTapGestures
-                            val position = layoutResult.getOffsetForPosition(offset)
-                            annotatedString.getStringAnnotations(
-                                start = position,
-                                end = position
-                            ).forEach { annotation ->
-                                if (annotation.tag.isNotEmpty()) {
-                                    val intent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
-                                    currentAct.startActivity(intent)
-                                }
-                            }
-                        }
-                    },
-                    onTextLayout = { result ->
-                        textLayoutResult = result
-                    }
-                )
-            }
-            else {
-                Text(
-                    text = globalInstance.remoteAppMessage[0].messageText,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter),
-                    color = androidx.compose.material.MaterialTheme.colors.secondary,
-                    style = subtitle.copy(
-                        fontWeight = FontWeight.Light,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-        }
-    }
     Box(Modifier
         .clickable {
             handlePcClick()
@@ -1194,11 +1134,72 @@ fun PortraitLayoutLibrary(imageHeight: Double, navigate: (String) -> Unit, handl
                 .fillMaxWidth()
                 //.height(200.dp),
                 .height(imageHeight.dp),
-            painter = painterResource(id = R.drawable.banner_image),
+            painter = painterResource(id = R.drawable.windows),
             contentDescription = null,
             contentScale = ContentScale.FillBounds)
 
+        if(globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage){
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .background(androidx.compose.material.MaterialTheme.colors.background)
+            ){
+                var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                if(globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
+                    val annotatedString = buildAnnotatedString {
+                        globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
+                            if(annotatedMessage.isClickable) {
+                                pushStringAnnotation(tag = index.toString(), annotation = annotatedMessage.url)
+                                withStyle(style = SpanStyle(color = Color.Yellow, textDecoration = TextDecoration.Underline)) {
+                                    append(annotatedMessage.message)
+                                }
+                                pop()
+                            } else {
+                                withStyle(style = SpanStyle(color = Color.White)) {
+                                    append(annotatedMessage.message)
+                                }
+                            }
+                            append(" ")
+                        }
+                    }
 
+                    androidx.compose.material.Text(
+                        text = annotatedString,
+                        modifier = Modifier.pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                val position = layoutResult.getOffsetForPosition(offset)
+                                annotatedString.getStringAnnotations(
+                                    start = position,
+                                    end = position
+                                ).forEach { annotation ->
+                                    if (annotation.tag.isNotEmpty()) {
+                                        val intent =
+                                            Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                        currentAct.startActivity(intent)
+                                    }
+                                }
+                            }
+                        },
+                        onTextLayout = { result ->
+                            textLayoutResult = result
+                        }
+                    )
+                }
+                else {
+                    Text(
+                        text = globalInstance.remoteAppMessage[0].messageText,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
+                        color = androidx.compose.material.MaterialTheme.colors.secondary,
+                        style = subtitle.copy(
+                            fontWeight = FontWeight.Light,
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+            }
+        }
         androidx.compose.material.Text(
 //            text = stringResource(id = R.string.pc),
             text = "Connect",
@@ -1242,169 +1243,145 @@ fun PortraitLayoutLibrary(imageHeight: Double, navigate: (String) -> Unit, handl
 @Composable
 fun LandscapeLayoutLibrary(modifierRow: Modifier, modifierCard: Modifier,
                            navigate: (String) -> Unit, handlePcClick: () -> Unit, profileCard: @Composable (Boolean) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
+    Row(modifierRow) {
+        Box(Modifier
+            .weight(0.5f, true)
+            .clickable { handlePcClick() }
+            .clip(RoundedCornerShape(5.dp))
+        ) {
+            val imageHeight = (LocalConfiguration.current.screenHeightDp / 2.0)
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                painter = painterResource(id = R.drawable.banner_image),
+                contentDescription = null,
+                contentScale = ContentScale.Crop //original is FillHeight
+            )
+            if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(androidx.compose.material.MaterialTheme.colors.background)
+                ) {
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
+                        val annotatedString = buildAnnotatedString {
+                            globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
+                                if (annotatedMessage.isClickable) {
+                                    pushStringAnnotation(
+                                        tag = index.toString(),
+                                        annotation = annotatedMessage.url
+                                    )
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = Color.Yellow,
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    ) {
+                                        append(annotatedMessage.message)
+                                    }
+                                    pop()
+                                } else {
+                                    withStyle(style = SpanStyle(color = Color.White)) {
+                                        append(annotatedMessage.message)
+                                    }
+                                }
+                                append(" ")
+                            }
+                        }
 
-//        profileCard(true)
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp),
-            painter = painterResource(id = R.drawable.banner_image),
-            contentDescription = null,
-            contentScale = ContentScale.Crop //original is FillHeight
-        )
+                        androidx.compose.material.Text(
+                            text = annotatedString,
+                            modifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    val layoutResult =
+                                        textLayoutResult ?: return@detectTapGestures
+                                    val position = layoutResult.getOffsetForPosition(offset)
+                                    annotatedString.getStringAnnotations(
+                                        start = position,
+                                        end = position
+                                    ).forEach { annotation ->
+                                        if (annotation.tag.isNotEmpty()) {
+                                            val intent = Intent(
+                                                Intent.ACTION_VIEW,
+                                                Uri.parse(annotation.item)
+                                            )
+                                            currentAct.startActivity(intent)
+                                        }
+                                    }
+                                }
+                            },
+                            onTextLayout = { result ->
+                                textLayoutResult = result
+                            }
+                        )
+                    } else {
+                        Text(
+                            text = globalInstance.remoteAppMessage[0].messageText,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter),
+                            color = androidx.compose.material.MaterialTheme.colors.secondary,
+                            style = subtitle.copy(
+                                fontWeight = FontWeight.Light,
+                                textAlign = TextAlign.Center,
+                                background = androidx.compose.material.MaterialTheme.colors.background
+                            )
+                        )
+                    }
+                }
+            }
+            androidx.compose.material.Text(
+                text = "Connect",
+                //textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = (imageHeight / 3.8).dp)
+                    .align(Alignment.TopCenter),
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
+                style = heading.copy(
+                    fontWeight = FontWeight.Light
+                )
+            )
+            androidx.compose.material.Icon(
+                modifier = Modifier
+                    .padding(top = (imageHeight / 1.9).dp)
+                    .size(35.dp)
+                    .align(Alignment.TopCenter),
+                imageVector = Icons.Filled.PowerSettingsNew,
+                contentDescription = "",
+                tint = androidx.compose.material.MaterialTheme.colors.secondary
+            )
+        }
 
+        if (globalInstance.remoteGamesMaintenance[0].showGames) {
+            Column(
+                modifier = Modifier
+                    .weight(0.5f, true)
+                    .padding(start = 10.dp)
+            ) {
+                GamesRow(
+                    navigate,
+                    orientationLandscape = true,
+                    games = if (GlobalData.getInstance().ourGames.isEmpty()) {
+                        currentAct.makeToast("Something Went Wrong")
+                        listOf()
+                    } else {
+                        when (GlobalData.getInstance().ourGames[0].games.size > 3) {
+                            true -> GlobalData.getInstance().ourGames[0].games.subList(0, 3)
+                                .toList()
+
+                            false -> GlobalData.getInstance().ourGames[0].games
+                        }
+                    },
+
+                    )
+            }
+        }
+    }
+    Column(modifierCard) {
         profileCard(true)
-//        Row(modifierRow) {
-//            Box(Modifier
-//                .weight(0.5f, true)
-//                .height(300.dp)
-//                .clickable { handlePcClick() }
-//                .clip(RoundedCornerShape(5.dp))) {
-//                val imageHeight = (LocalConfiguration.current.screenHeightDp / 2.0)
-//                Image(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .fillMaxHeight(),
-//                    painter = painterResource(id = R.drawable.banner_image),
-//                    contentDescription = null,
-//                    contentScale = ContentScale.Crop //original is FillHeight
-//                )
-////                if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
-////                    Box(
-////                        modifier = Modifier
-////                            .fillMaxWidth()
-////                            .background(androidx.compose.material.MaterialTheme.colors.background)
-////                    ) {
-////                        var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-////                        if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
-////                            val annotatedString = buildAnnotatedString {
-////                                globalInstance.remoteAppMessage[0].annotatedMessage.forEachIndexed { index, annotatedMessage ->
-////                                    if (annotatedMessage.isClickable) {
-////                                        pushStringAnnotation(
-////                                            tag = index.toString(),
-////                                            annotation = annotatedMessage.url
-////                                        )
-////                                        withStyle(
-////                                            style = SpanStyle(
-////                                                color = Color.Yellow,
-////                                                textDecoration = TextDecoration.Underline
-////                                            )
-////                                        ) {
-////                                            append(annotatedMessage.message)
-////                                        }
-////                                        pop()
-////                                    } else {
-////                                        withStyle(style = SpanStyle(color = Color.White)) {
-////                                            append(annotatedMessage.message)
-////                                        }
-////                                    }
-////                                    append(" ")
-////                                }
-////                            }
-////
-////                            androidx.compose.material.Text(
-////                                text = annotatedString,
-////                                modifier = Modifier.pointerInput(Unit) {
-////                                    detectTapGestures { offset ->
-////                                        val layoutResult =
-////                                            textLayoutResult ?: return@detectTapGestures
-////                                        val position = layoutResult.getOffsetForPosition(offset)
-////                                        annotatedString.getStringAnnotations(
-////                                            start = position,
-////                                            end = position
-////                                        ).forEach { annotation ->
-////                                            if (annotation.tag.isNotEmpty()) {
-////                                                val intent = Intent(
-////                                                    Intent.ACTION_VIEW,
-////                                                    Uri.parse(annotation.item)
-////                                                )
-////                                                currentAct.startActivity(intent)
-////                                            }
-////                                        }
-////                                    }
-////                                },
-////                                onTextLayout = { result ->
-////                                    textLayoutResult = result
-////                                }
-////                            )
-////                        } else {
-////                            Text(
-////                                text = globalInstance.remoteAppMessage[0].messageText,
-////                                modifier = Modifier
-////                                    .align(Alignment.TopCenter),
-////                                color = androidx.compose.material.MaterialTheme.colors.secondary,
-////                                style = subtitle.copy(
-////                                    fontWeight = FontWeight.Light,
-////                                    textAlign = TextAlign.Center,
-////                                    background = androidx.compose.material.MaterialTheme.colors.background
-////                                )
-////                            )
-////                        }
-////                    }
-////                }
-//                androidx.compose.material.Text(
-//                    text = "Connect",
-//                    //textAlign = TextAlign.Center,
-//                    modifier = Modifier
-//                        .padding(top = (imageHeight / 3.8).dp)
-//                        .align(Alignment.TopCenter),
-//                    color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
-//                    style = heading.copy(
-//                        fontWeight = FontWeight.Light
-//                    )
-//                )
-//                androidx.compose.material.Icon(
-//                    modifier = Modifier
-//                        .padding(top = (imageHeight / 1.9).dp)
-//                        .size(35.dp)
-//                        .align(Alignment.TopCenter),
-//                    imageVector = Icons.Filled.PowerSettingsNew,
-//                    contentDescription = "",
-//                    tint = androidx.compose.material.MaterialTheme.colors.secondary
-//                )
-//            }
-//
-//            if (globalInstance.remoteGamesMaintenance[0].showGames) {
-//                Column(
-//                    modifier = Modifier
-//                        .weight(0.5f, true)
-//                        .height(300.dp)
-//                        .padding(start = 10.dp)
-//                ) {
-//                    GamesRow(
-//                        navigate,
-//                        orientationLandscape = true,
-//                        games = if (GlobalData.getInstance().ourGames.isEmpty()) {
-//                            currentAct.makeToast("Something Went Wrong")
-//                            listOf()
-//                        } else {
-//                            when (GlobalData.getInstance().ourGames[0].games.size > 3) {
-//                                true -> GlobalData.getInstance().ourGames[0].games.subList(0, 3)
-//                                    .toList()
-//
-//                                false -> GlobalData.getInstance().ourGames[0].games
-//                            }
-//                        },
-//
-//                        )
-//                }
-//            }
-//        }
-//        Column(modifierCard) {
-//            profileCard(true)
-//        }
     }
 }
-
-
-
-
 
 @Composable
 fun Speedometer(

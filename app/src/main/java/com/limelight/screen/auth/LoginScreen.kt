@@ -33,7 +33,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -49,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.SolidColor
@@ -70,7 +68,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.limelight.components.OTP_VIEW_TYPE_BOX
 import com.limelight.components.OtpView
 import com.limelight.components.isEmailValid
@@ -94,8 +91,8 @@ import com.limelight.components.CustomDialog
 import com.limelight.components.Play
 import com.limelight.logic.auth.LoginErrors
 import com.limelight.screen.account.globalInstance
-
 import com.limelight.theme.heading
+
 
 
 lateinit var currentActivity : LoginActivity
@@ -331,13 +328,14 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
         Column(
                 modifier = Modifier.fillMaxSize()
                     .background(brush = Brush.horizontalGradient(colors = gradientColors)),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+                horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
                 if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Black)
+                            /*.background(Black)*/
                     ) {
                         var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
                         if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {
@@ -358,7 +356,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                         }
                                         pop()
                                     } else {
-                                        withStyle(style = SpanStyle(color = Color.White)) {
+                                        withStyle(style = SpanStyle(color = White)) {
                                             append(annotatedMessage.message)
                                         }
                                     }
@@ -727,7 +725,6 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Black)
                 ) {
                     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
                     if (globalInstance.remoteAppMessage[0].useAnnotation && globalInstance.remoteAppMessage[0].annotatedMessage.isNotEmpty()) {

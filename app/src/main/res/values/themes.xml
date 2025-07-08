@@ -10,6 +10,7 @@
 
 <!--    <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>-->
     <style name="Theme.Antcloud_App.Splash" parent="Theme.SplashScreen">
+        <item name="android:windowBackground">@color/black</item>
         <item name="windowSplashScreenBackground">@color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/splash_icon</item>
         <item name="postSplashScreenTheme">@style/Theme.AppCompat.NoActionBar</item>

@@ -40,6 +40,7 @@ import com.limelight.utils.UiHelper;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PictureInPictureParams;
 import android.app.Service;
 import android.content.ComponentName;
@@ -66,6 +67,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -75,10 +77,14 @@ import android.view.View.OnSystemUiVisibilityChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import org.json.JSONObject;
 
@@ -95,6 +101,13 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import coil.ComponentRegistry;
+import coil.ImageLoader;
+import coil.decode.GifDecoder;
+import coil.decode.ImageDecoderDecoder;
+import coil.request.ImageRequest;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -111,8 +124,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     boolean pcStream = false;
     PreferenceManager pref;
     Timer timer;
-
-
     private static final int REFERENCE_HORIZ_RES = 1280;
     private static final int REFERENCE_VERT_RES = 720;
     private static final int STYLUS_DOWN_DEAD_ZONE_DELAY = 100;
@@ -158,6 +169,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private WifiManager.WifiLock highPerfWifiLock;
     private WifiManager.WifiLock lowLatencyWifiLock;
     private boolean connectedToUsbDriverService = false;
+    ConstraintLayout loadingLayout;
+    ImageView spinnerImage;
+    TextView loadingText;
 
     private ServiceConnection usbDriverServiceConnection = new ServiceConnection() {
         @Override
@@ -186,6 +200,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     public static final String EXTRA_APP_HDR = "HDR";
     public static final String EXTRA_SERVER_CERT = "ServerCert";
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -209,11 +224,27 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         // Inflate the content
         setContentView(R.layout.activity_game);
+        loadingLayout =  findViewById(R.id.loadingLayout);
+        spinnerImage =  findViewById(R.id.spinnerImage);
+        loadingText =  findViewById(R.id.loadingText);
         pref = new PreferenceManager(this);
 
-        // Start the spinner
-        spinner = SpinnerDialog.displayDialog(this, getResources().getString(R.string.conn_establishing_title),
-                getResources().getString(R.string.conn_establishing_msg), true);
+
+        loadingLayout.setVisibility(View.VISIBLE);
+        loadingText.setText(getResources().getString(R.string.conn_establishing_msg));
+
+        ImageLoader imageLoader = new ImageLoader.Builder(this)
+                .build();
+
+        ImageRequest request = new ImageRequest.Builder(this)
+                .data(R.drawable.spinner)
+                .target(spinnerImage)
+                .build();
+
+        imageLoader.enqueue(request);
+
+//        spinner = SpinnerDialog.displayDialog(this, getResources().getString(R.string.conn_establishing_title),
+//                getResources().getString(R.string.conn_establishing_msg), true);
 
         // Read the stream preferences
         prefConfig = PreferenceConfiguration.readPreferences(this);
@@ -516,11 +547,13 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                     usbDriverServiceConnection, Service.BIND_AUTO_CREATE);
         }
         if (!decoderRenderer.isAvcSupported()) {
-            if (spinner != null) {
-                spinner.dismiss();
-                spinner = null;
-            }
-            Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback.", true);
+            loadingLayout.setVisibility(View.GONE);
+//            if (spinner != null) {
+//                spinner.dismiss();
+//                spinner = null;
+//            }
+            showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback.");
+           // Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback.", true);
             return;
         }
         streamView.getHolder().addCallback(this);
@@ -902,15 +935,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             getWindow().setAttributes(windowLayoutParams);
         }
 
-        // Until Marshmallow, we can't ask for a 4K display mode, so we'll
-        // need to hint the OS to provide one.
         boolean aspectRatioMatch = false;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            // We'll calculate whether we need to scale by aspect ratio. If not, we'll use
-            // setFixedSize so we can handle 4K properly. The only known devices that have
-            // >= 4K screens have exactly 4K screens, so we'll be able to hit this good path
-            // on these devices. On Marshmallow, we can start changing to 4K manually but no
-            // 4K devices run 6.0 at the moment.
             Point screenSize = new Point(0, 0);
             display.getSize(screenSize);
 
@@ -1060,8 +1086,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     protected void onStop() {
         super.onStop();
 
-        SpinnerDialog.closeDialogs(this);
-        Dialog.closeDialogs();
+        loadingLayout.setVisibility(View.GONE);
+//        SpinnerDialog.closeDialogs(this);
+//        Dialog.closeDialogs();
 
         if (virtualController != null) {
             virtualController.hide();
@@ -2183,9 +2210,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (spinner != null) {
-                    spinner.setMessage(getResources().getString(R.string.conn_starting) + " " + stage);
-                }
+//                if (spinner != null) {
+//                    spinner.setMessage(getResources().getString(R.string.conn_starting) + " " + stage);
+//                }
             }
         });
     }
@@ -2226,10 +2253,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (spinner != null) {
-                    spinner.dismiss();
-                    spinner = null;
-                }
+                loadingLayout.setVisibility(View.GONE);
+//                if (spinner != null) {
+//                    spinner.dismiss();
+//                    spinner = null;
+//                }
 
                 if (!displayedFailureDialog) {
                     displayedFailureDialog = true;
@@ -2251,7 +2279,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                         dialogText += "\n\n" + getResources().getString(R.string.nettest_text_blocked);
                     }
 
-                    Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText, true);
+                    showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText);
+                    //Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText, true);
                 }
             }
         });
@@ -2328,9 +2357,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                             message += "\n\n" + getResources().getString(R.string.check_ports_msg) + "\n" +
                                     MoonBridge.stringifyPortFlags(portFlags, "\n");
                         }
-
-                        Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_terminated_title),
-                                message, true);
+                        showErrorDialog(Game.this, getResources().getString(R.string.conn_terminated_title), message);
+//                        Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_terminated_title),
+//                                message, true);
                     }
                     else {
                         finish();
@@ -2375,12 +2404,14 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                loadingLayout.setVisibility(View.INVISIBLE);
                 pcStream =  true;
                 Log.i("test" , "wfwfwvcw");
-                if (spinner != null) {
-                    spinner.dismiss();
-                    spinner = null;
-                }
+                loadingLayout.setVisibility(View.GONE);
+//                if (spinner != null) {
+//                    spinner.dismiss();
+//                    spinner = null;
+//                }
 
                 connected = true;
                 connecting = false;
@@ -2693,4 +2724,32 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         startActivity(new Intent(Game.this, AppView.class));
         finish();
     }
+
+
+    public void showErrorDialog(Activity activity, String tltle, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_error_layout, null);
+        builder.setView(dialogView);
+
+        TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
+        Button btnGoBack = dialogView.findViewById(R.id.btn_go_back);
+
+        dialogTitle.setText(tltle);
+        dialogMessage.setText(message);
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(true);
+        dialog.show();
+
+        btnGoBack.setOnClickListener(v -> {
+            dialog.dismiss();
+            onBackPressed();
+        });
+
+    }
+
+
+
+
 }

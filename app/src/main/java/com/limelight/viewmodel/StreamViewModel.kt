@@ -82,6 +82,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
 
     private val _requestSocketDisconnect = MutableSharedFlow<Unit>(replay = 0)
     val requestSocketDisconnect: SharedFlow<Unit> = _requestSocketDisconnect
+    var socketDisconnect: Boolean = false
 
 
 
@@ -99,8 +100,10 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
         if (socket.connected()) {
             Log.d("Socket", " Disconnecting due to: $reason")
             socket.disconnect()
-            viewModelScope.launch {
-                _requestSocketDisconnect.emit(Unit)
+            if(socketDisconnect) {
+                viewModelScope.launch {
+                    _requestSocketDisconnect.emit(Unit)
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.limelight.data.ForgotState
@@ -25,6 +26,7 @@ class SignupActivity : ComponentActivity() {
             emailMobileValue = intent.getStringExtra("email").toString()
         }
         setContent {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
             hideStatusBar(this@SignupActivity)
             viewModel = hiltViewModel()
             SignupScreen(this@SignupActivity, viewModel, emailMobileValue)

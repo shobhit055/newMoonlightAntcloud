@@ -327,6 +327,7 @@ class AppView : AppCompatActivity() {
                 if(process.code()==200) {
                     globalInstance.vmIP = process.body()?.vmip!!
                     if (globalInstance.vmIP != "") {
+                        viewModel.socketDisconnect = true
                         resolutionLayout.visibility = View.VISIBLE
                         loadingLayout.visibility = View.INVISIBLE
                         Log.d("Socket", "VM IP: ${globalInstance.vmIP}")

@@ -3,6 +3,7 @@ package com.limelight.activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.limelight.R
@@ -24,11 +25,13 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         postPhoneOtpState = LoginState(success = -1)
         if(intent.hasExtra("email"))
             emailMobileValue = intent.getStringExtra("email").toString()
         if(intent.hasExtra("type"))
             type = intent.getStringExtra("type").toString()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             viewModel =  hiltViewModel()
             viewModel.updateType(type)

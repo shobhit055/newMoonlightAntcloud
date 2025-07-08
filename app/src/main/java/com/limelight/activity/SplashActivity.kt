@@ -1,13 +1,11 @@
 package com.limelight.activity
 
-
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-
 import androidx.compose.runtime.LaunchedEffect
+import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.limelight.common.AppUtils
 import com.limelight.common.AppUtils.Companion.clearCheck
@@ -48,6 +46,7 @@ class SplashActivity : ComponentActivity(){
        // enableEdgeToEdge()
         actionBar?.hide()
         setContent {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
             hideStatusBar(activity)
             viewModel = hiltViewModel()
             FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = false
@@ -63,7 +62,7 @@ class SplashActivity : ComponentActivity(){
             when (checkUserState.success){
                 1 -> {
                     apiResp = true
-                    MainScreen(activity,flag,apiResp)
+//                    MainScreen(activity,flag,apiResp)
                     LaunchedEffect(Unit) {
                         if (globalInstance.accountData.refreshToken != "") {
                             checkUserState.userData?.refreshToken =
@@ -120,7 +119,7 @@ class SplashActivity : ComponentActivity(){
             when (refreshTokenState.success){
                 1 -> {
                     apiResp = true
-                    MainScreen(activity,flag,apiResp)
+//                    MainScreen(activity,flag,apiResp)
                     LaunchedEffect(Unit) {
                         calledRefresh = true
                         if ((refreshTokenState.accessToken != "") && (refreshTokenState.refreshToken!= "")) {
