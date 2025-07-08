@@ -113,6 +113,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import com.google.firebase.perf.FirebasePerformance
 
 import com.limelight.components.CustomDialog
 import com.limelight.common.GlobalData
@@ -120,6 +121,7 @@ import com.limelight.components.Loading
 import com.limelight.components.signOut
 import com.limelight.theme.subtitle
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.AppUtils.Companion.gradientColors
 import com.limelight.common.AppUtils.Companion.saveRefreshTokenData
 import com.limelight.data.PreferenceManager
@@ -151,6 +153,24 @@ fun libraryNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
         currentAct =  activity
 
         libraryScreen(navigate ,activity)
+
+        if(globalInstance.appStartToken){
+            globalInstance.traceAppStartToken.stop()
+            globalInstance.appStartToken = false
+
+        }
+        if(globalInstance.emailClickLoginBtn){
+            globalInstance.traceEmailClickLoginBtn.stop()
+            globalInstance.emailClickLoginBtn = false
+        }
+        if(globalInstance.phoneClickLoginBtn){
+            globalInstance.tracePhoneClickLoginBtn.stop()
+            globalInstance.phoneClickLoginBtn = false
+        }
+        if(globalInstance.signUp){
+            globalInstance.signUp =  false
+            globalInstance.traceSignUp.stop()
+        }
     }
 }
 
@@ -362,22 +382,22 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
             }
         }
     }
+
+
     val handlePcClick = {
         if (userData.value.currentPlan != "Basic") {
             if (!globalInstance.paymentStatus) {
                 val launchPc = {
-                    if (userData.value.currentPlan != "Basic") {
-                        if (!GlobalData.getInstance().paymentStatus) {
+                    AnalyticsManager.desktopStreamButton()
+                    globalInstance.gameStream = true
+                    globalInstance.traceGameStream = FirebasePerformance
+                        .getInstance()
+                        .newTrace("game_stream")
+                    globalInstance.traceGameStream.start()
                             val intent = Intent(currentAct,AppView::class.java)
                             intent.putExtra("connect" , "socket")
                             currentAct.startActivity(intent)
-                        } else {
-                            currentAct.makeToast("Thank you for your payment. Your account is being set up right now. It will be available in ${GlobalData.getInstance().paymentPcTimerMins} : ${GlobalData.getInstance().paymentPcTimerSecs} minutes.")
                         }
-                    }
-                    else
-                        showUpgradePlan.value = true
-                }
                 if(pref.getProperExit() || pref.getPcExit()) {
                     val currentTime = LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC)
                     if(pref.getProperExit()) {
@@ -445,7 +465,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .clickable {
-                            //AnalyticsManager.libraryAccountButton()
+                            AnalyticsManager.libraryAccountButton()
                             navigate(DrawerScreens.Account.route)
                         }) {
                     androidx.compose.material.Text(
@@ -1079,12 +1099,12 @@ fun GameTile(game: Game, modifier: Modifier, expand: Boolean = false, orientatio
             .wrapContentSize()
             .padding(vertical = 10.dp, horizontal = 7.dp)
             .clickable {
-                //    AnalyticsManager.gameButton(game.gameId)
+                    AnalyticsManager.gameButton(game.gameId)
                 onClick()
             }) {
-//        globalInstance.imageLoading = true
-//        globalInstance.traceImageLoading =  FirebasePerformance.getInstance().newTrace("image_loading")
-//        globalInstance.traceImageLoading.start()
+        globalInstance.imageLoading = true
+        globalInstance.traceImageLoading =  FirebasePerformance.getInstance().newTrace("image_loading")
+        globalInstance.traceImageLoading.start()
         AsyncImages(
             url = if (!expand) "https://antplay-gamedata.s3.ap-south-1.amazonaws.com/${game.gameId}.jpg"
             else { if(orientationLandscape) "https://antplay-gamedata.s3.ap-south-1.amazonaws.com/background_landscape.jpg" else "https://antplay-gamedata.s3.ap-south-1.amazonaws.com/background.jpg"},

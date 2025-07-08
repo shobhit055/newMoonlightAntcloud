@@ -14,6 +14,7 @@ import com.limelight.data.TermsResp
 import com.limelight.data.User
 import com.limelight.data.VideoTutorial
 import io.socket.client.Socket
+import com.google.firebase.perf.metrics.Trace
 
 
 class GlobalData {
@@ -51,7 +52,56 @@ class GlobalData {
     var remoteGamesMaintenance: List<GamesMaintenance> = listOf()
 
 
+    var appStartToken: Boolean = false
+    var appStartWithoutToken: Boolean = false
+    var verifyOTPBtn: Boolean = false
+    var signUp: Boolean = false
+    var emailClickLoginBtn : Boolean = false
+    var phoneClickLoginBtn : Boolean = false
+    var signOutBtn : Boolean = false
     var purchasePlan : Boolean = false
+    var createPricingOrder : Boolean = false
+    var forgotPassword : Boolean = false
+    var emailLoginApi : Boolean = false
+    var phoneLoginApi : Boolean = false
+    var otpSubmit : Boolean = false
+    var updateResolution : Boolean = false
+    var updateLocation : Boolean = false
+    var postSupportData : Boolean = false
+
+
+    var userRegisterApi : Boolean = false
+
+    lateinit var traceAppStartToken: Trace
+    lateinit var traceAppStartWithoutToken: Trace
+    lateinit var traceVerifyOTPBtn: Trace
+    lateinit var traceEmailClickLoginBtn: Trace
+    lateinit var traceSignUp: Trace
+    lateinit var tracePhoneClickLoginBtn: Trace
+    lateinit var traceSignOut: Trace
+    lateinit var tracePurchasePlan: Trace
+    lateinit var traceGameStream: Trace
+    lateinit var traceImageLoading: Trace
+    lateinit var traceCreatePricingOrder: Trace
+    lateinit var traceForgotPassword: Trace
+    lateinit var traceEmailLoginApi: Trace
+    lateinit var tracePhoneLoginApi: Trace
+    lateinit var traceGenerateOTPApi: Trace
+    lateinit var traceOtpSubmit: Trace
+    lateinit var traceUserRegisterApi: Trace
+    lateinit var traceGetAllMobileData: Trace
+    lateinit var traceGetAllGameData: Trace
+    lateinit var traceCheckUserApi: Trace
+    lateinit var traceRefreshTokenApi: Trace
+    lateinit var traceLogoutUserApi: Trace
+    lateinit var traceCouponSubmit: Trace
+    lateinit var traceUpdateUserPhone: Trace
+    lateinit var traceUpdateResolution: Trace
+    lateinit var traceUpdateLocation: Trace
+    lateinit var tracePostSupportData: Trace
+    lateinit var traceJoinWaitList: Trace
+
+
 
     companion object {
         private var dataInstance: GlobalData = GlobalData()

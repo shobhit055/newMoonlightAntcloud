@@ -269,7 +269,7 @@ class WebViewActivity : AppCompatActivity() {
                     "loaded" -> {
                         if(globalInstance.gameStream){
                             globalInstance.gameStream =  false
-                          //  globalInstance.traceGameStream.stop()
+                            globalInstance.traceGameStream.stop()
                         }
                         subReceivedMsg?.invoke("start")
                     }

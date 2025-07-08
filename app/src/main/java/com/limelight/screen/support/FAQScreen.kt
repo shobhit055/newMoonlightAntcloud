@@ -28,6 +28,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
 import com.limelight.components.Loading
@@ -41,6 +42,7 @@ fun FAQNav(navGraph: NavGraphBuilder, activity: NavActivity,
            updateToolbar: ((String) -> Unit), navigate: ((String) -> Unit)) {
     return navGraph.composable(DrawerScreens.FAQs.route) {
         val viewModel: FAQViewModel = hiltViewModel()
+        AnalyticsManager.faqNavButton()
         LaunchedEffect(key1 = Unit) {
         }
         updateToolbar("FAQs")

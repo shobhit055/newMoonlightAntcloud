@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.perf.FirebasePerformance
 
 import com.limelight.common.AppUtils.Companion.clearCheck
 import com.limelight.common.AppUtils.Companion.gradientColors
@@ -55,10 +56,11 @@ import com.limelight.theme.subtitle
 import com.limelight.viewmodel.UserViewModel
 import com.limelight.R
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager.Companion.removeAnalyticsUserId
 import com.limelight.common.DrawerScreens
 import kotlin.math.absoluteValue
 
-
+val globalInstance  =  GlobalData.getInstance()
 @Composable
 fun Drawer(
     modifier: Modifier = Modifier,
@@ -206,10 +208,11 @@ fun Drawer(
 }
 
 fun signOut(activity: NavActivity, viewModel: UserViewModel) {
-//    globalInstance.logoutUserApi = true
-//    globalInstance.traceLogoutUserApi = FirebasePerformance.getInstance().newTrace("logout_user_api")
-//    globalInstance.traceLogoutUserApi.start()
+    globalInstance.logoutUserApi = true
+    globalInstance.traceLogoutUserApi = FirebasePerformance.getInstance().newTrace("logout_user_api")
+    globalInstance.traceLogoutUserApi.start()
 
+    removeAnalyticsUserId()
     viewModel.getLogoutData("JWT ${GlobalData.getInstance().accountData.refreshToken}")
     val logoutState = viewModel.logoutState.value
     when(logoutState.success){

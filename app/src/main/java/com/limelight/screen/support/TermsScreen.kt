@@ -19,11 +19,12 @@ import com.limelight.common.GlobalData
 import com.limelight.data.TermsResp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.limelight.common.AnalyticsManager
 
 fun termsNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: ((String) -> Unit)) {
     return navGraph.composable(DrawerScreens.Terms.route) {
         updateToolbar("Terms & Conditions")
-//        AnalyticsManager.tcNavButton()
+        AnalyticsManager.tcNavButton()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

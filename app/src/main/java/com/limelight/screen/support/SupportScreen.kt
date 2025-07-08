@@ -67,6 +67,7 @@ import com.limelight.theme.heading
 import com.limelight.theme.mainTitle
 import com.limelight.theme.subtitle
 import androidx.compose.foundation.lazy.items
+import com.limelight.common.AnalyticsManager
 
 
 const val EXPAND_ANIMATION_DURATION = 400
@@ -80,6 +81,7 @@ fun supportNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
             viewModel.initializeCardsList(GlobalData.getInstance().androidData.support)
 
         }
+        AnalyticsManager.supportNavButton()
         Column{
             SupportScreen(activity,navigate,  viewModel)
         }
@@ -146,7 +148,10 @@ fun SupportScreenCards(
                 style = subtitle.copy(fontSize = 16.sp),
                 color = MaterialTheme.colors.secondary)
             Button(
-                onClick = { navigate(DrawerScreens.Report.route) },
+                onClick = {
+                    AnalyticsManager.reportButton()
+                    navigate(DrawerScreens.Report.route)
+                          },
                 modifier = Modifier.fillMaxWidth(if (landscape) 0.4f else 0.92f).padding(top = 10.dp)) {
                 Icon(
                     imageVector = Icons.Filled.Report,

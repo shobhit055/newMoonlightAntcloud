@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
 import com.limelight.data.PolicyListResp
@@ -32,7 +33,7 @@ fun PrivacyNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
         GlobalData.getInstance().androidData.policy =  GlobalData.getInstance().remoteDataPolicy
         val policy: List<PolicyListResp> = GlobalData.getInstance().androidData.policy
         updateToolbar("Privacy Policy")
-     /*   AnalyticsManager.privacyPolicyNavButton()*/
+        AnalyticsManager.privacyPolicyNavButton()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

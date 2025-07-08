@@ -49,7 +49,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.AppUtils.Companion.saveRefreshTokenData
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
@@ -66,7 +68,7 @@ import com.limelight.viewmodel.UserViewModel
 
 
 var allowSubmission = true
-
+val globalInstance  =  GlobalData.getInstance()
 enum class IssueCodes(val title: String, val code: String) {
     Latency("Latency", "latency"),
     GameControls("Game Controls", "gameControls"),
@@ -243,8 +245,11 @@ fun ReportScreen(viewModel: SupportViewModel, activity: NavActivity) {
         TextButton(
             enabled = allowSubmission,
             onClick = {
+                AnalyticsManager.submitReportButton()
+                globalInstance.postSupportData = true
+                globalInstance.tracePostSupportData=  FirebasePerformance.getInstance().newTrace("post_support_data")
+                globalInstance.tracePostSupportData.start()
                     onReportSubmit(viewModel)
-//                onEventHandler(ReportEvent.OnSubmit)
 
             },
             modifier = Modifier.fillMaxWidth(if(landscape) 0.4f else 1f),

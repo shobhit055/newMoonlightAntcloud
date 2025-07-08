@@ -86,6 +86,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import com.google.firebase.perf.FirebasePerformance
 
 
 import com.limelight.components.Loading
@@ -115,6 +116,7 @@ import com.limelight.common.AppUtils.Companion.gradientColors
 import com.limelight.common.AppUtils.Companion.navigateNavScreen
 import com.limelight.Theme
 import com.limelight.activity.LoginActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.AppUtils.Companion.navigateSplashActivity
 import com.limelight.components.CustomDialog
 import com.limelight.components.Play
@@ -174,6 +176,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
     when (signupState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                AnalyticsManager.signupSuccess()
                 navigateNavScreen(activity, signupState.userData!!)
             }
         }
@@ -210,6 +213,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
     when (postPhoneOtpState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                globalInstance.traceGenerateOTPApi.stop()
                 if (!viewModel.flag) {
                     viewModel.updateSignUpState("otp")
                     viewModel.flag = true
@@ -248,6 +252,17 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
     when (postPhoneVerifyState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.verifyOTPBtn){
+                    globalInstance.verifyOTPBtn =  false
+                    globalInstance.traceVerifyOTPBtn.stop()
+                }
+                globalInstance.signUp = true
+                globalInstance.traceSignUp=  FirebasePerformance.getInstance().newTrace("signup_after_verify_otp")
+                globalInstance.traceSignUp.start()
+
+                globalInstance.userRegisterApi = true
+                globalInstance.traceUserRegisterApi=  FirebasePerformance.getInstance().newTrace("user_register_api")
+                globalInstance.traceUserRegisterApi.start()
                 val dataModel = UserRegisterReq(
                     viewModel.emailState.trim(), viewModel.passwordState.trim(),
                     "+91${user.phone}", user.firstName, user.lastName, user.location, user.source
@@ -258,6 +273,10 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
 
         0 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.verifyOTPBtn){
+                    globalInstance.verifyOTPBtn =  false
+                    globalInstance.traceVerifyOTPBtn.stop()
+                }
                 viewModel.otpState = ""
                 viewModel.updateSignUpState("otp")
                 when (postPhoneVerifyState.errorCode) {
@@ -925,6 +944,9 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
                 else if(password.length<6)
                     activity.makeToast("please enter valid password")
                 else {
+                    AnalyticsManager.signupButton()
+                    globalInstance.traceGenerateOTPApi =  FirebasePerformance.getInstance().newTrace("generate_otp_btn")
+                    globalInstance.traceGenerateOTPApi.start()
                     location.State = state
                     location.Pincode = pincode
                     viewModel.updateSignUpState("loading")
@@ -1030,6 +1052,10 @@ fun EnterOTP(activity : SignupActivity, viewModel: AuthenticateViewModel, landsc
                 activity.makeToast("please enter otp")
             }
             else {
+                AnalyticsManager.signupOTPButton()
+                globalInstance.verifyOTPBtn = true
+                globalInstance.traceVerifyOTPBtn = FirebasePerformance.getInstance().newTrace("verify_otp_btn")
+                globalInstance.traceVerifyOTPBtn.start()
                 viewModel.updateSignUpState("loading")
                 viewModel.updateSignUpLoadingText("Verify the OTP.....")
                 val dataModel = PhoneVerifyReq("+91" + viewModel.phoneNumberState.trim(), viewModel.otpState.trim())

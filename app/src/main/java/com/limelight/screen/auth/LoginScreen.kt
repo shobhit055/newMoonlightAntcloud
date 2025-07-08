@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.components.OTP_VIEW_TYPE_BOX
 import com.limelight.components.OtpView
 import com.limelight.components.isEmailValid
@@ -85,6 +86,8 @@ import com.limelight.theme.titleText
 import com.limelight.viewmodel.AuthenticateViewModel
 import com.limelight.R
 import com.limelight.activity.LoginActivity
+import com.limelight.common.AnalyticsManager
+import com.limelight.common.AnalyticsManager.Companion.emailLoginButton
 import com.limelight.common.AppUtils
 import com.limelight.common.AppUtils.Companion.gradientColors
 import com.limelight.components.CustomDialog
@@ -120,10 +123,19 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
     when (loginState.success) {
         1 ->
             LaunchedEffect(Unit) {
+                if(globalInstance.emailLoginApi){
+                    globalInstance.emailLoginApi =  false
+                    globalInstance.traceEmailLoginApi.stop()
+                }
+                AnalyticsManager.emailLoginSuccess()
                 AppUtils.navigateNavScreen(activity, loginState.userData!!)
             }
         0 -> {
             LaunchedEffect(Unit){
+                if(globalInstance.emailLoginApi){
+                    globalInstance.emailLoginApi =  false
+                    globalInstance.traceEmailLoginApi.stop()
+                }
                 viewModel.updateType("email")
                 when (loginState.errorCode) {
                     401 -> {
@@ -165,13 +177,22 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
     when (postPhoneState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.phoneLoginApi){
+                    globalInstance.phoneLoginApi =  false
+                    globalInstance.tracePhoneLoginApi.stop()
+                }
                 activity.makeToast("Login successful")
+                AnalyticsManager.phoneLoginSuccess()
                 AppUtils.navigateNavScreen(activity, postPhoneState.userData!!)
             }
         }
 
         0 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.phoneLoginApi){
+                    globalInstance.phoneLoginApi =  false
+                    globalInstance.tracePhoneLoginApi.stop()
+                }
                 viewModel.otpState = ""
                 viewModel.updateType("otp")
                 when (postPhoneState.errorCode) {
@@ -552,6 +573,15 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                     else if (password.length < 6)
                                         activity.makeToast("please enter valid password")
                                     else {
+                                        emailLoginButton()
+                                        globalInstance.emailClickLoginBtn = true
+                                        globalInstance.traceEmailClickLoginBtn =
+                                            FirebasePerformance.getInstance().newTrace("email_click_login_btn")
+                                        globalInstance.traceEmailClickLoginBtn.start()
+                                        globalInstance.emailLoginApi = true
+                                        globalInstance.traceEmailLoginApi =
+                                            FirebasePerformance.getInstance().newTrace("email_login_api")
+                                        globalInstance.traceEmailLoginApi.start()
                                         viewModel.updateType("loading")
                                         viewModel.updateLoginLoadingText("Signing You In....")
                                         val dataModel = LoginReqData(email, password)
@@ -679,6 +709,15 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                             Button(
                                 onClick = {
                                     if (otp.length == 6) {
+                                        AnalyticsManager.phoneLoginButton()
+                                        globalInstance.phoneClickLoginBtn = true
+                                        globalInstance.tracePhoneClickLoginBtn =
+                                            FirebasePerformance.getInstance().newTrace("phone_click_login_btn")
+                                        globalInstance.tracePhoneClickLoginBtn.start()
+                                        globalInstance.phoneLoginApi = true
+                                        globalInstance.tracePhoneLoginApi =
+                                            FirebasePerformance.getInstance().newTrace("phone_login_api")
+                                        globalInstance.tracePhoneLoginApi.start()
                                         viewModel.updateType("loading")
                                         viewModel.updateLoginLoadingText("Verifying Your OTP ....")
                                         val dataModel =
@@ -941,6 +980,15 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                 else if (password.length < 6)
                                     activity.makeToast("please enter valid password")
                                 else {
+                                    emailLoginButton()
+                                    globalInstance.emailClickLoginBtn = true
+                                    globalInstance.traceEmailClickLoginBtn =
+                                        FirebasePerformance.getInstance().newTrace("email_click_login_btn")
+                                    globalInstance.traceEmailClickLoginBtn.start()
+                                    globalInstance.emailLoginApi = true
+                                    globalInstance.traceEmailLoginApi =
+                                        FirebasePerformance.getInstance().newTrace("email_login_api")
+                                    globalInstance.traceEmailLoginApi.start()
                                     viewModel.updateType("loading")
                                     viewModel.updateLoginLoadingText("Signing You In....")
                                     val dataModel = LoginReqData(email, password)
@@ -1068,6 +1116,15 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                         Button(
                             onClick = {
                                 if (otp.length == 6) {
+                                    AnalyticsManager.phoneLoginButton()
+                                    globalInstance.phoneClickLoginBtn = true
+                                    globalInstance.tracePhoneClickLoginBtn =
+                                        FirebasePerformance.getInstance().newTrace("phone_click_login_btn")
+                                    globalInstance.tracePhoneClickLoginBtn.start()
+                                    globalInstance.phoneLoginApi = true
+                                    globalInstance.tracePhoneLoginApi =
+                                        FirebasePerformance.getInstance().newTrace("phone_login_api")
+                                    globalInstance.tracePhoneLoginApi.start()
                                     viewModel.updateType("loading")
                                     viewModel.updateLoginLoadingText("Verifying Your OTP ....")
                                     val dataModel =

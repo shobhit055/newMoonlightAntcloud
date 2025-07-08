@@ -77,7 +77,9 @@ import com.limelight.R
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
 import com.limelight.components.CustomDialog
@@ -375,11 +377,11 @@ fun GameDetailsScreen(
                                 dialogState = DialogState.PAIDGAME
                                 openDialogCustom.value = true
                             } else {
-                                //AnalyticsManager.gameStreamButton()
+                                AnalyticsManager.gameStreamButton()
                                 globalInstance.gameStream = true
-//                            globalInstance.traceGameStream =
-//                                FirebasePerformance.getInstance().newTrace("game_stream")
-//                            globalInstance.traceGameStream.start()
+                            globalInstance.traceGameStream =
+                                FirebasePerformance.getInstance().newTrace("game_stream")
+                            globalInstance.traceGameStream.start()
 
                                 viewModel.selectedStore = game.gameId
                                 onPlayClick(activity, viewModel)

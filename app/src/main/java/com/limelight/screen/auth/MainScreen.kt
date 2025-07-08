@@ -62,6 +62,7 @@ import com.limelight.theme.PinkGradient
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.google.firebase.perf.FirebasePerformance
 
 import com.limelight.components.isEmailValid
 import com.limelight.components.isPhoneNumberValid
@@ -152,6 +153,8 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
             if(emailMobile.isDigitsOnly()) {
                 LaunchedEffect(Unit) {
                     if(emailMobile.isPhoneNumberValid()) {
+                        globalInstance.traceGenerateOTPApi =  FirebasePerformance.getInstance().newTrace("generate_otp_btn")
+                        globalInstance.traceGenerateOTPApi.start()
                         viewModel.updateLoginLoadingText("Sending the OTP.....")
                         val dataModel = PhoneOtpReq("+91${emailMobile.trim()}", false)
                         viewModel.getPostPhoneOtpData(dataModel, "login")
@@ -175,12 +178,14 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
     when(postPhoneOtpState.success){
         1->{
             LaunchedEffect(Unit) {
+                globalInstance.traceGenerateOTPApi.stop()
                 progressBarVisible = false
                 AppUtils.navigateLoginScreen(activity, emailMobile,"otp")
             }
         }
         0->{
             LaunchedEffect(Unit) {
+                globalInstance.traceGenerateOTPApi.stop()
                 progressBarVisible = false
                 when (postPhoneOtpState.errorCode) {
                     400 -> {
@@ -354,6 +359,7 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
                     onClick = {
                         if (emailMobile.isDigitsOnly()) {
                             if (emailMobile.isPhoneNumberValid()) {
+
                                 viewModel.updateLoginLoadingText("please wait ....")
                                 progressBarVisible = true
                                 val dataModel = CheckUserInDB("", "+91${emailMobile.trim()}")
@@ -364,11 +370,11 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
 
                         } else {
                             if (emailMobile.isEmailValid()) {
-                                AppUtils.navigateLoginScreen(activity, emailMobile, "email")
-//                        viewModel.updateLoginLoadingText("please wait ....")
-//                        progressBarVisible = true
-//                        val dataModel = CheckUserInDB(emailMobile.trim(), "")
-//                        viewModel.checkUserInDB(dataModel)
+                              //  AppUtils.navigateLoginScreen(activity, emailMobile, "email")
+                        viewModel.updateLoginLoadingText("please wait ....")
+                        progressBarVisible = true
+                        val dataModel = CheckUserInDB(emailMobile.trim(), "")
+                        viewModel.checkUserInDB(dataModel)
                             } else
                                 activity.makeToast("Please enter a valid Email")
 

@@ -68,6 +68,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.R
 import com.limelight.activity.NavActivity
 
@@ -93,6 +94,7 @@ import com.limelight.screen.auth.TextTheme
 import com.limelight.viewmodel.UserViewModel
 import com.google.gson.Gson
 import com.limelight.activity.WebViewActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.theme.heading
 import com.limelight.theme.light_grey
 import com.limelight.theme.mainTitle
@@ -560,8 +562,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                         else if (coupon.isNotEmpty()) {
                                             viewModel.updateLoadingState(true)
                                             GlobalData.getInstance().couponSubmit = true
-//                                            globalInstance.traceCouponSubmit =  FirebasePerformance.getInstance().newTrace("coupon_submit_api")
-//                                            globalInstance.traceCouponSubmit.start()
+                                            globalInstance.traceCouponSubmit =  FirebasePerformance.getInstance().newTrace("coupon_submit_api")
+                                            globalInstance.traceCouponSubmit.start()
 
                                             verifyCouponCodeApi(viewModel)
 
@@ -704,8 +706,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     disabledBackgroundColor = light_grey),
                                 onClick = {
                                     GlobalData.getInstance().joinWaitList = true
-//                                    globalInstance.traceJoinWaitList =  FirebasePerformance.getInstance().newTrace("add_user_to_wait_list_api")
-//                                    globalInstance.traceJoinWaitList.start()
+                                    globalInstance.traceJoinWaitList =  FirebasePerformance.getInstance().newTrace("add_user_to_wait_list_api")
+                                    globalInstance.traceJoinWaitList.start()
                                     addToWaitListApi(viewModel)
                                 }) {
                                 Text(
@@ -1240,15 +1242,18 @@ fun PricingItemCard(
                 if(viewModel.paymentsAllowed || (globalInstance.accountData.vmId != "" && globalInstance.accountData.vmId != null)) {
                     viewModel.subOpenLoadingDialogState?.invoke(true)
 
-
+                    globalInstance.purchasePlan = true
+                    globalInstance.tracePurchasePlan =
+                        FirebasePerformance.getInstance().newTrace("purchase_plan")
+                    globalInstance.tracePurchasePlan.start()
 
                     if (pricingData[0].id == tabSelected.toString()) {
-//                        AnalyticsManager.pricingPlanButton(item.code, viewModel.selectedQuantity.toString())
+                        AnalyticsManager.pricingPlanButton(item.code, viewModel.selectedQuantity.toString())
                     } else {
-//                        AnalyticsManager.pricingPlanButton(
-//                            item.code,
-//                            viewModel.selectedQuantity.toString()
-//                        )
+                        AnalyticsManager.pricingPlanButton(
+                            item.code,
+                            viewModel.selectedQuantity.toString()
+                        )
                     }
                 }
 

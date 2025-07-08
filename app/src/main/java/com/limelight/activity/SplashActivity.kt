@@ -7,6 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
 import com.limelight.common.AppUtils
 import com.limelight.common.AppUtils.Companion.clearCheck
 import com.limelight.common.AppUtils.Companion.hideStatusBar
@@ -18,6 +22,9 @@ import com.limelight.components.navigationRoutes
 import com.limelight.screen.auth.MainScreen
 import com.limelight.viewmodel.UserViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.messaging.messaging
+import com.limelight.common.AnalyticsManager.Companion.removeAnalyticsUserId
+import com.limelight.common.AnalyticsManager.Companion.setAnalyticsUserId
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.FileInputStream
@@ -25,7 +32,7 @@ import java.io.FileInputStream
 
 @SuppressLint("CustomSplashScreen")
 @AndroidEntryPoint
-class SplashActivity : ComponentActivity(){
+class  SplashActivity : ComponentActivity(){
      private var navigationRoute = navigationRoutes("")
      private var encryptedDataSize: Int = 0
      private var encryptedData: ByteArray? = null
@@ -39,6 +46,7 @@ class SplashActivity : ComponentActivity(){
 //     private lateinit var firebaseAnalytics: FirebaseAnalytics
      private var flag = 0
      private var apiResp = false
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,9 +58,9 @@ class SplashActivity : ComponentActivity(){
             hideStatusBar(activity)
             viewModel = hiltViewModel()
             FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = false
-//            FirebaseApp.initializeApp(applicationContext)
-//            Firebase.messaging.isAutoInitEnabled = true
-//            firebaseAnalytics =  Firebase.analytics
+            FirebaseApp.initializeApp(applicationContext)
+            Firebase.messaging.isAutoInitEnabled = true
+            firebaseAnalytics =  Firebase.analytics
             if(intent.hasExtra("flag"))
                 flag =  intent.getIntExtra("flag" , 0)
         //    startActivity(Intent(this@SplashActivity, AppView::class.java))
@@ -64,6 +72,7 @@ class SplashActivity : ComponentActivity(){
                     apiResp = true
 //                    MainScreen(activity,flag,apiResp)
                     LaunchedEffect(Unit) {
+                        setAnalyticsUserId(globalInstance.accountData.id)
                         if (globalInstance.accountData.refreshToken != "") {
                             checkUserState.userData?.refreshToken =
                                 globalInstance.accountData.refreshToken
@@ -75,6 +84,7 @@ class SplashActivity : ComponentActivity(){
                     }
                 }
                 0 -> {
+                    removeAnalyticsUserId()
                     if(file.exists()) {
                         file.delete()
                     }
@@ -129,6 +139,7 @@ class SplashActivity : ComponentActivity(){
                     }
                 }
                 0 -> {
+                    removeAnalyticsUserId()
                     calledRefresh = true
                     when (refreshTokenState.errorCode) {
                         502 -> {
@@ -156,7 +167,10 @@ class SplashActivity : ComponentActivity(){
                     viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
                 }
             }
-            else MainScreen(activity,flag,apiResp)
+            else {
+                removeAnalyticsUserId()
+                MainScreen(activity,flag,apiResp)
+            }
         }
     }
 
