@@ -1,6 +1,7 @@
 package com.limelight.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
@@ -37,7 +38,6 @@ import com.limelight.R
 import com.limelight.binding.PlatformBinding
 import com.limelight.binding.crypto.AndroidCryptoProvider
 import com.limelight.common.AppUtils
-import com.limelight.common.DrawerScreens
 import com.limelight.common.FPSSpinnerAdapter
 import com.limelight.common.GlobalData
 import com.limelight.common.ResolutionSpinnerAdapter
@@ -56,7 +56,6 @@ import com.limelight.nvstream.http.PairingManager
 import com.limelight.nvstream.http.PairingManager.PairState
 import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
-import com.limelight.preferences.StreamSettings
 import com.limelight.utils.CacheHelper
 import com.limelight.utils.Dialog
 import com.limelight.utils.RestClient
@@ -287,11 +286,8 @@ class AppView : AppCompatActivity() {
         val cbController = findViewById<CheckBox>(R.id.cbController)
         val bitrateSeekbar = findViewById<SeekBar>(R.id.bitrateSeekbar)
         val bitrateLabel = findViewById<TextView>(R.id.bitrate_value)
-        val textResolution = findViewById<TextView>(R.id.textResolution)
         val resolutionSpinner = findViewById<Spinner>(R.id.resolution_spinner)
-        val textFPS = findViewById<TextView>(R.id.textfps)
         val fpsSpinner = findViewById<Spinner>(R.id.fps_spinner)
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
 
         backBtn.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
@@ -416,41 +412,25 @@ class AppView : AppCompatActivity() {
                 myList.add("1440p")
                 myList.add("2160p")
             }
-
         }
         val resolutions  = myList.toTypedArray()
-
-        textResolution.setOnClickListener {
-            resolutionSpinner.visibility = View.VISIBLE
-            resolutionSpinner.performClick()
-        }
         val resolutionAdapter = ResolutionSpinnerAdapter(this, resolutions)
         resolutionSpinner.adapter = resolutionAdapter
-
         resolutionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val value = resolutions[position]
-                textResolution.text = value
                 bitrateSeekbar.progress = AppUtils.setBitrate(value)
-                resolutionSpinner.visibility = View.INVISIBLE
                 setResolutionInPreferences(value)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         val fpsNames = resources.getStringArray(R.array.fps_names)
-        textFPS.setOnClickListener {
-            fpsSpinner.visibility = View.VISIBLE
-            fpsSpinner.performClick()
-        }
         val fpsAdapter = FPSSpinnerAdapter(this, fpsNames)
         fpsSpinner.adapter = fpsAdapter
-
         fpsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val value = fpsNames[position]
-                textFPS.text = value
-                fpsSpinner.visibility = View.INVISIBLE
                 setFPSInPreferences(value)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -474,10 +454,13 @@ class AppView : AppCompatActivity() {
         })
         startVMButton.setOnClickListener {
             lifecycleScope.launch {
-                showLoadingDialog(this@AppView)
+                loadingText.text = "please wait"
+                loadingLayout.visibility = View.VISIBLE
+                resolutionLayout.visibility = View.INVISIBLE
+
                 withContext(Dispatchers.IO) {
-//                    doAddPc("103.182.65.125")
-                    doAddPc(GlobalData.getInstance().vmIP)
+                    doAddPc("103.182.65.107")
+//                    doAddPc(GlobalData.getInstance().vmIP)
                 }
             }
         }
@@ -658,8 +641,6 @@ class AppView : AppCompatActivity() {
 
                         val handlerThread = Thread {
                             if (!suspendGridUpdates) {
-
-                                hideLoadingDialog()
                                 ServerHelper.doStart(this@AppView, app, computer, managerBinder)
                                 finish()
                             }
@@ -698,13 +679,11 @@ class AppView : AppCompatActivity() {
 
 
     @Throws(InterruptedException::class)
-     fun doAddPc(rawUserInput: String) {
+    suspend fun doAddPc(rawUserInput: String) {
         var wrongSiteLocal = false
         var invalidInput = false
         var success: Boolean
         Log.i("test", "test11")
-//        val dialog = SpinnerDialog.displayDialog(
-//            this@AppView, resources.getString(R.string.title_add_pc), resources.getString(R.string.msg_add_pc), false)
 
         try {
             val details = ComputerDetails()
@@ -744,33 +723,32 @@ class AppView : AppCompatActivity() {
                 MoonBridge.ML_PORT_FLAG_TCP_47984 or MoonBridge.ML_PORT_FLAG_TCP_47989
             )
             else MoonBridge.ML_TEST_RESULT_INCONCLUSIVE
-   //     dialog.dismiss()
 
-        if (invalidInput) Dialog.displayDialog(
-            this,
-            resources.getString(R.string.conn_error_title),
-            resources.getString(R.string.addpc_unknown_host),
-            false
-        )
-        else if (wrongSiteLocal) Dialog.displayDialog(
-            this,
-            resources.getString(R.string.conn_error_title),
-            resources.getString(R.string.addpc_wrong_sitelocal),
-            false
-        )
-        else if (!success) {
-            val dialogText =
-                if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0) resources.getString(
-                    R.string.nettest_text_blocked
+        if (invalidInput) {
+            withContext(Dispatchers.Main) {
+                showErrorDialog(
+                    this@AppView,
+                    resources.getString(R.string.conn_error_title),
+                    resources.getString(R.string.addpc_unknown_host)
                 )
-                else resources.getString(R.string.addpc_fail)
+            }
 
-            Dialog.displayDialog(
-                this,
-                resources.getString(R.string.conn_error_title),
-                dialogText,
-                false
-            )
+        }else if (wrongSiteLocal) {
+            withContext(Dispatchers.Main) {
+                showErrorDialog(
+                    this@AppView,
+                    resources.getString(R.string.conn_error_title),
+                    resources.getString(R.string.addpc_wrong_sitelocal),
+                )
+            }
+        }else if (!success) {
+            withContext(Dispatchers.Main) {
+                showErrorDialog(
+                    this@AppView,
+                    resources.getString(R.string.conn_error_title),
+                    resources.getString(R.string.one_min_issue_msg)
+                )
+            }
         } else {
             Log.i("test", "test17")
             startComputerUpdates1()
@@ -874,7 +852,8 @@ class AppView : AppCompatActivity() {
 
                 else {
                     val pinStr = PairingManager.generatePinString()
-                     val accessToken = "JWT "+ GlobalData.getInstance().accountData.token
+//                     val accessToken = "JWT "+ GlobalData.getInstance().accountData.token
+                     val accessToken = "JWT "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzQ1MDc4ODUzNmE5M2I2OTBjZmIzOCIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoibG92ZUBhbnRwbGF5LnRlY2giLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiX3R2IjowLCJpYXQiOjE3NTIwNTc5OTgsImV4cCI6MTc1MjA2NTE5OH0.bx1lrYISfGFpOdWNxYL1D707EbqAiGBkWWaIc5k6X4I"
                     val handlerThread = Thread {
                         sendAndVerifySecurityPinManually(pinStr, accessToken)
                     }
@@ -971,6 +950,27 @@ class AppView : AppCompatActivity() {
 
     fun hideLoadingDialog() {
         loadingDialog?.dismiss()
+    }
+    fun showErrorDialog(activity: Activity, tltle: String?, message: String?) {
+        val builder = AlertDialog.Builder(activity)
+        val inflater = activity.layoutInflater
+        val dialogView = inflater.inflate(R.layout.dialog_error_layout, null)
+        builder.setView(dialogView)
+
+        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialog_message)
+        val btnGoBack = dialogView.findViewById<Button>(R.id.btn_go_back)
+
+        dialogTitle.text = tltle
+        dialogMessage.text = message
+        val dialog = builder.create()
+        dialog.setCancelable(true)
+        dialog.show()
+
+        btnGoBack.setOnClickListener { v: View? ->
+            dialog.dismiss()
+                finish()
+        }
     }
 }
 

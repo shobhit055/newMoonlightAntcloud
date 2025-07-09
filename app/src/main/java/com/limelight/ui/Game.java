@@ -1,5 +1,6 @@
 package com.limelight.ui;
 
+import com.bumptech.glide.Glide;
 import com.limelight.R;
 import com.limelight.binding.PlatformBinding;
 import com.limelight.binding.audio.AndroidAudioRenderer;
@@ -12,6 +13,13 @@ import com.limelight.binding.input.touch.RelativeTouchContext;
 import com.limelight.binding.input.driver.UsbDriverService;
 import com.limelight.binding.input.evdev.EvdevListener;
 import com.limelight.binding.input.touch.TouchContext;
+
+import android.os.Build;
+
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.decode.ImageDecoderDecoder;
+import coil.decode.GifDecoder;
 import com.limelight.binding.input.virtual_controller.VirtualController;
 import com.limelight.binding.video.CrashListener;
 import com.limelight.binding.video.MediaCodecDecoderRenderer;
@@ -233,15 +241,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         loadingLayout.setVisibility(View.VISIBLE);
         loadingText.setText(getResources().getString(R.string.conn_establishing_msg));
 
-        ImageLoader imageLoader = new ImageLoader.Builder(this)
-                .build();
-
-        ImageRequest request = new ImageRequest.Builder(this)
-                .data(R.drawable.spinner)
-                .target(spinnerImage)
-                .build();
-
-        imageLoader.enqueue(request);
+        Glide.with(this)
+                .asGif()
+                .load(R.drawable.spinner)
+                .into(spinnerImage);
 
 //        spinner = SpinnerDialog.displayDialog(this, getResources().getString(R.string.conn_establishing_title),
 //                getResources().getString(R.string.conn_establishing_msg), true);
@@ -547,12 +550,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
         if (!decoderRenderer.isAvcSupported()) {
             loadingLayout.setVisibility(View.GONE);
-//            if (spinner != null) {
-//                spinner.dismiss();
-//                spinner = null;
-//            }
-            showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback.");
-           // Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback.", true);
+            runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback."));
             return;
         }
         streamView.getHolder().addCallback(this);
@@ -2277,8 +2275,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                     if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0)  {
                         dialogText += "\n\n" + getResources().getString(R.string.nettest_text_blocked);
                     }
+                    String finalDialogText = dialogText;
+                    runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), finalDialogText));
 
-                    showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText);
                     //Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText, true);
                 }
             }
@@ -2356,9 +2355,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                             message += "\n\n" + getResources().getString(R.string.check_ports_msg) + "\n" +
                                     MoonBridge.stringifyPortFlags(portFlags, "\n");
                         }
-                        showErrorDialog(Game.this, getResources().getString(R.string.conn_terminated_title), message);
-//                        Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_terminated_title),
-//                                message, true);
+                        String finalMessage = message;
+                        runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_terminated_title), finalMessage));
+
                     }
                     else {
                         finish();
@@ -2743,7 +2742,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         btnGoBack.setOnClickListener(v -> {
             dialog.dismiss();
-            onBackPressed();
+            finish();
         });
 
     }

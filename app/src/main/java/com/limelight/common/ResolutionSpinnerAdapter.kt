@@ -27,11 +27,8 @@ class ResolutionSpinnerAdapter(
 
     private fun createView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.resolution_item_text, parent, false)
-
         val label = view.findViewById<TextView>(R.id.item_text)
-
         label.text = items[position]
-
         return view
     }
 }

@@ -145,8 +145,7 @@ fun pricingNav(t: NavGraphBuilder, activity: NavActivity, updateToolbar: ((Strin
 fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: ((String) -> Unit)) {
     val userViewModel  :UserViewModel = hiltViewModel()
     var calledRefresh = false
-    var apiName  =""
-    val scrollState = rememberScrollState()
+    var apiName  = ""
     GlobalData.getInstance().androidData.pricing =   GlobalData.getInstance().remoteDataPricing
     val pricingData =  GlobalData.getInstance().androidData.pricing
     val createPricingOrderState  = viewModel.createPricingOrderState.value

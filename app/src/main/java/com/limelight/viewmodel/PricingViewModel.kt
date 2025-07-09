@@ -55,51 +55,34 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     val updateLocationState: State<UpdateLocationState> = _updateLocationState
     private val _addToWaitListState = mutableStateOf(AddToWaitListState())
     val addToWaitListState: State<AddToWaitListState> = _addToWaitListState
-
-
     var pricingData: List<PricingGroups>? = null
     var idToken: String = ""
     var subIdToken: ((String) -> Unit)? = null
-
     private var selectedTabState: Long? = 0
     private var pageState: Int = 0
-
-
     var paymentsAllowed : Boolean = false
     var subPaymentAllowed: ((Boolean) -> Unit)? = null
-
     var openLoadingDialogState: Boolean = false
     var subOpenLoadingDialogState: ((Boolean) -> Unit)? = null
-
     var couponState: String = ""
     var subCouponState: ((String) -> Unit)? = null
-
     var showCouponError: Boolean = false
     var subShowCouponError: ((Boolean) -> Unit)? = null
-
-
     var selectedPlan: String = ""
     var selectedQuantity: Int = 1
     var appliedCoupon: String = ""
-
     var messageState: Boolean = false
     var subMessageState: ((Boolean) -> Unit)? = null
-
     var loadingState: Boolean = false
     var subLoadingState: ((Boolean) -> Unit)? = null
-
     var subSelectedTabState: ((Long?) -> Unit)? = null
     var subPageState: ((Int) -> Unit)? = null
-
     var stateLocation: String = ""
     var subStateLocation: ((String) -> Unit)? = null
-
     var pinCodeState: String = ""
     var subPinCodeState: ((String) -> Unit)? = null
-
     var showWaitList: Boolean = false
     var subShowWaitList: ((Boolean) -> Unit)? = null
-
     var showIntroWarning: Boolean = false
     var subShowIntroWarning: ((Boolean) -> Unit)? = null
 

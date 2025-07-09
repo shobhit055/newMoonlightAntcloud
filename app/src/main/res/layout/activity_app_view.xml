@@ -149,25 +149,13 @@
             android:layout_height="wrap_content"
             android:padding="10dp">
 
-            <TextView
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                android:id="@+id/textResolution"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Select Resolution"
-                android:padding="12dp"
-                android:textColor="@color/white"
-                android:textSize="16dp"
-                android:background="@drawable/spinner_background" />
-
             <Spinner
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:id="@+id/resolution_spinner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="invisible" />
+                android:background="@android:color/transparent"
+                android:layout_height="wrap_content"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -176,17 +164,6 @@
             android:layout_height="wrap_content"
             android:padding="10dp">
 
-            <TextView
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                android:id="@+id/textfps"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Select FPS"
-                android:padding="12dp"
-                android:textColor="@color/white"
-                android:textSize="16dp"
-                android:background="@drawable/spinner_background" />
 
             <Spinner
                 app:layout_constraintTop_toTopOf="parent"
@@ -194,7 +171,7 @@
                 android:id="@+id/fps_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="invisible" />
+                android:background="@android:color/transparent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
