@@ -305,9 +305,9 @@ fun GameDetailsScreen(
 
             Row(modifier = Modifier.clip(RoundedCornerShape(25.dp)).fillMaxWidth(.9f)
                 .height(bannerHeight)) {
-                // GlobalData.getInstance().imageLoading = true
-//                    globalInstance.traceImageLoading =  FirebasePerformance.getInstance().newTrace("image_loading")
-//                    globalInstance.traceImageLoading.start()
+                 GlobalData.getInstance().imageLoading = true
+                    globalInstance.traceImageLoading =  FirebasePerformance.getInstance().newTrace("image_loading")
+                    globalInstance.traceImageLoading.start()
                 AsyncImages(
                     url = if (game.isOurGame) "https://antplay-gamedata.s3.ap-south-1.amazonaws.com/${game.gameId}.jpg"
                     else "https://antplay-gamedata.s3.ap-south-1.amazonaws.com/background.jpg",

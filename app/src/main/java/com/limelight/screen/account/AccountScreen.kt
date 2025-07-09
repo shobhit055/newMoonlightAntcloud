@@ -100,7 +100,9 @@ import com.limelight.data.UpdateResolutionReq
 import com.limelight.screen.auth.LoginComplete
 import com.limelight.viewmodel.UserViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
 import com.limelight.theme.BlueGradient
@@ -191,6 +193,7 @@ fun AccountScreen(
     toggle: (Boolean) -> Unit) {
     val postPhoneOtpState =  viewModel.postPhoneOtpState.value
     val postPhoneVerifyState = viewModel.postPhoneVerifyState.value
+    val updatePhoneState =  viewModel.updatePhoneState.value
     val updateResolutionState =  viewModel.updateResolutionState.value
     val forgotState =  viewModel.forgotState.value
     val resendVerificationEmailState = viewModel.resendVerificationEmailState.value
@@ -255,12 +258,23 @@ fun AccountScreen(
     when(postPhoneVerifyState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.otpSubmit){
+                    globalInstance.otpSubmit =  false
+                    globalInstance.traceOtpSubmit.stop()
+                }
+                globalInstance.updateUserPhone = true
+                globalInstance.traceUpdateUserPhone=  FirebasePerformance.getInstance().newTrace("update_user_phone_api")
+                globalInstance.traceUpdateUserPhone.start()
                 onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
                 updatePhoneNumber(viewModel)
             }
         }
         0 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.otpSubmit){
+                    globalInstance.otpSubmit =  false
+                    globalInstance.traceOtpSubmit.stop()
+                }
                 onAreaChanged(toggle, viewModel, BottomSheetState.ENTER_OTP)
                 when (postPhoneVerifyState.errorCode) {
                     400 ->  {
@@ -288,12 +302,22 @@ fun AccountScreen(
     when(updateResolutionState.success){
         1->{
             LaunchedEffect(Unit) {
+                if(globalInstance.updateResolution){
+                    globalInstance.updateResolution = false
+                    globalInstance.traceUpdateResolution.stop()
+                }
+
                 viewModel.updateResolution(updateResolutionState.resolution)
+                AnalyticsManager.changeResolutionButton(viewModel.selectedResolution)
                 activity.makeToast(updateResolutionState.message)
                 onAreaChanged(toggle, viewModel, BottomSheetState.COMPLETE)
             }
         }
         0->{
+            if(globalInstance.updateResolution){
+                globalInstance.updateResolution = false
+                globalInstance.traceUpdateResolution.stop()
+            }
             LaunchedEffect(Unit) {
                 onAreaChanged(toggle, viewModel, BottomSheetState.EDIT_RESOLUTION)
                 val msg = updateResolutionState.error
@@ -334,6 +358,7 @@ fun AccountScreen(
         }
 
     }
+
     when(resendVerificationEmailState.success){
         1->{
             LaunchedEffect(Unit) {
@@ -364,19 +389,20 @@ fun AccountScreen(
             }
         }
     }
+
     var user by remember {
         mutableStateOf(viewModel.accountData)
     }
-
     viewModel.subAccountData = {
         user = it
     }
-
-    val updatePhoneState =  viewModel.updatePhoneState.value
-
     when(updatePhoneState.success){
         1->{
             LaunchedEffect(Unit) {
+                if(globalInstance.updateUserPhone){
+                    globalInstance.updateUserPhone = false
+                    globalInstance.traceUpdateUserPhone.stop()
+                }
                 user.phone = updatePhoneState.phone
                 activity.makeToast(updatePhoneState.message)
                 onAreaChanged(toggle, viewModel, BottomSheetState.COMPLETE)
@@ -384,6 +410,10 @@ fun AccountScreen(
         }
         0->{
             LaunchedEffect(Unit) {
+                if(globalInstance.updateUserPhone){
+                    globalInstance.updateUserPhone = false
+                    globalInstance.traceUpdateUserPhone.stop()
+                }
                 onAreaChanged(toggle, viewModel, BottomSheetState.EDIT_PHONE)
                 val msg = updatePhoneState.error
                 if (updatePhoneState.errorCode == 401) {
@@ -458,6 +488,7 @@ fun AccountScreen(
                 else Modifier.fillMaxWidth(1f),
                     text = if (editable) "Save Changes" else "Edit Profile",
                     icon = if (editable) Icons.Filled.Save else Icons.Filled.Edit) {
+                    AnalyticsManager.accountEditButton(editable)
                     editable = !editable
                 }
             }
@@ -547,7 +578,7 @@ fun AccountScreen(
                     text = stringResource(id = R.string.checkout_plans_button),
                     icon = Icons.Filled.Payments,
                     onClick = {
-                     //   AnalyticsManager.checkoutPlan()
+                        AnalyticsManager.checkoutPlan()
                         navigate(DrawerScreens.Pricing.route)
                     },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
@@ -569,7 +600,7 @@ fun AccountScreen(
                 ) {
                     Button(
                         onClick = {
-                            // AnalyticsManager.controllerMappingButton()
+                             AnalyticsManager.controllerMappingButton()
 
                         },
                         shape = RoundedCornerShape(5.dp),
@@ -592,15 +623,15 @@ fun AccountScreen(
                     .padding(top = 30.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
                     NavButton(location = DrawerScreens.Policy) {
-                        //AnalyticsManager.privacyPolicyButton()
+                        AnalyticsManager.privacyPolicyButton()
                         navigate(DrawerScreens.Policy.route)
                     }
                     NavButton(location = DrawerScreens.FAQs) {
-                        //AnalyticsManager.faqButton()
+                        AnalyticsManager.faqButton()
                         navigate(DrawerScreens.FAQs.route)
                     }
                     NavButton(location = DrawerScreens.Terms) {
-                        //AnalyticsManager.tcButton()
+                        AnalyticsManager.tcButton()
                         navigate(DrawerScreens.Terms.route)
                     }
                 }
@@ -792,7 +823,7 @@ fun EditEmail(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
         PlayButton(
             text = "Resend Verification Link",
             icon = Icons.Filled.Send) {
-//            AnalyticsManager.emailVerificationButton()
+            AnalyticsManager.emailVerificationButton()
             onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
             resendVerificationEmail(viewModel)
         }
@@ -879,9 +910,9 @@ fun EditPassword(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
             text = "Reset Password",
             icon = Icons.Filled.Send
         ) {
-//            globalInstance.forgotPassword  =  true
-//            globalInstance.traceForgotPassword=  FirebasePerformance.getInstance().newTrace("forgot_password")
-//            globalInstance.traceForgotPassword.start()
+            globalInstance.forgotPassword  =  true
+            globalInstance.traceForgotPassword=  FirebasePerformance.getInstance().newTrace("forgot_password")
+            globalInstance.traceForgotPassword.start()
 
             onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
             val dataModel = ForgotPasswordReq(viewModel.accountData.email)
@@ -1001,6 +1032,9 @@ fun EditResolution(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
         text = "Change Resolution",
         icon = Icons.Filled.Send,
         onClick = {
+            globalInstance.updateResolution = true
+            globalInstance.traceUpdateResolution=  FirebasePerformance.getInstance().newTrace("update_resolution")
+            globalInstance.traceUpdateResolution.start()
             onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
             updateResolution(viewModel)
         })

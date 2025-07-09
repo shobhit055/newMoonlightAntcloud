@@ -22,6 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.limelight.Theme
+import com.limelight.common.AnalyticsManager.Companion.paymentFailed
+import com.limelight.common.AnalyticsManager.Companion.paymentSuccess
+import com.limelight.common.AnalyticsManager.Companion.pgResponse
 import com.limelight.common.GlobalData
 import com.limelight.components.makeToast
 import com.limelight.components.setScreenOrientation
@@ -253,14 +256,14 @@ class WebViewActivity : AppCompatActivity() {
                         this@WebViewActivity.finish()
                     }
                     "success" -> {
-//                        pgResponse(msg) //add to analytics
-//                        paymentSuccess(globalInstance.paymentPlan, globalInstance.paymentPrice)
+                        pgResponse(msg)
+                        paymentSuccess(globalInstance.paymentPlan, globalInstance.paymentPrice)
                         GlobalData.getInstance().paymentStatus = true
                         viewModel?.countdownTimer?.start()
                     }
                     "failed" -> {
-//                        pgResponse(msg)
-//                        paymentFailed(globalInstance.paymentPlan)
+                        pgResponse(msg)
+                        paymentFailed(globalInstance.paymentPlan)
                     }
                 }
             } else if (page == "stream") {

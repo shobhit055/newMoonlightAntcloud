@@ -56,6 +56,7 @@ import com.limelight.theme.subtitle
 import com.limelight.viewmodel.UserViewModel
 import com.limelight.R
 import com.limelight.activity.NavActivity
+import com.limelight.common.AnalyticsManager
 import com.limelight.common.AnalyticsManager.Companion.removeAnalyticsUserId
 import com.limelight.common.DrawerScreens
 import kotlin.math.absoluteValue
@@ -92,6 +93,10 @@ fun Drawer(
                     Column(modifier = Modifier.align(Alignment.CenterEnd),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                         IconButton(onClick = {
+                            AnalyticsManager.signOutButton()
+                            globalInstance.signOutBtn = true
+                            globalInstance.traceSignOut =  FirebasePerformance.getInstance().newTrace("app_sign_out")
+                            globalInstance.traceSignOut.start()
                             signOut(activity,viewModel)
                         }){
                             Icon(imageVector = Icons.Outlined.Logout,

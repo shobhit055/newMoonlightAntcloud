@@ -68,8 +68,7 @@ class GlobalData {
     var updateResolution : Boolean = false
     var updateLocation : Boolean = false
     var postSupportData : Boolean = false
-
-
+    var updateUserPhone : Boolean = false
     var userRegisterApi : Boolean = false
 
     lateinit var traceAppStartToken: Trace

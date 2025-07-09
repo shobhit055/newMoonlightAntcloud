@@ -130,7 +130,7 @@ fun pricingNav(t: NavGraphBuilder, activity: NavActivity, updateToolbar: ((Strin
             viewModel.getCheckPaymentAllowedData()
         }
         updateToolbar("Pricing")
-
+        AnalyticsManager.pricingButton()
         Column(modifier = Modifier.fillMaxSize()
             .padding(0.dp)
             .verticalScroll(state = rememberScrollState())
@@ -268,7 +268,12 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
         }
     }
     when(updateLocationState.success){
+
         1 -> {
+            if(globalInstance.updateLocation){
+                globalInstance.updateLocation = false
+                globalInstance.traceUpdateLocation.stop()
+            }
             LaunchedEffect(Unit) {
                 activity.makeToast(updateLocationState.message)
                 GlobalData.getInstance().accountData.location.State = viewModel.stateLocation
@@ -276,6 +281,10 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
             }
         }
         0 -> {
+            if(globalInstance.updateLocation){
+                globalInstance.updateLocation = false
+                globalInstance.traceUpdateLocation.stop()
+            }
             LaunchedEffect(Unit) {
                 val msg = updateLocationState.error
                 if (updateLocationState.errorCode == 401) {
@@ -1366,6 +1375,7 @@ fun NavButton(viewModel: PricingViewModel, text: String, id: Long?, tabSelected:
             } else {
                 viewModel.updateTabState(id)
                 viewModel.updatePageState(0)
+                AnalyticsManager.pricingTabButton(text)
 
             }
         },
@@ -1411,6 +1421,8 @@ fun InputCoupon(
         )
     }
 }
+
+
 fun delayClose(viewModel: PricingViewModel) {
     coroutineScope.launch {
         delay(2000)
@@ -1439,6 +1451,9 @@ fun createPricingOrderApi(viewModel: PricingViewModel) {
     }
 
 fun updateLocationApi(viewModel: PricingViewModel) {
+    globalInstance.updateLocation = true
+    globalInstance.traceUpdateLocation =  FirebasePerformance.getInstance().newTrace("update_location_api")
+    globalInstance.traceUpdateLocation.start()
     val location = Location()
     location.State = viewModel.stateLocation
     location.Pincode = viewModel.pinCodeState

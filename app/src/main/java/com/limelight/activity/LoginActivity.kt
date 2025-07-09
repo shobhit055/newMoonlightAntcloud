@@ -12,6 +12,7 @@ import com.limelight.data.LoginState
 
 import com.limelight.viewmodel.AuthenticateViewModel
 import com.limelight.common.AppUtils
+import com.limelight.common.GlobalData
 import com.limelight.screen.auth.LoginScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,6 +23,7 @@ class LoginActivity : ComponentActivity() {
     var type: String = ""
     var postPhoneOtpState : LoginState? = null
     lateinit  var viewModel : AuthenticateViewModel
+    val globalInstance = GlobalData.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +44,10 @@ class LoginActivity : ComponentActivity() {
 
     override fun onResume()  {
         super.onResume()
+        if(globalInstance.signOutBtn){
+            globalInstance.signOutBtn =  false
+            globalInstance.traceSignOut.stop()
+        }
         if(AppUtils.getKey()==null){
             AppUtils.getKeyGenerator()
         }
