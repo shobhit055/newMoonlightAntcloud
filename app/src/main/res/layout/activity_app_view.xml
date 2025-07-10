@@ -257,10 +257,10 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/errorText"
+            android:id="@+id/error_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/one_min_issue_msg"
+            android:text="@string/conn_error_title"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -269,7 +269,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/errorText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toBottomOf="@+id/error_title"
             app:layout_constraintBottom_toTopOf="@+id/error_backBtn" />
 
 
@@ -285,6 +300,8 @@
             android:layout_height="wrap_content"
             android:text="Go Back"
             android:textAllCaps="false"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/errorText"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" />
@@ -295,12 +312,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ProgressBar
-        android:visibility="invisible"
-        android:id="@+id/progressBar"
-        android:layout_centerInParent="true"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
 
 
 

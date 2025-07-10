@@ -16,10 +16,6 @@ import com.limelight.binding.input.touch.TouchContext;
 
 import android.os.Build;
 
-import coil.ImageLoader;
-import coil.request.ImageRequest;
-import coil.decode.ImageDecoderDecoder;
-import coil.decode.GifDecoder;
 import com.limelight.binding.input.virtual_controller.VirtualController;
 import com.limelight.binding.video.CrashListener;
 import com.limelight.binding.video.MediaCodecDecoderRenderer;
@@ -178,8 +174,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private WifiManager.WifiLock lowLatencyWifiLock;
     private boolean connectedToUsbDriverService = false;
     ConstraintLayout loadingLayout;
+    ConstraintLayout connection_error_layout;
+    TextView  errorText;
     ImageView spinnerImage;
     TextView loadingText;
+    Button errorBackBtn;
 
     private ServiceConnection usbDriverServiceConnection = new ServiceConnection() {
         @Override
@@ -233,21 +232,24 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Inflate the content
         setContentView(R.layout.activity_game);
         loadingLayout =  findViewById(R.id.loadingLayout);
+        connection_error_layout =  findViewById(R.id.connection_error_layout);
+        errorText =  findViewById(R.id.errorText);
         spinnerImage =  findViewById(R.id.spinnerImage);
         loadingText =  findViewById(R.id.loadingText);
+        errorBackBtn =  findViewById(R.id.error_backBtn);
         pref = new PreferenceManager(this);
 
-
         loadingLayout.setVisibility(View.VISIBLE);
-        loadingText.setText(getResources().getString(R.string.conn_establishing_msg));
+        loadingText.setText("Connecting");
+        errorBackBtn.setOnClickListener(v -> {
+            onBackPressed();
+        });
 
         Glide.with(this)
                 .asGif()
                 .load(R.drawable.spinner)
                 .into(spinnerImage);
 
-//        spinner = SpinnerDialog.displayDialog(this, getResources().getString(R.string.conn_establishing_title),
-//                getResources().getString(R.string.conn_establishing_msg), true);
 
         // Read the stream preferences
         prefConfig = PreferenceConfiguration.readPreferences(this);
@@ -269,25 +271,17 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         streamView.setOnGenericMotionListener(this);
         streamView.setOnKeyListener(this);
         streamView.setInputCallbacks(this);
-
-        // Listen for touch events on the background touch view to enable trackpad mode
-        // to work on areas outside of the StreamView itself. We use a separate View
-        // for this rather than just handling it at the Activity level, because that
-        // allows proper touch splitting, which the OSC relies upon.
         View backgroundTouchView = findViewById(R.id.backgroundTouchView);
         backgroundTouchView.setOnTouchListener(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Request unbuffered input event dispatching for all input classes we handle here.
-            // Without this, input events are buffered to be delivered in lock-step with VBlank,
-            // artificially increasing input latency while streaming.
             streamView.requestUnbufferedDispatch(
-                    InputDevice.SOURCE_CLASS_BUTTON | // Keyboards
-                    InputDevice.SOURCE_CLASS_JOYSTICK | // Gamepads
-                    InputDevice.SOURCE_CLASS_POINTER | // Touchscreens and mice (w/o pointer capture)
-                    InputDevice.SOURCE_CLASS_POSITION | // Touchpads
-                    InputDevice.SOURCE_CLASS_TRACKBALL // Mice (pointer capture)
-            );
+                    InputDevice.SOURCE_CLASS_BUTTON |
+                    InputDevice.SOURCE_CLASS_JOYSTICK |
+                    InputDevice.SOURCE_CLASS_POINTER |
+                    InputDevice.SOURCE_CLASS_POSITION |
+                    InputDevice.SOURCE_CLASS_TRACKBALL);
+
             backgroundTouchView.requestUnbufferedDispatch(
                     InputDevice.SOURCE_CLASS_BUTTON | // Keyboards
                     InputDevice.SOURCE_CLASS_JOYSTICK | // Gamepads
@@ -315,7 +309,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Warn the user if they're on a metered connection
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connMgr.isActiveNetworkMetered()) {
-           // displayTransientMessage(getResources().getString(R.string.conn_metered));
         }
 
         // Make sure Wi-Fi is fully powered up
@@ -549,8 +542,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                     usbDriverServiceConnection, Service.BIND_AUTO_CREATE);
         }
         if (!decoderRenderer.isAvcSupported()) {
-            loadingLayout.setVisibility(View.GONE);
-            runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), "This device or ROM doesn't support hardware accelerated H.264 playback."));
+            runOnUiThread(() -> {
+                errorText.setText("This device or ROM doesn't support hardware accelerated H.264 playback.");
+                loadingLayout.setVisibility(View.GONE);
+                connection_error_layout.setVisibility(View.VISIBLE);
+
+            });
             return;
         }
         streamView.getHolder().addCallback(this);
@@ -1773,14 +1770,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
     }
 
-    // Returns true if the event was consumed
-    // NB: View is only present if called from a view callback
+
     private boolean handleMotionEvent(View view, MotionEvent event) {
         // Pass through mouse/touch/joystick input if we're not grabbing
         if (!grabbedInput) {
             return false;
         }
-
         int eventSource = event.getSource();
         int deviceSources = event.getDevice() != null ? event.getDevice().getSources() : 0;
         if ((eventSource & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
@@ -1793,8 +1788,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
         else if ((eventSource & InputDevice.SOURCE_CLASS_POINTER) != 0 ||
                  (eventSource & InputDevice.SOURCE_CLASS_POSITION) != 0 ||
-                 eventSource == InputDevice.SOURCE_MOUSE_RELATIVE)
-        {
+                 eventSource == InputDevice.SOURCE_MOUSE_RELATIVE) {
             // This case is for mice and non-finger touch devices
             if (eventSource == InputDevice.SOURCE_MOUSE ||
                     (eventSource & InputDevice.SOURCE_CLASS_POSITION) != 0 || // SOURCE_TOUCHPAD
@@ -2276,9 +2270,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                         dialogText += "\n\n" + getResources().getString(R.string.nettest_text_blocked);
                     }
                     String finalDialogText = dialogText;
-                    runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_error_title), finalDialogText));
-
-                    //Dialog.displayDialog(Game.this, getResources().getString(R.string.conn_error_title), dialogText, true);
+                    runOnUiThread(() -> {
+                                errorText.setText(finalDialogText);
+                                loadingLayout.setVisibility(View.GONE);
+                                connection_error_layout.setVisibility(View.VISIBLE);
+                            });
                 }
             }
         });
@@ -2345,8 +2341,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                                     else {
                                         errorCodeString = Integer.toString(errorCode);
                                     }
-                                    message = getResources().getString(R.string.conn_terminated_msg) + "\n\n" +
-                                            getResources().getString(R.string.error_code_prefix) + " " + errorCodeString;
+                                    message = getResources().getString(R.string.one_min_issue_msg);
+
                                     break;
                             }
                         }
@@ -2356,8 +2352,15 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                                     MoonBridge.stringifyPortFlags(portFlags, "\n");
                         }
                         String finalMessage = message;
-                        runOnUiThread(() -> showErrorDialog(Game.this, getResources().getString(R.string.conn_terminated_title), finalMessage));
 
+                            streamView.setVisibility(View.GONE);
+                            stopConnection();
+
+                        runOnUiThread(() ->{
+                            errorText.setText(finalMessage);
+                            loadingLayout.setVisibility(View.GONE);
+                            connection_error_layout.setVisibility(View.VISIBLE);
+                        });
                     }
                     else {
                         finish();

@@ -1,10 +1,8 @@
 package com.limelight.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
@@ -13,7 +11,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.AdapterView
@@ -21,7 +18,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
@@ -57,7 +53,6 @@ import com.limelight.nvstream.http.PairingManager.PairState
 import com.limelight.nvstream.jni.MoonBridge
 import com.limelight.preferences.PreferenceConfiguration
 import com.limelight.utils.CacheHelper
-import com.limelight.utils.Dialog
 import com.limelight.utils.RestClient
 import com.limelight.utils.ServerHelper
 import com.limelight.utils.ShortcutHelper
@@ -112,6 +107,12 @@ class AppView : AppCompatActivity() {
 
     var prefs : SharedPreferences? = null
     val globalInstance = GlobalData.getInstance()
+
+   lateinit var loadingLayout : ConstraintLayout
+    lateinit  var resolutionLayout : LinearLayout
+    lateinit  var socketTimer_layout : ConstraintLayout
+    lateinit  var connection_error_layout : ConstraintLayout
+    lateinit  var errorText : TextView
 
 
     private val serviceConnection1: ServiceConnection = object : ServiceConnection {
@@ -272,10 +273,11 @@ class AppView : AppCompatActivity() {
         val viewModel: StreamViewModel by viewModels()
         val userViewModel: UserViewModel by viewModels()
         getVmipState = viewModel.getVMIPState.value
-        val loadingLayout =  findViewById<ConstraintLayout>(R.id.loadingLayout)
-        val resolutionLayout=  findViewById<LinearLayout>(R.id.resolutionLayout)
-        val socketTimer_layout=  findViewById<ConstraintLayout>(R.id.socketTimer_layout)
-        val connection_error_layout =  findViewById<ConstraintLayout>(R.id.connection_error_layout)
+        loadingLayout =  findViewById(R.id.loadingLayout)
+        resolutionLayout=  findViewById(R.id.resolutionLayout)
+        socketTimer_layout=  findViewById(R.id.socketTimer_layout)
+        connection_error_layout =  findViewById(R.id.connection_error_layout)
+        errorText =  findViewById(R.id.errorText)
         val loadingText=  findViewById<TextView>(R.id.loadingText)
         val spinnerImage =  findViewById<ImageView>(R.id.spinnerImage)
         val backBtn =  findViewById<Button>(R.id.backBtn)
@@ -395,6 +397,7 @@ class AppView : AppCompatActivity() {
 
 
         val myList = mutableListOf("360p", "480p")
+
         when(GlobalData.getInstance().accountData.resolution){
             "720" ->  myList.add("720p")
             "1080"->  {
@@ -454,7 +457,7 @@ class AppView : AppCompatActivity() {
         })
         startVMButton.setOnClickListener {
             lifecycleScope.launch {
-                loadingText.text = "please wait"
+                loadingText.text = getResources().getString(R.string.conn_establishing_msg)
                 loadingLayout.visibility = View.VISIBLE
                 resolutionLayout.visibility = View.INVISIBLE
 
@@ -650,7 +653,6 @@ class AppView : AppCompatActivity() {
                     }
                 }
                 if (!foundExistingApp) {
-                    hideLoadingDialog()
                     ServerHelper.doStart(this@AppView, app, computer, managerBinder)
                     finish()
                 }
@@ -726,28 +728,22 @@ class AppView : AppCompatActivity() {
 
         if (invalidInput) {
             withContext(Dispatchers.Main) {
-                showErrorDialog(
-                    this@AppView,
-                    resources.getString(R.string.conn_error_title),
-                    resources.getString(R.string.addpc_unknown_host)
-                )
+                errorText.text =   resources.getString(R.string.addpc_unknown_host)
+                loadingLayout.visibility = View.INVISIBLE
+                connection_error_layout.visibility = View.VISIBLE
             }
 
         }else if (wrongSiteLocal) {
             withContext(Dispatchers.Main) {
-                showErrorDialog(
-                    this@AppView,
-                    resources.getString(R.string.conn_error_title),
-                    resources.getString(R.string.addpc_wrong_sitelocal),
-                )
+                errorText.text =  resources.getString(R.string.addpc_wrong_sitelocal)
+                loadingLayout.visibility = View.INVISIBLE
+                connection_error_layout.visibility = View.VISIBLE
             }
         }else if (!success) {
             withContext(Dispatchers.Main) {
-                showErrorDialog(
-                    this@AppView,
-                    resources.getString(R.string.conn_error_title),
-                    resources.getString(R.string.one_min_issue_msg)
-                )
+                errorText.text =  resources.getString(R.string.one_min_issue_msg)
+                loadingLayout.visibility = View.INVISIBLE
+                connection_error_layout.visibility = View.VISIBLE
             }
         } else {
             Log.i("test", "test17")
@@ -836,24 +832,9 @@ class AppView : AppCompatActivity() {
                     computer.serverCert,
                     PlatformBinding.getCryptoProvider(this@AppView)
                 )
-                if (httpConn.pairState == PairState.PAIRED) {
-                    Log.i("test" , "paired")
-                    message = null
-                    success = true
-                    bindService(
-                        Intent(
-                            this@AppView,
-                            ComputerManagerService::class.java
-                        ), serviceConnection, BIND_AUTO_CREATE
-                    )
-                    managerBinder1!!.getComputer(computer.uuid).serverCert = httpConn.pairingManager.pairedCert
-                    managerBinder1!!.invalidateStateForComputer(computer.uuid)
-                }
-
-                else {
                     val pinStr = PairingManager.generatePinString()
 //                     val accessToken = "JWT "+ GlobalData.getInstance().accountData.token
-                     val accessToken = "JWT "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzQ1MDc4ODUzNmE5M2I2OTBjZmIzOCIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoibG92ZUBhbnRwbGF5LnRlY2giLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiX3R2IjowLCJpYXQiOjE3NTIwNTc5OTgsImV4cCI6MTc1MjA2NTE5OH0.bx1lrYISfGFpOdWNxYL1D707EbqAiGBkWWaIc5k6X4I"
+                     val accessToken = "JWT "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzQ1MDc4ODUzNmE5M2I2OTBjZmIzOCIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoibG92ZUBhbnRwbGF5LnRlY2giLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiX3R2IjowLCJpYXQiOjE3NTIxNDYyNDYsImV4cCI6MTc1MjE1MzQ0Nn0.WvyX8K4YPN-QMWdMC7OfIGH-U-F38Zo_0BMIn_SdZq4"
                     val handlerThread = Thread {
                         sendAndVerifySecurityPinManually(pinStr, accessToken)
                     }
@@ -870,7 +851,9 @@ class AppView : AppCompatActivity() {
                         }
                     } else if (pairState == PairState.ALREADY_IN_PROGRESS) {
                         message = resources.getString(R.string.pair_already_in_progress)
-                    } else if (pairState == PairState.PAIRED) {
+                    }
+
+                    else if (pairState == PairState.PAIRED) {
                         message = null
                         success = true
                         Log.i("test", "qldchnbq")
@@ -880,7 +863,7 @@ class AppView : AppCompatActivity() {
                         managerBinder1!!.invalidateStateForComputer(computer.uuid)
                     } else {
                         message = null
-                    }
+
                 }
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -937,41 +920,7 @@ class AppView : AppCompatActivity() {
         const val NAME_EXTRA: String = "Name"
         const val UUID_EXTRA: String = "UUID"
     }
-    private fun showLoadingDialog(context: Context) {
-        val view = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null)
 
-        loadingDialog = AlertDialog.Builder(context)
-            .setView(view)
-            .setCancelable(false)
-            .create()
-
-        loadingDialog?.show()
-    }
-
-    fun hideLoadingDialog() {
-        loadingDialog?.dismiss()
-    }
-    fun showErrorDialog(activity: Activity, tltle: String?, message: String?) {
-        val builder = AlertDialog.Builder(activity)
-        val inflater = activity.layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_error_layout, null)
-        builder.setView(dialogView)
-
-        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
-        val dialogMessage = dialogView.findViewById<TextView>(R.id.dialog_message)
-        val btnGoBack = dialogView.findViewById<Button>(R.id.btn_go_back)
-
-        dialogTitle.text = tltle
-        dialogMessage.text = message
-        val dialog = builder.create()
-        dialog.setCancelable(true)
-        dialog.show()
-
-        btnGoBack.setOnClickListener { v: View? ->
-            dialog.dismiss()
-                finish()
-        }
-    }
 }
 
 
