@@ -152,7 +152,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                 reconnection = true
             }
 
-            globalInstance.socket = IO.socket("wss://socket.antcloud.co:8000", opts)
+            globalInstance.socket = IO.socket("wss://socket.antcloud.co:9001", opts)
 
             globalInstance.socket.on(Socket.EVENT_CONNECT) {
                 Log.d("Socket", "Connected with ID: ${globalInstance.socket.id()}")

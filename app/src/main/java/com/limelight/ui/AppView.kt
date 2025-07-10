@@ -358,7 +358,10 @@ class AppView : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.timeLeft.collect { time ->
                 if(time != "00:00"){
-                    loadingText.text =  "${viewModel.loadingData}$time minutes"
+                    if(viewModel.loadingData.contains("Your PC is starting"))
+                        loadingText.text =  "${viewModel.loadingData}$time minutes"
+                    else
+                        loadingText.text =  viewModel.loadingData
                 }
                 else {
                     loadingLayout.visibility =  View.GONE
@@ -462,8 +465,8 @@ class AppView : AppCompatActivity() {
                 resolutionLayout.visibility = View.INVISIBLE
 
                 withContext(Dispatchers.IO) {
-                    doAddPc("103.182.65.107")
-//                    doAddPc(GlobalData.getInstance().vmIP)
+//                    doAddPc("103.182.65.107")
+                    doAddPc(GlobalData.getInstance().vmIP)
                 }
             }
         }
@@ -833,8 +836,7 @@ class AppView : AppCompatActivity() {
                     PlatformBinding.getCryptoProvider(this@AppView)
                 )
                     val pinStr = PairingManager.generatePinString()
-//                     val accessToken = "JWT "+ GlobalData.getInstance().accountData.token
-                     val accessToken = "JWT "+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzQ1MDc4ODUzNmE5M2I2OTBjZmIzOCIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImVtYWlsIjoibG92ZUBhbnRwbGF5LnRlY2giLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiX3R2IjowLCJpYXQiOjE3NTIxNDYyNDYsImV4cCI6MTc1MjE1MzQ0Nn0.WvyX8K4YPN-QMWdMC7OfIGH-U-F38Zo_0BMIn_SdZq4"
+                     val accessToken = "JWT "+ GlobalData.getInstance().accountData.token
                     val handlerThread = Thread {
                         sendAndVerifySecurityPinManually(pinStr, accessToken)
                     }
@@ -920,7 +922,6 @@ class AppView : AppCompatActivity() {
         const val NAME_EXTRA: String = "Name"
         const val UUID_EXTRA: String = "UUID"
     }
-
 }
 
 

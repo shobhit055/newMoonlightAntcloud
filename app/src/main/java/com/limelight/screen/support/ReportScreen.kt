@@ -71,7 +71,7 @@ var allowSubmission = true
 val globalInstance  =  GlobalData.getInstance()
 enum class IssueCodes(val title: String, val code: String) {
     Latency("Latency", "latency"),
-    GameControls("Game Controls", "gameControls"),
+    aGameControls("Game Controls", "gameControls"),
     GameLibrary("Game Library", "gameLibrary")
 }
 

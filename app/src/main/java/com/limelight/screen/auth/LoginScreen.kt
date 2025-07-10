@@ -349,7 +349,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
         Column(
                 modifier = Modifier.fillMaxSize()
                     .background(brush = Brush.horizontalGradient(colors = gradientColors)),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,verticalArrangement = Arrangement.Center
         ) {
 
                 if (globalInstance.remoteAppMessage.isNotEmpty() && globalInstance.remoteAppMessage[0].showMessage) {
@@ -430,9 +430,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                     }
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
+
                     Image(
                         modifier = Modifier.wrapContentWidth(),
                         painter = painterResource(id = R.drawable.ant_cloud_white_icon),
@@ -752,7 +750,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                     }
                 }
             }
-    }
+
 
     else{
         Column(

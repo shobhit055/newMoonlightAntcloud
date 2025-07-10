@@ -1154,7 +1154,7 @@ fun PortraitLayoutLibrary(imageHeight: Double, navigate: (String) -> Unit, handl
                 .fillMaxWidth()
                 //.height(200.dp),
                 .height(imageHeight.dp),
-            painter = painterResource(id = R.drawable.windows),
+            painter = painterResource(id = R.drawable.banner_image),
             contentDescription = null,
             contentScale = ContentScale.FillBounds)
 

@@ -221,6 +221,7 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
     Column(modifier = Modifier
         .fillMaxSize()
         .background(brush = Brush.horizontalGradient(colors = gradientColors)),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
 
         var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -285,11 +286,9 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
                 }
             }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
+
             Image(
-                modifier = Modifier.wrapContentWidth().padding(top = 50.dp),
+                modifier = Modifier.wrapContentWidth().padding(top = 0.dp),
                 painter = painterResource(id = R.drawable.ant_cloud_white_icon),
                 contentDescription = null, contentScale = ContentScale.FillBounds
             )
@@ -403,7 +402,7 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
             }
         }
     }
-        }
+
     else{
         Column(modifier = Modifier
             .fillMaxSize().verticalScroll(rememberScrollState())

@@ -91,10 +91,6 @@ class NavActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 systemUiController.setStatusBarColor(color = Color.Black, darkIcons = false)
             }
-
-
-
-
             initialize()
             var progress by remember { mutableFloatStateOf(0.0f) }
             var loadingData by remember { mutableStateOf("Loading Your Preferences ...") }
