@@ -156,6 +156,7 @@ fun ReportScreen(viewModel: SupportViewModel, activity: NavActivity) {
         internetError = it
     }
 
+
     val refreshTokenState = userViewModel.refreshTokenState.value
     when (refreshTokenState.success) {
         1 -> {

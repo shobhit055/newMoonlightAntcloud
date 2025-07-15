@@ -80,31 +80,20 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     private val _requestVmIpEvent = MutableSharedFlow<Unit>(replay = 0)
     val requestVmIpEvent: SharedFlow<Unit> = _requestVmIpEvent
 
-    private val _requestSocketDisconnect = MutableSharedFlow<Unit>(replay = 0)
-    val requestSocketDisconnect: SharedFlow<Unit> = _requestSocketDisconnect
-    var socketDisconnect: Boolean = false
-
-
-
-
-
     private val _status = MutableStateFlow(VMStatus.Idle)
     val status: StateFlow<VMStatus> = _status
     val globalInstance =   GlobalData.getInstance()
-
     private var timer: Timer? = null
     private val api = AppModule.injectBackendRetrofitApi()
     private val repository =  AuthRepository(api)
+    private val _isConnected = MutableStateFlow(true)
+    val isConnected: StateFlow<Boolean> = _isConnected
 
-    fun stopSocketConnection(socket: Socket, reason: String) {
+    private fun stopSocketConnection(socket: Socket, reason: String) {
         if (socket.connected()) {
-            Log.d("Socket", " Disconnecting due to: $reason")
+
+            Log.d("Socket", "Disconnecting due to testt: $reason")
             socket.disconnect()
-            if(socketDisconnect) {
-                viewModelScope.launch {
-                    _requestSocketDisconnect.emit(Unit)
-                }
-            }
         }
     }
 
@@ -115,12 +104,10 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     var resolution: String = ""
     var subResolution: ((String) -> Unit)? = null
 
-    var fpsNames: String = ""
-    var subFPSNames: ((String) -> Unit)? = null
+    var socketConnect: String = ""
 
     var initialValueKbps: Float = 5000f
     var subIntialValueKbps: ((Float) -> Unit)? = null
-
     private var job: Job? = null
 
     private val _getVMStatus= mutableStateOf(VMStatusState())
@@ -129,7 +116,6 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     val checkVMStatus: State<CheckVMStatusState> = _checkVMStatus
     private val _getVMIPState = mutableStateOf(GetVMIPState())
     val getVMIPState: State<GetVMIPState> = _getVMIPState
-
     var accountData: User = GlobalData.getInstance().accountData
     var subAccountData: ((User) -> Unit)? = null
     var selectedResolution: String = ""
@@ -140,6 +126,11 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     val _timeLeft = MutableStateFlow("06:00")
     val timeLeft: StateFlow<String> = _timeLeft
     private var countDownTimer: CountDownTimer? = null
+
+    val _disConnTimeLeft = MutableStateFlow("01:00")
+    val disConnTimeLeft: StateFlow<String> = _disConnTimeLeft
+    private var countDownTimerDisconn: CountDownTimer? = null
+
 
 
     fun callSocket(){
@@ -165,7 +156,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
 
             globalInstance.socket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.w("Socket", "Disconnected: ${args.getOrNull(0)}")
-
+                _isConnected.value = false
             }
 
             globalInstance.socket.on("new_connection") { args ->
@@ -233,10 +224,10 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
             }
 
             globalInstance.socket.on("reset") {
-                Log.w("Socket", " Stream reset by server.")
-                stopSocketConnection( globalInstance.socket, "streamend")
-
+                Log.w("Socket", "Stream reset by server.")
+                stopSocketConnection(globalInstance.socket, "reset")
             }
+
             globalInstance.socket.connect()
         }
         catch (e: URISyntaxException) {
@@ -343,34 +334,34 @@ fun updateLoadingData(name: String) {
 
     }
 
+    fun startDisconnectTimer():Boolean {
+        val totalTime =  60 * 1000L // 1 minutes in milliseconds
+
+        countDownTimerDisconn = object : CountDownTimer(totalTime, 1000) {
+            @SuppressLint("DefaultLocale")
+            override fun onTick(millisUntilFinished: Long) {
+                val minutes = (millisUntilFinished / 1000) / 60
+                val seconds = (millisUntilFinished / 1000) % 60
+                _disConnTimeLeft.value = String.format("%02d:%02d", minutes, seconds)
+            }
+
+            override fun onFinish() {
+                _disConnTimeLeft.value = "00:00"
+            }
+        }.start()
+        return  true
+    }
+
+    fun stopDisconnectTimer() {
+        countDownTimerDisconn?.cancel()
+
+    }
+
     fun onSocketStatusChanged(newStatus: VMStatus) {
         _status.value = newStatus
         when (newStatus) {
             VMStatus.Starting  -> startTimer()
-            else              -> stopTimer()
-        }
-    }
-    fun startRepeatingApiCall(token: String) {
-        if (timer == null) {
-            timer = Timer()
-            timer?.schedule(object : TimerTask() {
-                override fun run() {
-                    viewModelScope.launch {
-                        try {
-                            val response = repository.checkConnectionStatus(token)
-                            Log.i("test" , "connection" +response.body()?.connected!!)
-                            if(response.body()?.connected!!){
-                                Log.i("test" , "connection true")
-                                GlobalData.getInstance().socket.emit("control" , "video")
-                                timer?.cancel()
-                                timer = null
-                            }
-                        } catch (e: Exception) {
-                            println("API error: ${e.message}")
-                        }
-                    }
-                }
-            }, 0, 500)
+            else  -> stopTimer()
         }
     }
 
@@ -378,11 +369,10 @@ fun updateLoadingData(name: String) {
         GlobalData.getInstance().socket.emit("closestream")
     }
 
+    fun onBackPressed() {
+       GlobalData.getInstance().socket.disconnect()
+    }
 
-    //    override fun onCleared() {
-//        socket.disconnect()
-//        socket.off()
-//    }
 data class AddComputerUiState(
     val loading: Boolean = false,
     val showDialog: Int? = null,

@@ -232,7 +232,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Inflate the content
         setContentView(R.layout.activity_game);
         loadingLayout =  findViewById(R.id.loadingLayout);
-        connection_error_layout =  findViewById(R.id.connection_error_layout);
+        connection_error_layout =  findViewById(R.id.connection_eror_layout);
         errorText =  findViewById(R.id.errorText);
         spinnerImage =  findViewById(R.id.spinnerImage);
         loadingText =  findViewById(R.id.loadingText);
@@ -2725,31 +2725,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         startActivity(new Intent(Game.this, AppView.class));
         finish();
     }
-
-
-    public void showErrorDialog(Activity activity, String tltle, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        LayoutInflater inflater = activity.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_error_layout, null);
-        builder.setView(dialogView);
-
-        TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
-        TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
-        Button btnGoBack = dialogView.findViewById(R.id.btn_go_back);
-
-        dialogTitle.setText(tltle);
-        dialogMessage.setText(message);
-        AlertDialog dialog = builder.create();
-        dialog.setCancelable(true);
-        dialog.show();
-
-        btnGoBack.setOnClickListener(v -> {
-            dialog.dismiss();
-            finish();
-        });
-
-    }
-
 
 
 

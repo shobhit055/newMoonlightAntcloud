@@ -198,7 +198,7 @@ class AppUtils {
                 value = 10000
             else if(resolution=="1440p")
                 value = 30000
-            else if(resolution=="4K" )
+            else if(resolution=="2160" )
                 value = 50000
             return value
         }

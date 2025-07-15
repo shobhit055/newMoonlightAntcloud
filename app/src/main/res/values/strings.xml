@@ -333,5 +333,6 @@
     <string name="basic_banner_text">Want to start playing?</string>
     <string name="plan_hold_button">Contact Support</string>
     <string name="update_app">An update for the app is currently available. Please update your app</string>
+    <string name="stream_end_issue">Your Stream has ended! Please click below to go back to your dashboard!</string>
 
 </resources>

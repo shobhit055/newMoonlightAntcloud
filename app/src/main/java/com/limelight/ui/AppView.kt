@@ -8,7 +8,9 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
@@ -22,10 +24,17 @@ import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
@@ -60,7 +69,9 @@ import com.limelight.utils.SpinnerDialog
 import com.limelight.utils.UiHelper
 import com.limelight.viewmodel.StreamViewModel
 import com.limelight.viewmodel.UserViewModel
+import com.limelight.viewmodel.VMStatus
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,11 +114,8 @@ class AppView : AppCompatActivity() {
     var getVmipState = GetVMIPState()
     private val api = AppModule.injectBackendRetrofitApi()
     private val repository =  AuthRepository(api)
-    private var timer: Timer? = null
-
     var prefs : SharedPreferences? = null
     val globalInstance = GlobalData.getInstance()
-
    lateinit var loadingLayout : ConstraintLayout
     lateinit  var resolutionLayout : LinearLayout
     lateinit  var socketTimer_layout : ConstraintLayout
@@ -271,7 +279,6 @@ class AppView : AppCompatActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this@AppView)
         prefs!!.edit().putBoolean(PreferenceConfiguration.ONSCREEN_CONTROLLER_PREF_STRING,false).apply();
         val viewModel: StreamViewModel by viewModels()
-        val userViewModel: UserViewModel by viewModels()
         getVmipState = viewModel.getVMIPState.value
         loadingLayout =  findViewById(R.id.loadingLayout)
         resolutionLayout=  findViewById(R.id.resolutionLayout)
@@ -301,9 +308,13 @@ class AppView : AppCompatActivity() {
             globalInstance.openSupportScreen =  true
             onBackPressedDispatcher.onBackPressed()
         }
+        onBackPressedDispatcher.addCallback(this) {
+            viewModel.onBackPressed()
+            this.remove()
+            onBackPressedDispatcher.onBackPressed()
+        }
 
-        val imageLoader = ImageLoader.Builder(this)
-            .components {
+        val imageLoader = ImageLoader.Builder(this).components {
                 if (Build.VERSION.SDK_INT >= 28) {
                     add(ImageDecoderDecoder.Factory())
                 } else {
@@ -317,7 +328,6 @@ class AppView : AppCompatActivity() {
             .build()
         imageLoader.enqueue(request)
 
-
         lifecycleScope.launchWhenStarted {
             viewModel.requestVmIpEvent.collect {
                 val token = "JWT " + GlobalData.getInstance().accountData.token
@@ -325,35 +335,54 @@ class AppView : AppCompatActivity() {
                 if(process.code()==200) {
                     globalInstance.vmIP = process.body()?.vmip!!
                     if (globalInstance.vmIP != "") {
-                        viewModel.socketDisconnect = true
+                        viewModel.startDisconnectTimer()
+                        viewModel.socketConnect = "connected"
                         resolutionLayout.visibility = View.VISIBLE
                         loadingLayout.visibility = View.INVISIBLE
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.onSocketStatusChanged(VMStatus.Connected)
+                        }
                         Log.d("Socket", "VM IP: ${globalInstance.vmIP}")
                     }
                 }
             }
         }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.requestSocketDisconnect.collect {
-                loadingLayout.visibility = View.INVISIBLE
-                resolutionLayout.visibility = View.INVISIBLE
-                socketTimer_layout.visibility = View.INVISIBLE
-                connection_error_layout.visibility = View.VISIBLE
-            }
-        }
-
-
-
-
         if(intent.hasExtra("connect")){
             loadingLayout.visibility = View.VISIBLE
             resolutionLayout.visibility = View.INVISIBLE
             viewModel.callSocket()
         }
-        else
+        else {
+            viewModel.startDisconnectTimer()
             resolutionLayout.visibility = View.VISIBLE
+            loadingLayout.visibility = View.INVISIBLE
+        }
 
+
+        lifecycleScope.launch {
+            viewModel.disConnTimeLeft.collect { time ->
+                if(time == "00:00"){
+                    viewModel.stopDisconnectTimer()
+                    errorText.text = resources.getString(R.string.stream_end_issue)
+                    loadingLayout.visibility = View.INVISIBLE
+                    resolutionLayout.visibility = View.INVISIBLE
+                    socketTimer_layout.visibility = View.INVISIBLE
+                    connection_error_layout.visibility = View.VISIBLE
+                }
+            }
+        }
+
+
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.requestSocketDisconnect.collect {
+//                Log.i("test", "testing 123")
+//                errorText.text = resources.getString(R.string.stream_end_issue)
+//                loadingLayout.visibility = View.INVISIBLE
+//                resolutionLayout.visibility = View.INVISIBLE
+//                socketTimer_layout.visibility = View.INVISIBLE
+//                connection_error_layout.visibility = View.VISIBLE
+//            }
+//        }
 
         lifecycleScope.launch {
             viewModel.timeLeft.collect { time ->
@@ -368,15 +397,12 @@ class AppView : AppCompatActivity() {
                     resolutionLayout.visibility =  View.GONE
                     socketTimer_layout.visibility =  View.VISIBLE
                 }
-
             }
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             setShouldDockBigOverlays(false)
         }
         bindService(Intent(this@AppView, ComputerManagerService::class.java), serviceConnection1, BIND_AUTO_CREATE)
-
         val dbFile = getDatabasePath("computers4.db")
             if (dbFile.exists()) {
                 val deleted = deleteDatabase("computers4.db")
@@ -384,7 +410,6 @@ class AppView : AppCompatActivity() {
             } else {
                 Log.d("Database", "Database does not exist.")
             }
-
         val keyFile = File(filesDir.absolutePath + File.separator + "client.key")
         val certFile = File(filesDir.absolutePath + File.separator + "client.crt")
         if (keyFile.exists()) {
@@ -393,14 +418,11 @@ class AppView : AppCompatActivity() {
         if (certFile.exists()) {
             certFile.delete()
         }
-
         bitrateSeekbar.max = 50000
         bitrateSeekbar.progress = 5000
         bitrateSeekbar.min = 2000
 
-
         val myList = mutableListOf("360p", "480p")
-
         when(GlobalData.getInstance().accountData.resolution){
             "720" ->  myList.add("720p")
             "1080"->  {
@@ -460,12 +482,11 @@ class AppView : AppCompatActivity() {
         })
         startVMButton.setOnClickListener {
             lifecycleScope.launch {
-                loadingText.text = getResources().getString(R.string.conn_establishing_msg)
+                viewModel.stopDisconnectTimer()
                 loadingLayout.visibility = View.VISIBLE
                 resolutionLayout.visibility = View.INVISIBLE
-
+                loadingText.text = getResources().getString(R.string.conn_establishing_msg)
                 withContext(Dispatchers.IO) {
-//                    doAddPc("103.182.65.107")
                     doAddPc(GlobalData.getInstance().vmIP)
                 }
             }
@@ -656,6 +677,7 @@ class AppView : AppCompatActivity() {
                     }
                 }
                 if (!foundExistingApp) {
+
                     ServerHelper.doStart(this@AppView, app, computer, managerBinder)
                     finish()
                 }
@@ -916,6 +938,7 @@ class AppView : AppCompatActivity() {
                 )
             })
     }
+
 
     companion object {
         const val HIDDEN_APPS_PREF_FILENAME: String = "HiddenApps"
