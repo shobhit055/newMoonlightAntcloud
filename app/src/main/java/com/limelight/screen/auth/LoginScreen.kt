@@ -94,6 +94,7 @@ import com.limelight.components.CustomDialog
 import com.limelight.components.Play
 import com.limelight.logic.auth.LoginErrors
 import com.limelight.screen.account.globalInstance
+import com.limelight.theme.dark_grey
 import com.limelight.theme.heading
 
 
@@ -235,7 +236,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .background(MaterialTheme.colors.surface)
+                        .background(dark_grey)
                 ) {
                     Row(modifier = Modifier
                         .fillMaxWidth()

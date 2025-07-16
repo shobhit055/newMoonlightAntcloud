@@ -10,11 +10,9 @@
     <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA"/>
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
 
-
     <uses-permission
         android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
         android:maxSdkVersion="33" />
-
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -36,8 +34,6 @@
     <uses-feature
         android:name="android.hardware.sensor.gyroscope"
         android:required="false" />
-
-
     <uses-feature
         android:name="android.hardware.type.pc"
         android:required="false"/>
@@ -55,8 +51,7 @@
         android:installLocation="auto"
         android:gwpAsanMode="always"
         android:localeConfig="@xml/locales_config"
-        android:enableOnBackInvokedCallback="false"
-        android:theme="@style/AppTheme">
+        android:enableOnBackInvokedCallback="false">
 
         <provider
             android:name=".ui.PosterContentProvider"
@@ -104,30 +99,32 @@
             android:configChanges="keyboardHidden|screenSize|orientation|screenLayout|layoutDirection|density|fontScale"
             android:theme="@style/Theme.Antcloud_App.Splash"
             tools:ignore="DiscouragedApi">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
         </activity>
 
         <activity
             android:name=".activity.NavActivity"
             android:theme="@style/Theme.Antcloud_App"
-            android:exported="false">
-        </activity>
-
-
-        <activity
-            android:name=".activity.LoginActivity"
+            android:configChanges="keyboardHidden|screenSize|orientation|screenLayout|layoutDirection|density|fontScale"
             android:launchMode="singleTop"
             android:exported="false">
         </activity>
 
         <activity
+            android:name=".activity.LoginActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Antcloud_App"
+            android:exported="false">
+        </activity>
+
+        <activity
             android:name=".activity.SignupActivity"
-            android:exported="true"/>
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Antcloud_App"
+            android:exported="false"/>
 
         <activity
             android:name=".ui.ShortcutTrampoline"
@@ -211,6 +208,7 @@
             <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />
             <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="landscape" />
         </activity>
+
     </application>
 
 </manifest>

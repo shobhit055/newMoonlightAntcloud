@@ -19,7 +19,6 @@ public class AbsoluteTouchContext implements TouchContext {
     private boolean cancelled;
     private boolean confirmedLongPress;
     private boolean confirmedTap;
-
     private final Runnable longPressRunnable = new Runnable() {
         @Override
         public void run() {
@@ -42,27 +41,21 @@ public class AbsoluteTouchContext implements TouchContext {
             tapConfirmed();
         }
     };
-
     private final NvConnection conn;
     private final int actionIndex;
     private final View targetView;
     private final Handler handler;
-
     private final Runnable leftButtonUpRunnable = new Runnable() {
         @Override
         public void run() {
             conn.sendMouseButtonUp(MouseButtonPacket.BUTTON_LEFT);
         }
     };
-
     private static final int SCROLL_SPEED_FACTOR = 3;
-
     private static final int LONG_PRESS_TIME_THRESHOLD = 650;
     private static final int LONG_PRESS_DISTANCE_THRESHOLD = 30;
-
     private static final int DOUBLE_TAP_TIME_THRESHOLD = 250;
     private static final int DOUBLE_TAP_DISTANCE_THRESHOLD = 60;
-
     private static final int TOUCH_DOWN_DEAD_ZONE_TIME_THRESHOLD = 100;
     private static final int TOUCH_DOWN_DEAD_ZONE_DISTANCE_THRESHOLD = 20;
 

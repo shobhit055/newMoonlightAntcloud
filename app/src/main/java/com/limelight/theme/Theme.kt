@@ -74,7 +74,8 @@ fun AntCloudNewFlowTheme(
             while (currentContext is ContextWrapper) {
                 if (currentContext is Activity) {
                     val window = currentContext.window
-                    window.statusBarColor = colorScheme.primary.toArgb()
+                    window.statusBarColor = dark_grey.toArgb()
+//                    window.statusBarColor = colorScheme.primary.toArgb()
                     WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
                     break
                 }

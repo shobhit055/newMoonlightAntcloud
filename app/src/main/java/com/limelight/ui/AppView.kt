@@ -372,18 +372,6 @@ class AppView : AppCompatActivity() {
             }
         }
 
-
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.requestSocketDisconnect.collect {
-//                Log.i("test", "testing 123")
-//                errorText.text = resources.getString(R.string.stream_end_issue)
-//                loadingLayout.visibility = View.INVISIBLE
-//                resolutionLayout.visibility = View.INVISIBLE
-//                socketTimer_layout.visibility = View.INVISIBLE
-//                connection_error_layout.visibility = View.VISIBLE
-//            }
-//        }
-
         lifecycleScope.launch {
             viewModel.timeLeft.collect { time ->
                 if(time != "00:00"){
@@ -393,8 +381,9 @@ class AppView : AppCompatActivity() {
                         loadingText.text =  viewModel.loadingData
                 }
                 else {
-                    loadingLayout.visibility =  View.GONE
-                    resolutionLayout.visibility =  View.GONE
+                    loadingLayout.visibility =  View.INVISIBLE
+                    resolutionLayout.visibility =  View.INVISIBLE
+                    connection_error_layout.visibility =  View.INVISIBLE
                     socketTimer_layout.visibility =  View.VISIBLE
                 }
             }
@@ -755,6 +744,8 @@ class AppView : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 errorText.text =   resources.getString(R.string.addpc_unknown_host)
                 loadingLayout.visibility = View.INVISIBLE
+                socketTimer_layout.visibility = View.INVISIBLE
+                resolutionLayout.visibility = View.INVISIBLE
                 connection_error_layout.visibility = View.VISIBLE
             }
 
@@ -762,12 +753,16 @@ class AppView : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 errorText.text =  resources.getString(R.string.addpc_wrong_sitelocal)
                 loadingLayout.visibility = View.INVISIBLE
+                socketTimer_layout.visibility = View.INVISIBLE
+                resolutionLayout.visibility = View.INVISIBLE
                 connection_error_layout.visibility = View.VISIBLE
             }
         }else if (!success) {
             withContext(Dispatchers.Main) {
                 errorText.text =  resources.getString(R.string.one_min_issue_msg)
                 loadingLayout.visibility = View.INVISIBLE
+                socketTimer_layout.visibility = View.INVISIBLE
+                resolutionLayout.visibility = View.INVISIBLE
                 connection_error_layout.visibility = View.VISIBLE
             }
         } else {

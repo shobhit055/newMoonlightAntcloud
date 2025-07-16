@@ -717,7 +717,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
             ) {
                 Column(
                     modifier = Modifier
-                        .background(androidx.compose.material.MaterialTheme.colors.surface)
+                        .background(dark_grey)
                 ) {
                     androidx.compose.material.Text(
                         text = "Please upgrade your plan",
@@ -769,7 +769,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(androidx.compose.material.MaterialTheme.colors.surface)
+                    .background(dark_grey)
                     .clip(
                         RoundedCornerShape(10.dp)
                     )
@@ -787,7 +787,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
             ) {
                 Column(
                     modifier = Modifier
-                        .background(androidx.compose.material.MaterialTheme.colors.surface)
+                        .background(dark_grey)
                 ) {
                     androidx.compose.material.Text(
                         text = stringResource(id = R.string.update_app),
@@ -847,7 +847,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .background(androidx.compose.material.MaterialTheme.colors.surface)
+                        .background(dark_grey)
                 ) {
                     Row(
                         modifier = Modifier

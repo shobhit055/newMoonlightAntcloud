@@ -121,6 +121,7 @@ import com.limelight.common.AppUtils.Companion.navigateSplashActivity
 import com.limelight.components.CustomDialog
 import com.limelight.components.Play
 import com.limelight.screen.account.globalInstance
+import com.limelight.theme.dark_grey
 import com.limelight.theme.heading
 
 
@@ -319,7 +320,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .background(MaterialTheme.colors.surface)
+                        .background(dark_grey)
                 ) {
                     Row(modifier = Modifier
                         .fillMaxWidth()
@@ -1086,7 +1087,6 @@ fun LoginComplete(landscape: Boolean = false) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(),
-            //.background(MaterialTheme.colors.surface),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

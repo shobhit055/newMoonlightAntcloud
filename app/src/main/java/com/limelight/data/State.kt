@@ -15,7 +15,7 @@ data class LoginState(
 data class ForgotState(
     var isLoading: Boolean = false,
     var success: Int = -1,
-    var message: String? = null,
+    var message: String = "",
     var error: String = "",
     var errorCode: Int = -1)
 

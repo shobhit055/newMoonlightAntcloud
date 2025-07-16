@@ -202,6 +202,5 @@ class AppUtils {
                 value = 50000
             return value
         }
-
     }
 }

@@ -142,23 +142,18 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                 extraHeaders = mapOf("Origin" to listOf("https://antcloud.co"))
                 reconnection = true
             }
-
             globalInstance.socket = IO.socket("wss://socket.antcloud.co:9001", opts)
-
             globalInstance.socket.on(Socket.EVENT_CONNECT) {
                 Log.d("Socket", "Connected with ID: ${globalInstance.socket.id()}")
             }
-
             globalInstance.socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
                 Log.e("Socket", "Connection error: ${args.getOrNull(0)}")
                 stopSocketConnection(globalInstance.socket, "connect_error")
             }
-
             globalInstance.socket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.w("Socket", "Disconnected: ${args.getOrNull(0)}")
                 _isConnected.value = false
             }
-
             globalInstance.socket.on("new_connection") { args ->
                 val data = args.getOrNull(0) as? JSONObject
                 if ((data?.optInt("clients") ?: 0) >= 2) {
@@ -167,7 +162,6 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                     }
                 }
             }
-
             globalInstance.socket.on("waiting") { args ->
                 val length = (args.getOrNull(0) as? Int) ?: 0
                 val waitTime = when {
@@ -179,12 +173,10 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                 }
                 Log.d("Socket", "Queue length: $length, estimated wait: $waitTime")
             }
-
             globalInstance.socket.on("inactive") { args ->
                 Log.w("Socket", "Inactive: ${args.getOrNull(0)}")
                 stopSocketConnection(globalInstance.socket, "inactive")
             }
-
             globalInstance.socket.on("control") { args ->
                 val data = args.getOrNull(0)
                 Log.i("socket_test" , "test $data")
@@ -200,7 +192,6 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                     }
                 }
             }
-
             globalInstance.socket.on("status") { args ->
                 Log.d("Socket", " VM status: ${args.getOrNull(0)}")
                 if (args.getOrNull(0) == "starting") {
@@ -218,11 +209,9 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                     }
 
             }
-
             globalInstance.socket.on("gamequit") {
                 Log.w("Socket", "Game quit.")
             }
-
             globalInstance.socket.on("reset") {
                 Log.w("Socket", "Stream reset by server.")
                 stopSocketConnection(globalInstance.socket, "reset")
@@ -331,11 +320,10 @@ fun updateLoadingData(name: String) {
 
     fun stopTimer() {
         countDownTimer?.cancel()
-
     }
 
     fun startDisconnectTimer():Boolean {
-        val totalTime =  60 * 1000L // 1 minutes in milliseconds
+        val totalTime =  60 * 1000L
 
         countDownTimerDisconn = object : CountDownTimer(totalTime, 1000) {
             @SuppressLint("DefaultLocale")
@@ -354,7 +342,6 @@ fun updateLoadingData(name: String) {
 
     fun stopDisconnectTimer() {
         countDownTimerDisconn?.cancel()
-
     }
 
     fun onSocketStatusChanged(newStatus: VMStatus) {

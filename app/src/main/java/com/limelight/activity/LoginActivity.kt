@@ -33,7 +33,7 @@ class LoginActivity : ComponentActivity() {
             emailMobileValue = intent.getStringExtra("email").toString()
         if(intent.hasExtra("type"))
             type = intent.getStringExtra("type").toString()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             viewModel =  hiltViewModel()
             viewModel.updateType(type)

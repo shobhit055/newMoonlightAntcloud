@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -64,6 +63,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Red
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -105,8 +108,7 @@ import com.limelight.common.AnalyticsManager
 import com.limelight.common.DrawerScreens
 import com.limelight.common.GlobalData
 import com.limelight.theme.BlueGradient
-import com.limelight.theme.PinkGradient
-import com.limelight.theme.mainTitle
+import com.limelight.theme.dark_grey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -130,6 +132,7 @@ fun accountNav(
     navigate: ((String) -> Unit)) {
     return navGraph.composable(DrawerScreens.Account.route) {
         val viewModel: UserViewModel = hiltViewModel()
+        val systemUiController = rememberSystemUiController()
         val bottomSheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden, animationSpec = tween(
                 durationMillis = 200, delayMillis = 0, easing = FastOutLinearInEasing))
@@ -137,8 +140,16 @@ fun accountNav(
         val coroutineScope = rememberCoroutineScope()
         val toggle: ((Boolean) -> Unit) = {
             coroutineScope.launch {
-                if (it) bottomSheetState.show()
-                else bottomSheetState.hide()
+                if (it) {
+                    bottomSheetState.show()
+                    systemUiController.setStatusBarColor(
+                        color = dark_grey,
+                        darkIcons = true
+                    )
+                }
+                else {
+                    bottomSheetState.hide()
+                }
             }
         }
 
@@ -151,34 +162,33 @@ fun accountNav(
         var sheetState by remember { mutableStateOf(viewModel.bottomSheetState) }
 
         viewModel.subBottomSheetState = { sheetState = it }
-        val systemUiController = rememberSystemUiController()
+
+        systemUiController.setStatusBarColor(color = dark_grey, darkIcons = true)
+
         Theme {
             ModalBottomSheetLayout(
                 sheetState = bottomSheetState,
                 sheetContent = {
                     BottomSheet(activity, toggle, sheetState = sheetState, viewModel = viewModel)
                 },
-                scrimColor = Color.Black.copy(alpha = .5f),
-                sheetBackgroundColor = MaterialTheme.colors.background,
-                sheetElevation = 34.dp,
+                scrimColor = Transparent,
+                sheetBackgroundColor = Black,
+                sheetElevation = 20.dp,
                 sheetShape = RoundedCornerShape(20.dp)) {
 //                LazyColumn {
 //                    item {
-                AccountScreen(
-                    activity = activity,
-                    viewModel = viewModel,
-                    navigate = navigate,
-                    toggle)
+                AccountScreen(activity = activity, viewModel = viewModel, navigate = navigate, toggle)
                 BackHandler(enabled = bottomSheetState.isVisible) {
                     coroutineScope.launch {
+
                         bottomSheetState.hide()
+
+
                     }
                 }
             }
 
-            LaunchedEffect(Unit) {
-                systemUiController.setStatusBarColor(color = Color.Black)
-            }
+
         }
     }
 }
@@ -226,7 +236,9 @@ fun AccountScreen(
 
     when(postPhoneOtpState.success){
         1->{
-            onAreaChanged(toggle , viewModel , BottomSheetState.ENTER_OTP)
+            LaunchedEffect(key1 = Unit) {
+                onAreaChanged(toggle, viewModel, BottomSheetState.ENTER_OTP)
+            }
         }
         0->{
             LaunchedEffect(Unit) {
@@ -345,7 +357,8 @@ fun AccountScreen(
         1->{
             LaunchedEffect(Unit) {
                 onAreaChanged(toggle, viewModel, BottomSheetState.COMPLETE)
-                activity.makeToast("Verification Email Sent")
+                //Log.i("testt" , "" +forgotState.message)
+                activity.makeToast("Reset password email sent")
             }
         }
         0->{
@@ -592,31 +605,31 @@ fun AccountScreen(
 //                    }
             }
             else {
-                Row(modifier = Modifier
-                    .wrapContentSize(Alignment.Center)
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 0.dp)
-                ) {
-                    Button(
-                        onClick = {
-                             AnalyticsManager.controllerMappingButton()
-
-                        },
-                        shape = RoundedCornerShape(5.dp),
-                        modifier = if (landscape) Modifier.fillMaxWidth(0.4f) else Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = PinkGradient)) {
-                        Text(
-                            text = "Controller Mapping",
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .padding(6.dp)
-                                .align(Alignment.CenterVertically)
-                                .fillMaxWidth(0.9f),
-                            style = mainTitle.copy(fontWeight = FontWeight.Normal),
-                            color = MaterialTheme.colors.secondary)
-                    }
-                }
+//                Row(modifier = Modifier
+//                    .wrapContentSize(Alignment.Center)
+//                    .align(Alignment.CenterHorizontally)
+//                    .padding(top = 0.dp)
+//                ) {
+//                    Button(
+//                        onClick = {
+//                             AnalyticsManager.controllerMappingButton()
+//
+//                        },
+//                        shape = RoundedCornerShape(5.dp),
+//                        modifier = if (landscape) Modifier.fillMaxWidth(0.4f) else Modifier.weight(1f),
+//                        colors = ButtonDefaults.buttonColors(
+//                            backgroundColor = PinkGradient)) {
+//                        Text(
+//                            text = "Controller Mapping",
+//                            fontSize = 12.sp,
+//                            modifier = Modifier
+//                                .padding(6.dp)
+//                                .align(Alignment.CenterVertically)
+//                                .fillMaxWidth(0.9f),
+//                            style = mainTitle.copy(fontWeight = FontWeight.Normal),
+//                            color = MaterialTheme.colors.secondary)
+//                    }
+//                }
                 Row(modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 30.dp),
@@ -735,7 +748,7 @@ fun BottomSheet(
                 BottomSheetState.EDIT_PHONE -> BottomSheetBoilerPlate(
                     heading = "Change Your Number",
                     icon = Icons.Filled.Phone) {
-                    EditPhone(toggle ,  viewModel)
+                    EditPhone(toggle ,  viewModel , activity)
                 }
 
                 BottomSheetState.EDIT_PASSWORD -> BottomSheetBoilerPlate(
@@ -824,14 +837,14 @@ fun EditEmail(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
             icon = Icons.Filled.Send) {
             AnalyticsManager.emailVerificationButton()
             onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
-            resendVerificationEmail(viewModel)
+         //   resendVerificationEmail(viewModel)
         }
         Spacer(modifier = Modifier.size(20.dp))
     }
 }
 
 @Composable
-fun EditPhone(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
+fun EditPhone(toggle: (Boolean) -> Unit, viewModel: UserViewModel, activity: NavActivity) {
 
     var phoneNumber =  viewModel.accountData.phone
     if(phoneNumber.contains("+91")){
@@ -842,23 +855,19 @@ fun EditPhone(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
     }
     Spacer(modifier = Modifier.size(20.dp))
 
-  var   wrongNumber = !number.isPhoneNumberValid()
-    var isErrorPhone by remember { mutableStateOf(false) }
+    var isErrorPhone by remember { mutableStateOf(true) }
+    val phoneColor = if (isErrorPhone) White else Red
     BasicTextField(
         value = number,
         onValueChange = { newValue ->
             number = newValue
             viewModel.newNumber = newValue
-            isErrorPhone = !phoneNumber.isPhoneNumberValid()
+            isErrorPhone = newValue.length == 10
         },
-        textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
+        textStyle = TextStyle(color = White, fontSize = 14.sp),
         cursorBrush = SolidColor(BlueGradient),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = if(isErrorPhone) Modifier
-                .fillMaxWidth(0.8f)
-                .border(1.dp, Color.Red, RoundedCornerShape(16.dp)).padding(12.dp)
-            else Modifier.fillMaxWidth(0.8f)
-                .border(1.dp, Color.White, RoundedCornerShape(16.dp)).padding(12.dp),
+            modifier =  Modifier.fillMaxWidth(0.8f).border(1.dp, phoneColor, RoundedCornerShape(16.dp)).padding(12.dp),
         singleLine = true,
         decorationBox = { innerTextField ->
             Box(Modifier.padding(start = 2.dp)) {
@@ -876,16 +885,19 @@ fun EditPhone(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
         text = "Generate OTP",
         icon = Icons.AutoMirrored.Filled.Send,
         onClick = {
-
-            onAreaChanged(toggle,viewModel, BottomSheetState.LOADING)
-            val dataModel = PhoneOtpReq("+91$number",true)
-            viewModel.getPostPhoneOtpData(dataModel,"account")
+            if(number.length == 10) {
+                onAreaChanged(toggle, viewModel, BottomSheetState.LOADING)
+                val dataModel = PhoneOtpReq("+91$number", true)
+                viewModel.getPostPhoneOtpData(dataModel, "account")
+            }
+            else
+                activity.makeToast("please enter valid phone number")
         },
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.secondary,
             disabledBackgroundColor = MaterialTheme.colors.secondary.copy(
                 alpha = 0.5f
-            ), disabledContentColor = MaterialTheme.colors.surface
+            ), disabledContentColor = dark_grey
         ),
          disabled = !number.isPhoneNumberValid()
     )
@@ -1058,10 +1070,8 @@ fun EnterOtp(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
         otpCount = 6,
         containerSize = 48.dp,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        strokeColor = Color.White,
-        charColor = Color.White)
-
-
+        strokeColor = White,
+        charColor = White)
 
     Spacer(modifier = Modifier.size(10.dp))
     PlayButton(
@@ -1076,7 +1086,7 @@ fun EnterOtp(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
             backgroundColor = MaterialTheme.colors.secondary,
             disabledBackgroundColor = MaterialTheme.colors.secondary.copy(
                 alpha = 0.5f
-            ), disabledContentColor = MaterialTheme.colors.surface
+            ), disabledContentColor = dark_grey
         ),
         disabled = (otp.length != 6)
     )
@@ -1090,6 +1100,7 @@ private fun onAreaChanged(
     viewModel: UserViewModel,
     state: BottomSheetState
 ) {
+
     toggle(true)
     viewModel.updateBottomSheetState(state)
     if (state == BottomSheetState.COMPLETE) {

@@ -362,7 +362,7 @@ class UserViewModel @Inject constructor(private val checkUserUseCase: CheckUserL
                     is Resource.Success -> {
                         _forgotState.value = forgotState.value.copy(
                             isLoading = false,
-                            message = result.message,
+                            message = result.message!!,
                             success = 1)
 
                     }
@@ -386,7 +386,7 @@ class UserViewModel @Inject constructor(private val checkUserUseCase: CheckUserL
                     is Resource.Success -> {
                         _forgotState.value = forgotState.value.copy(
                             isLoading = false,
-                            message = result.message,
+                            message = result.message!!,
                             success = 1)
 
                     }

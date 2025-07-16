@@ -18,13 +18,13 @@ object AppModule {
     @Singleton
     @Provides
     fun apiRepository(api: ApiService) = AuthRepository(api) as AuthRepositoryInterface
+
     @Singleton
     @Provides
     fun injectBackendRetrofitApi() : ApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         val httpClient = OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor)
-
         return Retrofit.Builder().baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient.build()).build()

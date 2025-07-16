@@ -26,7 +26,6 @@ class SignupActivity : ComponentActivity() {
             emailMobileValue = intent.getStringExtra("email").toString()
         }
         setContent {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
             hideStatusBar(this@SignupActivity)
             viewModel = hiltViewModel()
             SignupScreen(this@SignupActivity, viewModel, emailMobileValue)

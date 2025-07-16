@@ -52,6 +52,7 @@ import com.limelight.screen.account.NavScreen
 import com.limelight.viewmodel.GameViewModel
 import com.limelight.viewmodel.UserViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.limelight.theme.dark_grey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -86,11 +87,10 @@ class NavActivity : ComponentActivity() {
         setContent {
             viewModel = hiltViewModel()
             userViewModel = hiltViewModel()
-
-            val systemUiController = rememberSystemUiController()
-            LaunchedEffect(Unit) {
-                systemUiController.setStatusBarColor(color = Color.Black, darkIcons = false)
-            }
+//            val systemUiController = rememberSystemUiController()
+//            LaunchedEffect(Unit) {
+//                systemUiController.setStatusBarColor(color = dark_grey, darkIcons = true)
+//            }
             initialize()
             var progress by remember { mutableFloatStateOf(0.0f) }
             var loadingData by remember { mutableStateOf("Loading Your Preferences ...") }
@@ -103,7 +103,7 @@ class NavActivity : ComponentActivity() {
                 progress += 0.34f
             }
             showReloadScreen = { reloadScreen = it }
-            Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight(), color = MaterialTheme.colors.surface) {
+            Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight(), color = dark_grey) {
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally) {

@@ -3,10 +3,23 @@ package com.limelight.activity
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -22,6 +35,7 @@ import com.limelight.components.navigationRoutes
 import com.limelight.screen.auth.MainScreen
 import com.limelight.viewmodel.UserViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.messaging
 import com.limelight.common.AnalyticsManager.Companion.removeAnalyticsUserId
 import com.limelight.common.AnalyticsManager.Companion.setAnalyticsUserId
@@ -47,30 +61,63 @@ class  SplashActivity : ComponentActivity(){
      private var flag = 0
      private var apiResp = false
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private var gameId = ""
+    private lateinit var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var updateAvailable = false
+    private lateinit var appUpdateManager: AppUpdateManager
+
+    @Composable
+    fun RegisterActivityResult() {
+        activityResultLauncher  = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result: ActivityResult ->
+            when (result.resultCode) {
+                com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED -> {
+                    this@SplashActivity.makeToast("Unable to update the app.")
+                }
+                RESULT_CANCELED -> {
+                    this@SplashActivity.makeToast("To proceed ahead, please relaunch the app at your convenience to install the latest version.")
+                }
+                else -> {
+                    updateAvailable = false
+                }
+            }
+        }
+    }
 
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       // enableEdgeToEdge()
         actionBar?.hide()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = false
+        FirebaseApp.initializeApp(applicationContext)
+        Firebase.messaging.isAutoInitEnabled = true
+        firebaseAnalytics =  Firebase.analytics
+        if(intent.hasExtra("flag"))
+            flag =  intent.getIntExtra("flag" , 0)
+        val extras = intent.extras
+        if(extras != null) {
+            navigationRoute = navigationRoutes(intent.getStringExtra("route").toString())
+            if(intent.hasExtra("gameId")) {
+                gameId = intent.getStringExtra("gameId").toString()
+            }
+        }
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                return@OnCompleteListener
+            }
+        })
+        getToken()
         setContent {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            hideStatusBar(activity)
+            RegisterActivityResult()
             viewModel = hiltViewModel()
-            FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = false
-            FirebaseApp.initializeApp(applicationContext)
-            Firebase.messaging.isAutoInitEnabled = true
-            firebaseAnalytics =  Firebase.analytics
-            if(intent.hasExtra("flag"))
-                flag =  intent.getIntExtra("flag" , 0)
-        //    startActivity(Intent(this@SplashActivity, AppView::class.java))
-            getToken()
             val checkUserState = viewModel.checkUserState.value
             val refreshTokenState = viewModel.refreshTokenState.value
             when (checkUserState.success){
                 1 -> {
                     apiResp = true
-//                    MainScreen(activity,flag,apiResp)
                     LaunchedEffect(Unit) {
                         setAnalyticsUserId(globalInstance.accountData.id)
                         if (globalInstance.accountData.refreshToken != "") {
@@ -129,7 +176,6 @@ class  SplashActivity : ComponentActivity(){
             when (refreshTokenState.success){
                 1 -> {
                     apiResp = true
-//                    MainScreen(activity,flag,apiResp)
                     LaunchedEffect(Unit) {
                         calledRefresh = true
                         if ((refreshTokenState.accessToken != "") && (refreshTokenState.refreshToken!= "")) {
@@ -172,7 +218,26 @@ class  SplashActivity : ComponentActivity(){
                 MainScreen(activity,flag,apiResp)
             }
         }
+        if(::activityResultLauncher.isInitialized){
+            appUpdateManager = AppUpdateManagerFactory.create(this)
+            val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                ) {
+                    updateAvailable = true
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        activityResultLauncher,
+                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                    )
+                }
+            }
+        }
     }
+
+
+
 
     private fun getToken() {
         file = File(filesDir, "file.nk")

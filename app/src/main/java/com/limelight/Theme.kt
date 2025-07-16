@@ -10,6 +10,7 @@ import com.limelight.theme.PinkGradient
 import com.limelight.theme.accentPrimaryGreen
 import com.limelight.theme.accentPurpleDark
 import com.limelight.theme.bgColorDark
+import com.limelight.theme.dark_grey
 import com.limelight.theme.headingColorDark
 import com.limelight.theme.secondaryColor
 import com.limelight.theme.secondaryVariant
@@ -34,8 +35,8 @@ val DarkColorPalette = darkColors(
     surface = bgColorDark,
     primaryVariant = headingColorDark,
     onPrimary = accentPurpleDark,
-    onSurface = accentPurpleDark,
-    onBackground = accentPurpleDark,
+    onSurface = dark_grey,
+    onBackground = dark_grey,
     onSecondary = accentPrimaryGreen,
 )
 

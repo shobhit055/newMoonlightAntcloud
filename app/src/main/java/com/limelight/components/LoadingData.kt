@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.limelight.theme.AntCloudNewFlowTheme
+import com.limelight.theme.dark_grey
 import com.limelight.theme.subtitle
 
 @Composable
@@ -46,6 +48,10 @@ fun Loading(text: String, increaseSize: Boolean = false, landscape: Boolean = fa
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
+                rememberSystemUiController().setStatusBarColor(
+                    color = dark_grey,
+                    darkIcons = true
+                )
                 content()
             }
         }
