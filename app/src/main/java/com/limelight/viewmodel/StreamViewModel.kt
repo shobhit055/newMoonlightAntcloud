@@ -68,8 +68,6 @@ enum class VMStatus {
     Connected,
     Error
 }
-/*val checkVMConnectionStatusLogic : CheckVMConnectionStatusLogic,
-private val authVmLogic : VMAuthLogic,*/
 
 @HiltViewModel
 class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLogic,
@@ -83,11 +81,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     private val _status = MutableStateFlow(VMStatus.Idle)
     val status: StateFlow<VMStatus> = _status
     val globalInstance =   GlobalData.getInstance()
-    private var timer: Timer? = null
-    private val api = AppModule.injectBackendRetrofitApi()
-    private val repository =  AuthRepository(api)
-    private val _isConnected = MutableStateFlow(true)
-    val isConnected: StateFlow<Boolean> = _isConnected
+
 
     private fun stopSocketConnection(socket: Socket, reason: String) {
         if (socket.connected()) {
@@ -101,13 +95,6 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     var loadingData: String = "Sending Boot Request \n Please refresh your page and try again if it takes more than 30 seconds."
     var subLoadingData: ((String) -> Unit)? = null
 
-    var resolution: String = ""
-    var subResolution: ((String) -> Unit)? = null
-
-    var socketConnect: String = ""
-
-    var initialValueKbps: Float = 5000f
-    var subIntialValueKbps: ((Float) -> Unit)? = null
     private var job: Job? = null
 
     private val _getVMStatus= mutableStateOf(VMStatusState())
@@ -117,11 +104,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
     private val _getVMIPState = mutableStateOf(GetVMIPState())
     val getVMIPState: State<GetVMIPState> = _getVMIPState
     var accountData: User = GlobalData.getInstance().accountData
-    var subAccountData: ((User) -> Unit)? = null
-    var selectedResolution: String = ""
     var userData = GlobalData.getInstance().accountData
-    var subUserData: ((User) -> Unit)? = null
-    var toggle: Boolean = false
     var vmStartingFlag =  false
     val _timeLeft = MutableStateFlow("06:00")
     val timeLeft: StateFlow<String> = _timeLeft
@@ -152,7 +135,7 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
             }
             globalInstance.socket.on(Socket.EVENT_DISCONNECT) { args ->
                 Log.w("Socket", "Disconnected: ${args.getOrNull(0)}")
-                _isConnected.value = false
+
             }
             globalInstance.socket.on("new_connection") { args ->
                 val data = args.getOrNull(0) as? JSONObject
@@ -203,10 +186,6 @@ class StreamViewModel @Inject constructor(private val vmStatusLogic : VmStatusLo
                     }
                     updateLoadingData("Your PC is starting \n This may take upto ")
                 }
-                else if(args.getOrNull(0) == "done"){
-//                    val token =  "JWT "+GlobalData.getInstance().accountData.token
-//                    startRepeatingApiCall(token)
-                    }
 
             }
             globalInstance.socket.on("gamequit") {

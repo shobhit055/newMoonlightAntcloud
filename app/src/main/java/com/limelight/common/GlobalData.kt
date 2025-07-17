@@ -51,7 +51,7 @@ class GlobalData {
     lateinit  var socket: Socket
     var remoteGamesMaintenance: List<GamesMaintenance> = listOf()
 
-
+    var checkUserApi: Boolean = false
     var appStartToken: Boolean = false
     var appStartWithoutToken: Boolean = false
     var verifyOTPBtn: Boolean = false

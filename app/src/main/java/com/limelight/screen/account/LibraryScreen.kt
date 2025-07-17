@@ -113,6 +113,8 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import com.google.firebase.Firebase
+import com.google.firebase.inappmessaging.inAppMessaging
 import com.google.firebase.perf.FirebasePerformance
 
 import com.limelight.components.CustomDialog
@@ -185,37 +187,24 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
     var imageHeight = (LocalConfiguration.current.screenWidthDp / 1.5)
     var calledRefresh = false
     val userViewModel: UserViewModel = hiltViewModel()
+
     LaunchedEffect(key1 = Unit) {
+        globalInstance.checkUserApi = true
+        globalInstance.traceCheckUserApi=  FirebasePerformance.getInstance().newTrace("check_user_api")
+        globalInstance.traceCheckUserApi.start()
         userViewModel.getCheckUserData("JWT ${GlobalData.getInstance().accountData.token}")
+        Firebase.inAppMessaging.triggerEvent("in_app_msg")
     }
-    val socketViewModel: StreamViewModel = hiltViewModel()
     val checkUserState = userViewModel.checkUserState.value
     val refreshTokenState = userViewModel.refreshTokenState.value
-    val vmStatusState = socketViewModel.getVMStatus.value
-
-
-    when (vmStatusState.success) {
-        1 -> {
-            LaunchedEffect(Unit) {
-//                if(vmStatusState.status=="stopped"){
-//                    socketViewModel.callSocket()
-//                }
-//                else if(vmStatusState.status=="running"){
-//                    activity.makeToast("your machine is already running")
-//                }
-            }
-        }
-
-        0 -> {
-        }
-    }
-
-
-
 
     when (checkUserState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                if(globalInstance.checkUserApi){
+                    globalInstance.traceCheckUserApi.stop()
+                    globalInstance.checkUserApi = false
+                }
                 if (GlobalData.getInstance().accountData.refreshToken != "") {
                     checkUserState.userData?.refreshToken =
                         GlobalData.getInstance().accountData.refreshToken
@@ -637,78 +626,6 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
                 navigate = navigate, handlePcClick = handlePcClick, profileCard)
         }
     }
-
-
-
-
-//        Column(
-//            Modifier
-//                .fillMaxWidth()
-//                .fillMaxHeight()
-//                .background(Color.Black)) {
-//            Box(
-//                modifier = Modifier
-//                    .clickable {
-//                        handlePcClick()
-//                    }
-//                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-//                    .fillMaxWidth()
-//                    .aspectRatio(1.8f)
-//                    .border(1.dp, Color.White, RoundedCornerShape(35.dp))
-//                    .background(Color.DarkGray, RoundedCornerShape(35.dp)),
-//                contentAlignment = Alignment.Center
-//            ) {
-//
-//                Image(
-//                    painter = painterResource(id = R.drawable.windows),
-//                    contentDescription = null,
-//                    contentScale = ContentScale.FillBounds,
-//                    modifier = Modifier.clip(RoundedCornerShape(35.dp))
-//                )
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(
-//                            brush = Brush.verticalGradient(colors = gradientColors),
-//                            RoundedCornerShape(35.dp)
-//                        )
-//                )
-//
-//
-//                Column {
-//                    Icon(
-//                        modifier = Modifier
-//                            .size(50.dp)
-//                            .align(Alignment.CenterHorizontally),
-//                        painter = painterResource(id = R.drawable.play_circle),
-//                        contentDescription = "Launch PC Mode",
-//                        tint = Color.White
-//                    )
-//                    Text(
-//                        fontSize = 16.sp,
-//                        text = "Connect",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        color = Color.White,
-//                        modifier = Modifier.padding(top = 8.dp)
-//                    )
-//                }
-//
-//            }
-//
-//            Text(
-//                text = "Quick Launch Games",
-//                style = TextStyle(
-//                    fontSize = 16.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    color = Color.Black,
-//                    textAlign = TextAlign.Start
-//                ), color = Color.White,
-//                modifier = Modifier.padding(start = 20.dp, top = 30.dp)
-//            )
-//        }
-
-
-
     if (showUpgradePlan.value) {
         CustomDialog(openDialogCustom = (showUpgradePlan.value), onDismiss = { /*TODO*/ }) {
             androidx.compose.material3.Card(
@@ -759,25 +676,6 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
 
             }
         }
-    }
-    if (openDialogCustom.value) {
-        CustomDialog(
-            openDialogCustom = openDialogCustom,
-            label = "",
-            onDismiss = { }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(dark_grey)
-                    .clip(
-                        RoundedCornerShape(10.dp)
-                    )
-            ) {
-                Loading("testtt")
-            }
-        }
-
     }
     if(showUpdateDialog.value) {
         CustomDialog(openDialogCustom = showUpdateDialog.value, onDismiss = { /*TODO*/ }) {

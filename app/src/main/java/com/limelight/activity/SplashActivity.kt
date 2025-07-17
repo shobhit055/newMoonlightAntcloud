@@ -37,6 +37,7 @@ import com.limelight.viewmodel.UserViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.messaging
+import com.google.firebase.perf.FirebasePerformance
 import com.limelight.common.AnalyticsManager.Companion.removeAnalyticsUserId
 import com.limelight.common.AnalyticsManager.Companion.setAnalyticsUserId
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,7 +58,6 @@ class  SplashActivity : ComponentActivity(){
      var activity  = this@SplashActivity
      var calledRefresh = false
      lateinit var viewModel: UserViewModel
-//     private lateinit var firebaseAnalytics: FirebaseAnalytics
      private var flag = 0
      private var apiResp = false
     private lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -115,8 +115,13 @@ class  SplashActivity : ComponentActivity(){
             viewModel = hiltViewModel()
             val checkUserState = viewModel.checkUserState.value
             val refreshTokenState = viewModel.refreshTokenState.value
-            when (checkUserState.success){
+            when (checkUserState.success) {
+
                 1 -> {
+                    if(globalInstance.checkUserApi){
+                        globalInstance.traceCheckUserApi.stop()
+                        globalInstance.checkUserApi = false
+                    }
                     apiResp = true
                     LaunchedEffect(Unit) {
                         setAnalyticsUserId(globalInstance.accountData.id)
@@ -127,38 +132,43 @@ class  SplashActivity : ComponentActivity(){
                         globalInstance.accountData = checkUserState.userData!!
                         globalInstance.accountData.token = checkUserState.token!!
                         navigateScreen(activity, NavActivity::class.java)
-                        finishAffinity()
+                        if(!updateAvailable) {
+                            finishAffinity()
+                        }
                     }
                 }
                 0 -> {
-                    removeAnalyticsUserId()
-                    if(file.exists()) {
+                    if(globalInstance.checkUserApi){
+                        globalInstance.traceCheckUserApi.stop()
+                        globalInstance.checkUserApi = false
+                    }
+                    if (file.exists()) {
                         file.delete()
                     }
                     when (checkUserState.errorCode) {
                         401 -> {
-                            val msg =  checkUserState.error
-                            if(msg == "Token Expired" && !calledRefresh) {
+                            val msg = checkUserState.error
+                            if (msg == "Token Expired" && !calledRefresh) {
                                 LaunchedEffect(Unit) {
                                     viewModel.getRefreshTokenData("JWT " + globalInstance.accountData.refreshToken)
                                 }
-                            }
-                            else {
+                            } else {
                                 LaunchedEffect(Unit) {
                                     activity.makeToast("Error 307 : Unable to validate session. Kindly login again")
                                     calledRefresh = false
                                     clearCheck(activity)
                                 }
-                                MainScreen(activity,flag,apiResp)
+                                callMainScreen(activity, flag, apiResp)
+
                             }
                         }
-                        0->{
+                        0 -> {
                             LaunchedEffect(Unit) {
                                 if (checkUserState.error != "")
                                     activity.makeToast(checkUserState.error)
                                 clearCheck(activity)
                             }
-                            MainScreen(activity,flag,apiResp)
+                            callMainScreen(activity, flag, apiResp)
                         }
                         else -> {
                             LaunchedEffect(Unit) {
@@ -168,24 +178,30 @@ class  SplashActivity : ComponentActivity(){
                                     file2.delete()
                                 }
                             }
-                            MainScreen(activity,flag,apiResp)
+                            callMainScreen(activity, flag, apiResp)
+
                         }
                     }
                 }
             }
-            when (refreshTokenState.success){
+            when (refreshTokenState.success) {
                 1 -> {
                     apiResp = true
                     LaunchedEffect(Unit) {
                         calledRefresh = true
-                        if ((refreshTokenState.accessToken != "") && (refreshTokenState.refreshToken!= "")) {
-                            saveRefreshTokenData(activity,refreshTokenState.accessToken,refreshTokenState.refreshToken)
+                        if ((refreshTokenState.accessToken != "") && (refreshTokenState.refreshToken != "")) {
+                            saveRefreshTokenData(
+                                activity,
+                                refreshTokenState.accessToken,
+                                refreshTokenState.refreshToken
+                            )
                             viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
                         }
                     }
                 }
+
                 0 -> {
-                    removeAnalyticsUserId()
+
                     calledRefresh = true
                     when (refreshTokenState.errorCode) {
                         502 -> {
@@ -193,8 +209,9 @@ class  SplashActivity : ComponentActivity(){
                                 if (refreshTokenState.error != "")
                                     activity.makeToast(refreshTokenState.error).toString()
                             }
-                            MainScreen(activity,flag,apiResp)
+                            callMainScreen(activity, flag, apiResp)
                         }
+
                         else -> {
                             LaunchedEffect(Unit) {
                                 if (file2.exists()) {
@@ -203,19 +220,34 @@ class  SplashActivity : ComponentActivity(){
                                 if (refreshTokenState.error != "")
                                     activity.makeToast(refreshTokenState.error).toString()
                             }
-                            MainScreen(activity,flag,apiResp)
+                            callMainScreen(activity, flag, apiResp)
+
                         }
                     }
                 }
             }
-            if(globalInstance.accountData.token != ""){
-                LaunchedEffect(Unit) {
-                    viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+
+            if (!updateAvailable) {
+                if (globalInstance.accountData.token != "") {
+
+                    LaunchedEffect(Unit) {
+                        globalInstance.appStartToken = true
+                        globalInstance.traceAppStartToken =
+                            FirebasePerformance.getInstance().newTrace("app_start_with_token")
+                        globalInstance.traceAppStartToken.start()
+
+                        globalInstance.checkUserApi = true
+                        globalInstance.traceCheckUserApi = FirebasePerformance.getInstance().newTrace("check_user_api")
+                        globalInstance.traceCheckUserApi.start()
+                        viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+                    }
+                } else {
+                    globalInstance.appStartWithoutToken = true
+                    globalInstance.traceAppStartWithoutToken =
+                        FirebasePerformance.getInstance().newTrace("app_start_without_token")
+                    globalInstance.traceAppStartWithoutToken.start()
+                    callMainScreen(activity, flag, apiResp)
                 }
-            }
-            else {
-                removeAnalyticsUserId()
-                MainScreen(activity,flag,apiResp)
             }
         }
         if(::activityResultLauncher.isInitialized){
@@ -236,7 +268,11 @@ class  SplashActivity : ComponentActivity(){
         }
     }
 
-
+    @Composable
+    private fun callMainScreen(activity: SplashActivity, initialState : Int, apiResp: Boolean) {
+        removeAnalyticsUserId()
+        MainScreen(activity,flag,apiResp)
+    }
 
 
     private fun getToken() {
@@ -288,6 +324,24 @@ class  SplashActivity : ComponentActivity(){
     private fun doRead(fis: FileInputStream): Int {
         encryptedDataSize = fis.read(encryptedData)
         return encryptedDataSize
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        if(::activityResultLauncher.isInitialized){
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        activityResultLauncher,
+                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                    )
+                }/* else if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
+
+            }*/
+            }
+        }
     }
 
 }

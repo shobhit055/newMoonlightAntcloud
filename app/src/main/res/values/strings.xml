@@ -327,7 +327,7 @@
     <string name ="contact_support">Contact Support</string>
     <string name ="goback">Go Back</string>
 
-    <string name ="one_min_issue_msg">Your seem to be unable to start a video with PC. Please check your internet connection once and try again</string>
+    <string name ="one_min_issue_msg">You seem to be unable to start a video connection with the PC. Please check your internet connection once and try again.</string>
     <string name="plan">Plan</string>
     <string name="plan_hold_text">Your payment is on hold!</string>
     <string name="basic_banner_text">Want to start playing?</string>

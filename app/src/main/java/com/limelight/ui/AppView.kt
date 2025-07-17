@@ -121,6 +121,7 @@ class AppView : AppCompatActivity() {
     lateinit  var socketTimer_layout : ConstraintLayout
     lateinit  var connection_error_layout : ConstraintLayout
     lateinit  var errorText : TextView
+    var errorTimerFlag = ""
 
 
     private val serviceConnection1: ServiceConnection = object : ServiceConnection {
@@ -335,8 +336,8 @@ class AppView : AppCompatActivity() {
                 if(process.code()==200) {
                     globalInstance.vmIP = process.body()?.vmip!!
                     if (globalInstance.vmIP != "") {
+                        errorTimerFlag =  "vmip"
                         viewModel.startDisconnectTimer()
-                        viewModel.socketConnect = "connected"
                         resolutionLayout.visibility = View.VISIBLE
                         loadingLayout.visibility = View.INVISIBLE
                         CoroutineScope(Dispatchers.Main).launch {
@@ -353,6 +354,7 @@ class AppView : AppCompatActivity() {
             viewModel.callSocket()
         }
         else {
+            errorTimerFlag =  "streamEnd"
             viewModel.startDisconnectTimer()
             resolutionLayout.visibility = View.VISIBLE
             loadingLayout.visibility = View.INVISIBLE
@@ -363,7 +365,11 @@ class AppView : AppCompatActivity() {
             viewModel.disConnTimeLeft.collect { time ->
                 if(time == "00:00"){
                     viewModel.stopDisconnectTimer()
-                    errorText.text = resources.getString(R.string.stream_end_issue)
+                    if(errorTimerFlag=="vmip")
+                        errorText.text = resources.getString(R.string.one_min_issue_msg)
+                    else
+                        errorText.text = resources.getString(R.string.stream_end_issue)
+
                     loadingLayout.visibility = View.INVISIBLE
                     resolutionLayout.visibility = View.INVISIBLE
                     socketTimer_layout.visibility = View.INVISIBLE
@@ -591,6 +597,7 @@ class AppView : AppCompatActivity() {
         if (managerBinder1 != null) {
             unbindService(serviceConnection1)
         }
+
     }
 
 
@@ -657,6 +664,7 @@ class AppView : AppCompatActivity() {
 
                         val handlerThread = Thread {
                             if (!suspendGridUpdates) {
+
                                 ServerHelper.doStart(this@AppView, app, computer, managerBinder)
                                 finish()
                             }
