@@ -79,6 +79,7 @@
             android:exported="true"
             android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.Antcloud_App"
             android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection">
 
             <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="system-default" />

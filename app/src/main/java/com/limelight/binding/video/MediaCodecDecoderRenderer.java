@@ -38,26 +38,20 @@ import android.view.Choreographer;
 import android.view.SurfaceHolder;
 
 public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements Choreographer.FrameCallback {
-
     private static final boolean USE_FRAME_RENDER_TIME = false;
     private static final boolean FRAME_RENDER_TIME_ONLY = USE_FRAME_RENDER_TIME && false;
-
     // Used on versions < 5.0
     private ByteBuffer[] legacyInputBuffers;
-
     private MediaCodecInfo avcDecoder;
     private MediaCodecInfo hevcDecoder;
     private MediaCodecInfo av1Decoder;
-
     private final ArrayList<byte[]> vpsBuffers = new ArrayList<>();
     private final ArrayList<byte[]> spsBuffers = new ArrayList<>();
     private final ArrayList<byte[]> ppsBuffers = new ArrayList<>();
     private boolean submittedCsd;
     private byte[] currentHdrMetadata;
-
     private int nextInputBufferIndex = -1;
     private ByteBuffer nextInputBuffer;
-
     private Context context;
     private Activity activity;
     private MediaCodec videoDecoder;
@@ -78,7 +72,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private String glRenderer;
     private boolean foreground = true;
     private PerfOverlayListener perfListener;
-
     private static final int CR_MAX_TRIES = 10;
     private static final int CR_RECOVERY_TYPE_NONE = 0;
     private static final int CR_RECOVERY_TYPE_FLUSH = 1;
@@ -86,7 +79,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private static final int CR_RECOVERY_TYPE_RESET = 3;
     private AtomicInteger codecRecoveryType = new AtomicInteger(CR_RECOVERY_TYPE_NONE);
     private final Object codecRecoveryMonitor = new Object();
-
     // Each thread that touches the MediaCodec object or any associated buffers must have a flag
     // here and must call doCodecRecoveryIfRequired() on a regular basis.
     private static final int CR_FLAG_INPUT_THREAD = 0x1;
@@ -95,38 +87,32 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     private static final int CR_FLAG_ALL = CR_FLAG_INPUT_THREAD | CR_FLAG_RENDER_THREAD | CR_FLAG_CHOREOGRAPHER;
     private int codecRecoveryThreadQuiescedFlags = 0;
     private int codecRecoveryAttempts = 0;
-
     private MediaFormat inputFormat;
     private MediaFormat outputFormat;
     private MediaFormat configuredFormat;
-
     private boolean needsBaselineSpsHack;
     private SeqParameterSet savedSps;
-
     private RendererException initialException;
     private long initialExceptionTimestamp;
     private static final int EXCEPTION_REPORT_DELAY_MS = 3000;
-
     private VideoStats activeWindowVideoStats;
     private VideoStats lastWindowVideoStats;
     private VideoStats globalVideoStats;
-
     private long lastTimestampUs;
     private int lastFrameNumber;
     private int refreshRate;
     private PreferenceConfiguration prefs;
-
     private LinkedBlockingQueue<Integer> outputBufferQueue = new LinkedBlockingQueue<>();
     private static final int OUTPUT_BUFFER_QUEUE_LIMIT = 2;
     private long lastRenderedFrameTimeNanos;
     private HandlerThread choreographerHandlerThread;
     private Handler choreographerHandler;
-
     private int numSpsIn;
     private int numPpsIn;
     private int numVpsIn;
     private int numFramesIn;
     private int numFramesOut;
+
 
     private MediaCodecInfo findAvcDecoder() {
         MediaCodecInfo decoder = MediaCodecHelper.findProbableSafeDecoder("video/avc", MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
@@ -148,33 +134,20 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         return true;
                     }
                 }
-
-                // We had performance point data but none met the specified streaming settings
                 return false;
             }
-
-            // Fall-through to try the Android M API if there's no performance point data
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
-                // We'll ask the decoder what it can do for us at this resolution and see if our
-                // requested frame rate falls below or inside the range of achievable frame rates.
                 Range<Double> fpsRange = caps.getAchievableFrameRatesFor(prefs.width, prefs.height);
                 if (fpsRange != null) {
                     return prefs.fps <= fpsRange.getUpper();
                 }
-
-                // Fall-through to try the Android L API if there's no performance point data
             } catch (IllegalArgumentException e) {
-                // Video size not supported at any frame rate
                 return false;
             }
         }
-
-        // As a last resort, we will use areSizeAndRateSupported() which is explicitly NOT a
-        // performance metric, but it can work at least for the purpose of determining if
-        // the codec is going to die when given a stream with the specified settings.
         return caps.areSizeAndRateSupported(prefs.width, prefs.height, prefs.fps);
     }
 
@@ -186,7 +159,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             return !decoderCanMeetPerformancePoint(avcCaps, prefs) && decoderCanMeetPerformancePoint(hevcCaps, prefs);
         }
         else {
-            // No performance data
             return false;
         }
     }
@@ -195,11 +167,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             MediaCodecInfo.VideoCapabilities av1Caps = av1DecoderInfo.getCapabilitiesForType("video/av01").getVideoCapabilities();
             MediaCodecInfo.VideoCapabilities hevcCaps = hevcDecoderInfo.getCapabilitiesForType("video/hevc").getVideoCapabilities();
-
             return !decoderCanMeetPerformancePoint(hevcCaps, prefs) && decoderCanMeetPerformancePoint(av1Caps, prefs);
         }
         else {
-            // No performance data
             return false;
         }
     }
@@ -208,44 +178,30 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             MediaCodecInfo.VideoCapabilities avcCaps = avcDecoderInfo.getCapabilitiesForType("video/avc").getVideoCapabilities();
             MediaCodecInfo.VideoCapabilities av1Caps = av1DecoderInfo.getCapabilitiesForType("video/av01").getVideoCapabilities();
-
             return !decoderCanMeetPerformancePoint(avcCaps, prefs) && decoderCanMeetPerformancePoint(av1Caps, prefs);
         }
         else {
-            // No performance data
             return false;
         }
     }
 
     private MediaCodecInfo findHevcDecoder(PreferenceConfiguration prefs, boolean meteredNetwork, boolean requestedHdr) {
-        // Don't return anything if H.264 is forced
         if (prefs.videoFormat == PreferenceConfiguration.FormatOption.FORCE_H264) {
             return null;
         }
-
-        // We don't try the first HEVC decoder. We'd rather fall back to hardware accelerated AVC instead
-        //
-        // We need HEVC Main profile, so we could pass that constant to findProbableSafeDecoder, however
-        // some decoders (at least Qualcomm's Snapdragon 805) don't properly report support
-        // for even required levels of HEVC.
         MediaCodecInfo hevcDecoderInfo = MediaCodecHelper.findProbableSafeDecoder("video/hevc", -1);
         if (hevcDecoderInfo != null) {
             if (!MediaCodecHelper.decoderIsWhitelistedForHevc(hevcDecoderInfo)) {
                 LimeLog.info("Found HEVC decoder, but it's not whitelisted - "+hevcDecoderInfo.getName());
-
-                // Force HEVC enabled if the user asked for it
                 if (prefs.videoFormat == PreferenceConfiguration.FormatOption.FORCE_HEVC) {
                     LimeLog.info("Forcing HEVC enabled despite non-whitelisted decoder");
                 }
-                // HDR implies HEVC forced on, since HEVCMain10HDR10 is required for HDR.
                 else if (requestedHdr) {
                     LimeLog.info("Forcing HEVC enabled for HDR streaming");
                 }
-                // > 4K streaming also requires HEVC, so force it on there too.
                 else if (prefs.width > 4096 || prefs.height > 4096) {
                     LimeLog.info("Forcing HEVC enabled for over 4K streaming");
                 }
-                // Use HEVC if the H.264 decoder is unable to meet the performance point
                 else if (avcDecoder != null && decoderCanMeetPerformancePointWithHevcAndNotAvc(hevcDecoderInfo, avcDecoder, prefs)) {
                     LimeLog.info("Using non-whitelisted HEVC decoder to meet performance point");
                 }
@@ -259,7 +215,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     private MediaCodecInfo findAv1Decoder(PreferenceConfiguration prefs) {
-        // For now, don't use AV1 unless explicitly requested
         if (prefs.videoFormat != PreferenceConfiguration.FormatOption.FORCE_AV1) {
             return null;
         }
@@ -268,16 +223,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         if (decoderInfo != null) {
             if (!MediaCodecHelper.isDecoderWhitelistedForAv1(decoderInfo)) {
                 LimeLog.info("Found AV1 decoder, but it's not whitelisted - "+decoderInfo.getName());
-
-                // Force HEVC enabled if the user asked for it
                 if (prefs.videoFormat == PreferenceConfiguration.FormatOption.FORCE_AV1) {
                     LimeLog.info("Forcing AV1 enabled despite non-whitelisted decoder");
                 }
-                // Use AV1 if the HEVC decoder is unable to meet the performance point
                 else if (hevcDecoder != null && decoderCanMeetPerformancePointWithAv1AndNotHevc(decoderInfo, hevcDecoder, prefs)) {
                     LimeLog.info("Using non-whitelisted AV1 decoder to meet performance point");
                 }
-                // Use AV1 if the H.264 decoder is unable to meet the performance point and we have no HEVC decoder
                 else if (hevcDecoder == null && decoderCanMeetPerformancePointWithAv1AndNotAvc(decoderInfo, avcDecoder, prefs)) {
                     LimeLog.info("Using non-whitelisted AV1 decoder to meet performance point");
                 }
@@ -307,7 +258,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.consecutiveCrashCount = consecutiveCrashCount;
         this.glRenderer = glRenderer;
         this.perfListener = perfListener;
-
         this.activeWindowVideoStats = new VideoStats();
         this.lastWindowVideoStats = new VideoStats();
         this.globalVideoStats = new VideoStats();
@@ -335,10 +285,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         else {
             LimeLog.info("No AV1 decoder found");
         }
-
-        // Set attributes that are queried in getCapabilities(). This must be done here
-        // because getCapabilities() may be called before setup() in current versions of the common
-        // library. The limitation of this is that we don't know whether we're using HEVC or AVC.
         int avcOptimalSlicesPerFrame = 0;
         int hevcOptimalSlicesPerFrame = 0;
         if (avcDecoder != null) {
@@ -374,7 +320,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         }
 
-        // Use the larger of the two slices per frame preferences
         optimalSlicesPerFrame = (byte)Math.max(avcOptimalSlicesPerFrame, hevcOptimalSlicesPerFrame);
         LimeLog.info("Requesting "+optimalSlicesPerFrame+" slices per frame");
 
@@ -427,13 +372,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     public int getPreferredColorSpace() {
-        // Default to Rec 709 which is probably better supported on modern devices.
-        //
-        // We are sticking to Rec 601 on older devices unless the device has an HEVC decoder
-        // to avoid possible regressions (and they are < 5% of installed devices). If we have
-        // an HEVC decoder, we will use Rec 709 (even for H.264) since we can't choose a
-        // colorspace by codec (and it's probably safe to say a SoC with HEVC decoding is
-        // plenty modern enough to handle H.264 VUI colorspace info).
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || hevcDecoder != null || av1Decoder != null) {
             return MoonBridge.COLORSPACE_REC_709;
         }
@@ -465,28 +403,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     private MediaFormat createBaseMediaFormat(String mimeType) {
         MediaFormat videoFormat = MediaFormat.createVideoFormat(mimeType, initialWidth, initialHeight);
-
-        // Avoid setting KEY_FRAME_RATE on Lollipop and earlier to reduce compatibility risk
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, refreshRate);
         }
-
-        // Populate keys for adaptive playback
         if (adaptivePlayback) {
             videoFormat.setInteger(MediaFormat.KEY_MAX_WIDTH, initialWidth);
             videoFormat.setInteger(MediaFormat.KEY_MAX_HEIGHT, initialHeight);
         }
-
-        // Android 7.0 adds color options to the MediaFormat
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             videoFormat.setInteger(MediaFormat.KEY_COLOR_RANGE,
                     getPreferredColorRange() == MoonBridge.COLOR_RANGE_FULL ?
                     MediaFormat.COLOR_RANGE_FULL : MediaFormat.COLOR_RANGE_LIMITED);
-
-            // If the stream is HDR-capable, the decoder will detect transitions in color standards
-            // rather than us hardcoding them into the MediaFormat.
             if ((getActiveVideoFormat() & MoonBridge.VIDEO_FORMAT_MASK_10BIT) == 0) {
-                // Set color format keys when not in HDR mode, since we know they won't change
                 videoFormat.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
                 switch (getPreferredColorSpace()) {
                     case MoonBridge.COLORSPACE_REC_601:
@@ -506,7 +434,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
     }
 
     private void configureAndStartDecoder(MediaFormat format) {
-        // Set HDR metadata if present
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (currentHdrMetadata != null) {
                 ByteBuffer hdrStaticInfo = ByteBuffer.allocate(25).order(ByteOrder.LITTLE_ENDIAN);
@@ -534,28 +461,19 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 format.removeKey(MediaFormat.KEY_HDR_STATIC_INFO);
             }
         }
-
         LimeLog.info("Configuring with format: "+format);
-
         videoDecoder.configure(format, renderTarget.getSurface(), null, 0);
-
         configuredFormat = format;
-
-        // After reconfiguration, we must resubmit CSD buffers
         submittedCsd = false;
         vpsBuffers.clear();
         spsBuffers.clear();
         ppsBuffers.clear();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // This will contain the actual accepted input format attributes
             inputFormat = videoDecoder.getInputFormat();
             LimeLog.info("Input format: "+inputFormat);
         }
-
         videoDecoder.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-
-        // Start the decoder
         videoDecoder.start();
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -612,7 +530,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 return -1;
             }
 
-            // These fixups only apply to H264 decoders
             needsSpsBitstreamFixup = MediaCodecHelper.decoderNeedsSpsBitstreamRestrictions(selectedDecoderInfo.getName());
             needsBaselineSpsHack = MediaCodecHelper.decoderNeedsBaselineSpsHack(selectedDecoderInfo.getName());
             constrainedHighProfile = MediaCodecHelper.decoderNeedsConstrainedHighProfile(selectedDecoderInfo.getName());
@@ -655,7 +572,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             refFrameInvalidationActive = refFrameInvalidationAv1;
         }
         else {
-            // Unknown format
             LimeLog.severe("Unknown format");
             return -3;
         }
@@ -665,20 +581,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
         for (int tryNumber = 0;; tryNumber++) {
             LimeLog.info("Decoder configuration try: "+tryNumber);
-
             MediaFormat mediaFormat = createBaseMediaFormat(mimeType);
-
-            // This will try low latency options until we find one that works (or we give up).
             boolean newFormat = MediaCodecHelper.setDecoderLowLatencyOptions(mediaFormat, selectedDecoderInfo, tryNumber);
-
-            // Throw the underlying codec exception on the last attempt if the caller requested it
             if (tryConfigureDecoder(selectedDecoderInfo, mediaFormat, !newFormat && throwOnCodecError)) {
-                // Success!
                 break;
             }
-
             if (!newFormat) {
-                // We couldn't even configure a decoder without any low latency options
                 return -5;
             }
         }
@@ -706,36 +614,21 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.initialHeight = height;
         this.videoFormat = format;
         this.refreshRate = redrawRate;
-
         return initializeDecoder(false);
     }
-
-    // All threads that interact with the MediaCodec instance must call this function regularly!
     private boolean doCodecRecoveryIfRequired(int quiescenceFlag) {
-        // NB: We cannot check 'stopping' here because we could end up bailing in a partially
-        // quiesced state that will cause the quiesced threads to never wake up.
         if (codecRecoveryType.get() == CR_RECOVERY_TYPE_NONE) {
-            // Common case
             return false;
         }
-
-        // We need some sort of recovery, so quiesce all threads before starting that
         synchronized (codecRecoveryMonitor) {
             if (choreographerHandlerThread == null) {
-                // If we have no choreographer thread, we can just mark that as quiesced right now.
                 codecRecoveryThreadQuiescedFlags |= CR_FLAG_CHOREOGRAPHER;
             }
-
             codecRecoveryThreadQuiescedFlags |= quiescenceFlag;
-
-            // This is the final thread to quiesce, so let's perform the codec recovery now.
             if (codecRecoveryThreadQuiescedFlags == CR_FLAG_ALL) {
-                // Input and output buffers are invalidated by stop() and reset().
                 nextInputBuffer = null;
                 nextInputBufferIndex = -1;
                 outputBufferQueue.clear();
-
-                // If we just need a flush, do so now with all threads quiesced.
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_FLUSH) {
                     LimeLog.warning("Flushing decoder");
                     try {
@@ -743,20 +636,14 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
                     } catch (IllegalStateException e) {
                         e.printStackTrace();
-
-                        // Something went wrong during the restart, let's use a bigger hammer
-                        // and try a reset instead.
                         codecRecoveryType.set(CR_RECOVERY_TYPE_RESTART);
                     }
                 }
 
-                // We don't count flushes as codec recovery attempts
                 if (codecRecoveryType.get() != CR_RECOVERY_TYPE_NONE) {
                     codecRecoveryAttempts++;
                     LimeLog.info("Codec recovery attempt: "+codecRecoveryAttempts);
                 }
-
-                // For "recoverable" exceptions, we can just stop, reconfigure, and restart.
                 if (codecRecoveryType.get() == CR_RECOVERY_TYPE_RESTART) {
                     LimeLog.warning("Trying to restart decoder after CodecException");
                     try {
@@ -765,16 +652,11 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
-
-                        // Our Surface is probably invalid, so just stop
                         stopping = true;
                         codecRecoveryType.set(CR_RECOVERY_TYPE_NONE);
                     } catch (IllegalStateException e) {
                         e.printStackTrace();
-
-                        // Something went wrong during the restart, let's use a bigger hammer
-                        // and try a reset instead.
-                        codecRecoveryType.set(CR_RECOVERY_TYPE_RESET);
+                      codecRecoveryType.set(CR_RECOVERY_TYPE_RESET);
                     }
                 }
 
@@ -1444,9 +1326,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 long rttInfo = MoonBridge.getEstimatedRttInfo();
                 StringBuilder sb = new StringBuilder();
                 sb.append(context.getString(R.string.perf_overlay_streamdetails, initialWidth + "x" + initialHeight, fps.totalFps)).append('\n');
-                sb.append(context.getString(R.string.perf_overlay_decoder, decoder)).append('\n');
-                sb.append(context.getString(R.string.perf_overlay_incomingfps, fps.receivedFps)).append('\n');
-                sb.append(context.getString(R.string.perf_overlay_renderingfps, fps.renderedFps)).append('\n');
                 sb.append(context.getString(R.string.perf_overlay_netdrops,
                         (float)lastTwo.framesLost / lastTwo.totalFrames * 100)).append('\n');
                 sb.append(context.getString(R.string.perf_overlay_netlatency,
@@ -1457,7 +1336,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                             (float)lastTwo.maxHostProcessingLatency / 10,
                             (float)lastTwo.totalHostProcessingLatency / 10 / lastTwo.framesWithHostProcessingLatency)).append('\n');
                 }
-                sb.append(context.getString(R.string.perf_overlay_dectime, decodeTimeMs));
+
                 perfListener.onPerfUpdate(sb.toString());
             }
 

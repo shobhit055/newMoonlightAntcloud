@@ -120,7 +120,7 @@ public class StreamSettings extends Activity {
     public static class SettingsFragment extends PreferenceFragment {
         private int nativeResolutionStartIndex = Integer.MAX_VALUE;
         private boolean nativeFramerateShown = false;
-
+        
         private void setValue(String preferenceKey, String value) {
             ListPreference pref = (ListPreference) findPreference(preferenceKey);
 

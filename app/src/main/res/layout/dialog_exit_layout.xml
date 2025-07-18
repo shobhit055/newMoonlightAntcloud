@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="20dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:clipToOutline="true"
+    android:background="@drawable/rounded_corner_style"
+    android:gravity="center_horizontal"
+    tools:ignore="UnusedAttribute">
+
+    <TextView
+        android:padding="8dp"
+        android:gravity="center"
+        android:textStyle="bold"
+         android:id="@+id/dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exit PC"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+    <TextView
+        android:padding="10dp"
+        android:textStyle="normal"
+        android:id="@+id/dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/exit_stream"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:gravity="center"
+        />
+
+    <LinearLayout
+        android:padding="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="5dp"
+            android:textColor="@color/black"
+            android:textAllCaps="false"
+            android:padding="10dp"
+            android:id="@+id/cancel"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:background="@drawable/rounded_corner_btn"/>
+
+
+
+        <Button
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="20dp"
+            android:textColor="@color/white"
+            android:background="@drawable/rounded_corner_btn_blue"
+            android:textAllCaps="false"
+            android:id="@+id/yes"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Yes" />
+    </LinearLayout>
+</LinearLayout>

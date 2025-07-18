@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
-import android.os.Build.VERSION.SDK_INT
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Toast
@@ -14,7 +13,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +23,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,14 +33,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,8 +65,6 @@ import com.limelight.common.DrawerScreens
 import com.limelight.components.VerticalGrid
 import com.limelight.components.makeToast
 import com.limelight.data.Game
-import com.limelight.theme.BlueGradient
-import com.limelight.theme.PinkGradient
 import com.limelight.viewmodel.UserViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.TextButton
@@ -84,10 +73,8 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -107,34 +94,25 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
-import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
 import com.google.firebase.Firebase
 import com.google.firebase.inappmessaging.inAppMessaging
 import com.google.firebase.perf.FirebasePerformance
 
 import com.limelight.components.CustomDialog
 import com.limelight.common.GlobalData
-import com.limelight.components.Loading
 import com.limelight.components.signOut
 import com.limelight.theme.subtitle
 import com.limelight.activity.NavActivity
 import com.limelight.common.AnalyticsManager
-import com.limelight.common.AppUtils.Companion.gradientColors
 import com.limelight.common.AppUtils.Companion.saveRefreshTokenData
-import com.limelight.data.PreferenceManager
+import com.limelight.data.PreferenceManger
 import com.limelight.screen.price.globalInstance
 import com.limelight.theme.dark_grey
 import com.limelight.theme.heading
 import com.limelight.theme.mainTitle
 import com.limelight.theme.primaryGreen
 import com.limelight.ui.AppView
-import com.limelight.viewmodel.StreamViewModel
-import kotlinx.coroutines.NonDisposableHandle.parent
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -298,7 +276,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
         showMaintenanceDialog.value = it
     }
 
-    val pref = PreferenceManager(currentAct)
+    val pref = PreferenceManger(currentAct)
     showUpdateDialog.value = (currentAppVersion < globalInstance.androidData.playVersion)
 
     val showCard: @Composable (Int, Int,  Unit, Int, Boolean) -> Unit = { imageRes: Int, textRes: Int, clickRes: Unit, buttonTextRes: Int, landscape: Boolean ->

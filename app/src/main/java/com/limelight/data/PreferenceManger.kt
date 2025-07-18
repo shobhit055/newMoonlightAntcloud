@@ -3,7 +3,7 @@ package com.limelight.data
 import android.content.Context
 import android.content.SharedPreferences
 
-open class PreferenceManager constructor(context: Context) : IPreferenceHelper {
+open class PreferenceManger constructor(context: Context) : IPreferenceHelper {
     private val PREFS_NAME = "cookies"
     private var preferences: SharedPreferences
     init {

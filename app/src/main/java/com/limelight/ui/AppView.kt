@@ -8,9 +8,7 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
@@ -27,14 +25,8 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
@@ -50,6 +42,7 @@ import com.limelight.computers.ComputerManagerService
 import com.limelight.computers.ComputerManagerService.ApplistPoller
 import com.limelight.computers.ComputerManagerService.ComputerManagerBinder
 import com.limelight.data.GetVMIPState
+import com.limelight.data.PreferenceManger
 import com.limelight.dependencyinjection.AppModule
 import com.limelight.dependencyinjection.AuthRepository
 import com.limelight.grid.AppGridAdapter
@@ -68,7 +61,6 @@ import com.limelight.utils.ShortcutHelper
 import com.limelight.utils.SpinnerDialog
 import com.limelight.utils.UiHelper
 import com.limelight.viewmodel.StreamViewModel
-import com.limelight.viewmodel.UserViewModel
 import com.limelight.viewmodel.VMStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -86,8 +78,9 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.URI
 import java.net.URISyntaxException
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.Collections
-import java.util.Timer
 
 @Suppress("DEPRECATION")
 @AndroidEntryPoint
@@ -116,12 +109,13 @@ class AppView : AppCompatActivity() {
     private val repository =  AuthRepository(api)
     var prefs : SharedPreferences? = null
     val globalInstance = GlobalData.getInstance()
-   lateinit var loadingLayout : ConstraintLayout
+    lateinit var loadingLayout : ConstraintLayout
     lateinit  var resolutionLayout : LinearLayout
     lateinit  var socketTimer_layout : ConstraintLayout
     lateinit  var connection_error_layout : ConstraintLayout
     lateinit  var errorText : TextView
     var errorTimerFlag = ""
+    lateinit  var prefManager: PreferenceManger
 
 
     private val serviceConnection1: ServiceConnection = object : ServiceConnection {
@@ -280,6 +274,7 @@ class AppView : AppCompatActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this@AppView)
         prefs!!.edit().putBoolean(PreferenceConfiguration.ONSCREEN_CONTROLLER_PREF_STRING,false).apply();
         val viewModel: StreamViewModel by viewModels()
+        prefManager = PreferenceManger(this)
         getVmipState = viewModel.getVMIPState.value
         loadingLayout =  findViewById(R.id.loadingLayout)
         resolutionLayout=  findViewById(R.id.resolutionLayout)
@@ -311,6 +306,7 @@ class AppView : AppCompatActivity() {
         }
         onBackPressedDispatcher.addCallback(this) {
             viewModel.onBackPressed()
+            pcExit()
             this.remove()
             onBackPressedDispatcher.onBackPressed()
         }
@@ -369,7 +365,7 @@ class AppView : AppCompatActivity() {
                         errorText.text = resources.getString(R.string.one_min_issue_msg)
                     else
                         errorText.text = resources.getString(R.string.stream_end_issue)
-
+                    pcExit()
                     loadingLayout.visibility = View.INVISIBLE
                     resolutionLayout.visibility = View.INVISIBLE
                     socketTimer_layout.visibility = View.INVISIBLE
@@ -487,7 +483,10 @@ class AppView : AppCompatActivity() {
             }
         }
         shutdowVMButton.setOnClickListener {
+//            val intent = Intent(this@AppView,StreamSettings::class.java)
+//            startActivity(intent)
             viewModel.closeStream()
+            pcExit()
             onBackPressedDispatcher.onBackPressed()
         }
 
@@ -507,6 +506,8 @@ class AppView : AppCompatActivity() {
             hiddenAppIds.add(hiddenAppIdStr.toInt())
         }
     }
+
+
 
     private fun setBitratevalue(mbps: Int) {
         val value =  mbps*1000
@@ -548,14 +549,11 @@ class AppView : AppCompatActivity() {
             .apply();
     }
 
-    private fun updateHiddenApps(hideImmediately: Boolean) {
-        val hiddenAppIdStringSet = HashSet<String>()
-        for (hiddenAppId in hiddenAppIds) {
-            hiddenAppIdStringSet.add(hiddenAppId.toString())
+    fun pcExit(){
+        prefManager.setProperExit(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            prefManager.setExitTime(LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC))
         }
-        getSharedPreferences(HIDDEN_APPS_PREF_FILENAME, MODE_PRIVATE).edit()
-            .putStringSet(uuidString, hiddenAppIdStringSet).apply()
-        appGridAdapter!!.updateHiddenApps(hiddenAppIds, hideImmediately)
     }
 
     private fun populateAppGridWithCache() {
@@ -750,6 +748,7 @@ class AppView : AppCompatActivity() {
 
         if (invalidInput) {
             withContext(Dispatchers.Main) {
+                pcExit()
                 errorText.text =   resources.getString(R.string.addpc_unknown_host)
                 loadingLayout.visibility = View.INVISIBLE
                 socketTimer_layout.visibility = View.INVISIBLE
@@ -760,6 +759,7 @@ class AppView : AppCompatActivity() {
         }else if (wrongSiteLocal) {
             withContext(Dispatchers.Main) {
                 errorText.text =  resources.getString(R.string.addpc_wrong_sitelocal)
+                pcExit()
                 loadingLayout.visibility = View.INVISIBLE
                 socketTimer_layout.visibility = View.INVISIBLE
                 resolutionLayout.visibility = View.INVISIBLE
@@ -768,6 +768,7 @@ class AppView : AppCompatActivity() {
         }else if (!success) {
             withContext(Dispatchers.Main) {
                 errorText.text =  resources.getString(R.string.one_min_issue_msg)
+                pcExit()
                 loadingLayout.visibility = View.INVISIBLE
                 socketTimer_layout.visibility = View.INVISIBLE
                 resolutionLayout.visibility = View.INVISIBLE

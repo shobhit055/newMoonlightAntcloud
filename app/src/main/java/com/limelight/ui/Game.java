@@ -14,6 +14,7 @@ import com.limelight.binding.input.driver.UsbDriverService;
 import com.limelight.binding.input.evdev.EvdevListener;
 import com.limelight.binding.input.touch.TouchContext;
 
+import android.app.AlertDialog;
 import android.os.Build;
 
 import com.limelight.binding.input.virtual_controller.VirtualController;
@@ -22,8 +23,7 @@ import com.limelight.binding.video.MediaCodecDecoderRenderer;
 import com.limelight.binding.video.MediaCodecHelper;
 import com.limelight.binding.video.PerfOverlayListener;
 import com.limelight.common.GlobalData;
-import com.limelight.computers.ComputerManagerService;
-import com.limelight.model.PreferenceManager;
+import com.limelight.data.PreferenceManger;
 import com.limelight.nvstream.NvConnection;
 import com.limelight.nvstream.NvConnectionListener;
 import com.limelight.nvstream.StreamConfiguration;
@@ -35,8 +35,6 @@ import com.limelight.nvstream.input.MouseButtonPacket;
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.GlPreferences;
 import com.limelight.preferences.PreferenceConfiguration;
-import com.limelight.utils.Dialog;
-import com.limelight.utils.RestClient;
 import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
 import com.limelight.utils.SpinnerDialog;
@@ -44,7 +42,6 @@ import com.limelight.utils.UiHelper;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.PictureInPictureParams;
 import android.app.Service;
 import android.content.ComponentName;
@@ -61,10 +58,10 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Rational;
 import android.view.Display;
@@ -82,6 +79,7 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -93,7 +91,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
@@ -104,14 +101,8 @@ import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import coil.ComponentRegistry;
-import coil.ImageLoader;
-import coil.decode.GifDecoder;
-import coil.decode.ImageDecoderDecoder;
-import coil.request.ImageRequest;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -126,7 +117,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private final TouchContext[] touchContextMap = new TouchContext[2];
     private long threeFingerDownTime = 0;
     boolean pcStream = false;
-    PreferenceManager pref;
+    PreferenceManger pref;
     Timer timer;
     private static final int REFERENCE_HORIZ_RES = 1280;
     private static final int REFERENCE_VERT_RES = 720;
@@ -176,9 +167,15 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     ConstraintLayout loadingLayout;
     ConstraintLayout connection_error_layout;
     TextView  errorText;
-    ImageView spinnerImage;
+    ImageView spinnerImage,setting_icon;
     TextView loadingText;
     Button errorBackBtn;
+    CheckBox cbPerformanceStats,cbController;
+    boolean onScreenController = false,performanceStates = false;
+    SharedPreferences preferences;
+    AtomicInteger gamepadMask;
+    AlertDialog dialog;
+
 
     private ServiceConnection usbDriverServiceConnection = new ServiceConnection() {
         @Override
@@ -207,7 +204,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     public static final String EXTRA_APP_HDR = "HDR";
     public static final String EXTRA_SERVER_CERT = "ServerCert";
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "NewApi"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -235,14 +232,24 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         connection_error_layout =  findViewById(R.id.connection_eror_layout);
         errorText =  findViewById(R.id.errorText);
         spinnerImage =  findViewById(R.id.spinnerImage);
+        setting_icon =  findViewById(R.id.setting_icon);
         loadingText =  findViewById(R.id.loadingText);
         errorBackBtn =  findViewById(R.id.error_backBtn);
-        pref = new PreferenceManager(this);
+        cbPerformanceStats =  findViewById(R.id.cbPerformanceStats);
+        cbController =  findViewById(R.id.cbController);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        pref = new PreferenceManger(this);
+        performanceOverlayView = findViewById(R.id.performanceOverlay);
+
+
+
 
         loadingLayout.setVisibility(View.VISIBLE);
         loadingText.setText("Connecting");
         errorBackBtn.setOnClickListener(v -> {
-            onBackPressed();
+            pcExit();
+            startActivity(new Intent(Game.this, AppView.class));
+            finish();
         });
 
         Glide.with(this)
@@ -254,9 +261,41 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Read the stream preferences
         prefConfig = PreferenceConfiguration.readPreferences(this);
         tombstonePrefs = Game.this.getSharedPreferences("DecoderTombstone", 0);
-
-
         setPreferredOrientationForCurrentDisplay();
+         gamepadMask = new AtomicInteger(ControllerHandler.getAttachedControllerMask(this));
+        cbPerformanceStats.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                prefConfig.enablePerfOverlay = true;
+                performanceOverlayView.setVisibility(View.VISIBLE);
+
+            } else {
+                prefConfig.enablePerfOverlay = false;
+                performanceOverlayView.setVisibility(View.GONE);
+            }
+        });
+        setting_icon.setOnClickListener(v -> {
+            if(dialog!=null && dialog.isShowing())
+                dialog.dismiss();
+            else
+                showSettingDialog(Game.this);
+
+        });
+
+
+
+        cbController.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                gamepadMask.updateAndGet(v -> v | 1);
+                virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(),
+                        this);
+                virtualController.refreshLayout();
+
+                virtualController.show();
+            } else {
+                virtualController.hide();
+            }
+        });
+
         Log.i("test" , "testing" + prefConfig.width+ prefConfig.height + "fps" + prefConfig.fps + "bitrate "  +prefConfig.bitrate);
         if (prefConfig.stretchVideo || shouldIgnoreInsetsForResolution(prefConfig.width, prefConfig.height)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -293,7 +332,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         notificationOverlayView = findViewById(R.id.notificationOverlay);
 
-        performanceOverlayView = findViewById(R.id.performanceOverlay);
+
 
         inputCaptureProvider = InputCaptureManager.getInputCaptureProvider(this, this);
 
@@ -392,9 +431,13 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
 
         // Check if the user has enabled performance stats overlay
+
         if (prefConfig.enablePerfOverlay) {
             performanceOverlayView.setVisibility(View.VISIBLE);
         }
+
+
+
 
         decoderRenderer = new MediaCodecDecoderRenderer(
                 this,
@@ -447,16 +490,16 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
         }
 
-        int gamepadMask = ControllerHandler.getAttachedControllerMask(this);
+
         if (!prefConfig.multiController) {
             // Always set gamepad 1 present for when multi-controller is
             // disabled for games that don't properly support detection
             // of gamepads removed and replugged at runtime.
-            gamepadMask = 1;
+            gamepadMask.set(1);
         }
         if (prefConfig.onscreenController) {
             // If we're using OSC, always set at least gamepad 1.
-            gamepadMask |= 1;
+            gamepadMask.updateAndGet(v -> v | 1);
         }
 
         // Set to the optimal mode for streaming
@@ -496,7 +539,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 .setMaxPacketSize(1392)
                 .setRemoteConfiguration(StreamConfiguration.STREAM_CFG_AUTO) // NvConnection will perform LAN and VPN detection
                 .setSupportedVideoFormats(supportedVideoFormats)
-                .setAttachedGamepadMask(gamepadMask)
+                .setAttachedGamepadMask(gamepadMask.get())
                 .setClientRefreshRateX100((int)(displayRefreshRate * 100))
                 .setAudioConfiguration(prefConfig.audioConfiguration)
                 .setColorSpace(decoderRenderer.getPreferredColorSpace())
@@ -1029,10 +1072,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     protected void onDestroy() {
         super.onDestroy();
         if(pcStream) {
-            pref.setProperExit(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                pref.setExitTime(LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC));
-            }
+            pcExit();
         }
 
         if (controllerHandler != null) {
@@ -2722,10 +2762,91 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(Game.this, AppView.class));
-        finish();
+        showExitDialog(this);
     }
 
+
+    public void showExitDialog(Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_exit_layout, null);
+        builder.setView(dialogView);
+        Button btnCancel = dialogView.findViewById(R.id.cancel);
+        Button btnYes = dialogView.findViewById(R.id.yes);
+
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(true);
+        dialog.show();
+
+        btnCancel.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
+        btnYes.setOnClickListener(v -> {
+            dialog.dismiss();
+            pcExit();
+            startActivity(new Intent(Game.this, AppView.class));
+            finish();
+
+        });
+
+    }
+
+
+    @SuppressLint("NewApi")
+    public void showSettingDialog(Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_setting_layout, null);
+        builder.setView(dialogView);
+        CheckBox cbPerformanceStats = dialogView.findViewById(R.id.cbPerformanceStats);
+        CheckBox cbController = dialogView.findViewById(R.id.cbController);
+
+        cbController.setChecked(onScreenController);
+        cbPerformanceStats.setChecked(performanceStates);
+
+        dialog = builder.create();
+        dialog.setCancelable(true);
+        dialog.show();
+
+        cbPerformanceStats.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                performanceStates =  true;
+                prefConfig.enablePerfOverlay = true;
+                performanceOverlayView.setVisibility(View.VISIBLE);
+
+            } else {
+                performanceStates =  false;
+                prefConfig.enablePerfOverlay = false;
+                performanceOverlayView.setVisibility(View.GONE);
+            }
+        });
+
+
+
+        cbController.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                onScreenController = true;
+                gamepadMask.updateAndGet(v -> v | 1);
+                virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(),
+                        this);
+                virtualController.refreshLayout();
+
+                virtualController.show();
+            } else {
+                onScreenController = false;
+                virtualController.hide();
+            }
+        });
+    }
+
+
+
+    public void pcExit(){
+        pref.setProperExit(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pref.setExitTime(LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC));
+        }
+    }
 
 
 }

@@ -28,7 +28,7 @@ import com.limelight.common.AnalyticsManager.Companion.pgResponse
 import com.limelight.common.GlobalData
 import com.limelight.components.makeToast
 import com.limelight.components.setScreenOrientation
-import com.limelight.data.PreferenceManager
+import com.limelight.data.PreferenceManger
 import com.limelight.screen.WebViewScreen
 import com.limelight.viewmodel.WebViewModel
 import java.time.LocalDateTime
@@ -45,7 +45,7 @@ class WebViewActivity : AppCompatActivity() {
     private var webView: WebView? = null
     private var page: String? = null
     var pcStream = false
-    var pref: PreferenceManager?= null
+    var pref: PreferenceManger?= null
     var fpsGpad: Boolean = false
     var fpsGpadDrag: Boolean = false
     var fpsConfigEditor: Boolean = false
@@ -72,7 +72,7 @@ class WebViewActivity : AppCompatActivity() {
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pref = PreferenceManager(this)
+        pref = PreferenceManger(this)
         var url = intent.getStringExtra("url")
         page = intent.getStringExtra("page")
         if (url == null) {

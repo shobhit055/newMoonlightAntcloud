@@ -142,10 +142,6 @@ fun accountNav(
             coroutineScope.launch {
                 if (it) {
                     bottomSheetState.show()
-                    systemUiController.setStatusBarColor(
-                        color = dark_grey,
-                        darkIcons = true
-                    )
                 }
                 else {
                     bottomSheetState.hide()
@@ -163,7 +159,6 @@ fun accountNav(
 
         viewModel.subBottomSheetState = { sheetState = it }
 
-        systemUiController.setStatusBarColor(color = dark_grey, darkIcons = true)
 
         Theme {
             ModalBottomSheetLayout(
@@ -837,7 +832,7 @@ fun EditEmail(toggle: (Boolean) -> Unit, viewModel: UserViewModel) {
             icon = Icons.Filled.Send) {
             AnalyticsManager.emailVerificationButton()
             onAreaChanged(toggle , viewModel , BottomSheetState.LOADING)
-         //   resendVerificationEmail(viewModel)
+           resendVerificationEmail(viewModel)
         }
         Spacer(modifier = Modifier.size(20.dp))
     }

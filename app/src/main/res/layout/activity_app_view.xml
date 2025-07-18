@@ -209,6 +209,7 @@
             android:progress="5000" />
 
         <CheckBox
+            android:visibility="gone"
             android:textColor="@color/white"
            android:buttonTint="@color/white"
             android:layout_marginLeft="5dp"
