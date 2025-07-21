@@ -25,6 +25,7 @@ class LoginActivity : ComponentActivity() {
     lateinit  var viewModel : AuthenticateViewModel
     val globalInstance = GlobalData.getInstance()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

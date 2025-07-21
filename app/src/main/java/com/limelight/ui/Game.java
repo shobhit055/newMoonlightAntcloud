@@ -144,6 +144,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private String appName;
     private NvApp app;
     private float desiredRefreshRate;
+//    int gamepadMask;
     private InputCaptureProvider inputCaptureProvider;
     private int modifierFlags = 0;
     private boolean grabbedInput = true;
@@ -167,13 +168,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     ConstraintLayout loadingLayout;
     ConstraintLayout connection_error_layout;
     TextView  errorText;
-    ImageView spinnerImage,setting_icon;
+    ImageView spinnerImage,setting_icon,keybord_icon;
     TextView loadingText;
     Button errorBackBtn;
     CheckBox cbPerformanceStats,cbController;
     boolean onScreenController = false,performanceStates = false;
     SharedPreferences preferences;
-    AtomicInteger gamepadMask;
     AlertDialog dialog;
 
 
@@ -233,6 +233,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         errorText =  findViewById(R.id.errorText);
         spinnerImage =  findViewById(R.id.spinnerImage);
         setting_icon =  findViewById(R.id.setting_icon);
+        keybord_icon =  findViewById(R.id.keybord_icon);
         loadingText =  findViewById(R.id.loadingText);
         errorBackBtn =  findViewById(R.id.error_backBtn);
         cbPerformanceStats =  findViewById(R.id.cbPerformanceStats);
@@ -260,9 +261,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         // Read the stream preferences
         prefConfig = PreferenceConfiguration.readPreferences(this);
+        prefConfig.onscreenController = true;
+//        gamepadMask = ControllerHandler.getAttachedControllerMask(this);
+//        gamepadMask |= 1;
         tombstonePrefs = Game.this.getSharedPreferences("DecoderTombstone", 0);
         setPreferredOrientationForCurrentDisplay();
-         gamepadMask = new AtomicInteger(ControllerHandler.getAttachedControllerMask(this));
+
         cbPerformanceStats.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 prefConfig.enablePerfOverlay = true;
@@ -280,16 +284,14 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 showSettingDialog(Game.this);
 
         });
-
-
+        keybord_icon.setOnClickListener(v -> {
+            toggleKeyboard();
+        });
 
         cbController.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                gamepadMask.updateAndGet(v -> v | 1);
-                virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(),
-                        this);
+                virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(), this);
                 virtualController.refreshLayout();
-
                 virtualController.show();
             } else {
                 virtualController.hide();
@@ -490,16 +492,17 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
         }
 
-
+        int gamepadMask = ControllerHandler.getAttachedControllerMask(this);
         if (!prefConfig.multiController) {
             // Always set gamepad 1 present for when multi-controller is
             // disabled for games that don't properly support detection
             // of gamepads removed and replugged at runtime.
-            gamepadMask.set(1);
+            gamepadMask=1;
         }
         if (prefConfig.onscreenController) {
             // If we're using OSC, always set at least gamepad 1.
-            gamepadMask.updateAndGet(v -> v | 1);
+            gamepadMask |= 1;
+
         }
 
         // Set to the optimal mode for streaming
@@ -539,7 +542,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 .setMaxPacketSize(1392)
                 .setRemoteConfiguration(StreamConfiguration.STREAM_CFG_AUTO) // NvConnection will perform LAN and VPN detection
                 .setSupportedVideoFormats(supportedVideoFormats)
-                .setAttachedGamepadMask(gamepadMask.get())
+                .setAttachedGamepadMask(gamepadMask)
                 .setClientRefreshRateX100((int)(displayRefreshRate * 100))
                 .setAudioConfiguration(prefConfig.audioConfiguration)
                 .setColorSpace(decoderRenderer.getPreferredColorSpace())
@@ -572,11 +575,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         if (prefConfig.onscreenController) {
             // create virtual onscreen controller
-            virtualController = new VirtualController(controllerHandler,
-                    (FrameLayout)streamView.getParent(),
-                    this);
-            virtualController.refreshLayout();
-            virtualController.show();
+//            virtualController = new VirtualController(controllerHandler,
+//                    (FrameLayout)streamView.getParent(),
+//                    this);
+//            virtualController.refreshLayout();
+//            virtualController.show();
         }
 
         if (prefConfig.usbDriver) {
@@ -2089,7 +2092,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                         // All fingers up
                         if (event.getEventTime() - threeFingerDownTime < THREE_FINGER_TAP_THRESHOLD) {
                             // This is a 3 finger tap to bring up the keyboard
-                            toggleKeyboard();
+                           // toggleKeyboard();
                             return true;
                         }
                     }
@@ -2826,7 +2829,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         cbController.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 onScreenController = true;
-                gamepadMask.updateAndGet(v -> v | 1);
                 virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(),
                         this);
                 virtualController.refreshLayout();
