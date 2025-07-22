@@ -47,7 +47,7 @@ import java.io.FileInputStream
 
 @SuppressLint("CustomSplashScreen")
 @AndroidEntryPoint
-class  SplashActivity : ComponentActivity(){
+class SplashActivity : ComponentActivity(){
      private var navigationRoute = navigationRoutes("")
      private var encryptedDataSize: Int = 0
      private var encryptedData: ByteArray? = null
@@ -342,6 +342,8 @@ class  SplashActivity : ComponentActivity(){
             }*/
             }
         }
+
     }
+
 
 }

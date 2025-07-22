@@ -103,6 +103,11 @@ class AuthRepository @Inject constructor(private val api : ApiService) : AuthRep
         return api.checkPaymentAllowed()
     }
 
+    override suspend fun checkForSale(): Response<ResponseBody> {
+        return api.checkForSale()
+    }
+
+
     override suspend fun verifyCouponCode(@Header("Authorization") token: String, @Query("code") code: String): Response<ResponseBody> {
         return api.verifyCouponCode(token,code)
     }

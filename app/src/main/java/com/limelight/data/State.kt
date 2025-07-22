@@ -103,6 +103,13 @@ data class CheckPaymentState(
     var error: String = "",
     var errorCode: Int = -1)
 
+data class CheckForSaleState(
+    var isLoading: Boolean = false,
+    var success: Int = -1,
+    var message: String? = null,
+    var error: String = "",
+    var errorCode: Int = -1)
+
 data class AddToWaitListState(
     var isLoading: Boolean = false,
     var success: Int = -1,

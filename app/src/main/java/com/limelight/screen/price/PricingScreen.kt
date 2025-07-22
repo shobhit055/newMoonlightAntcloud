@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +29,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -56,9 +58,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Red
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -95,10 +101,15 @@ import com.limelight.viewmodel.UserViewModel
 import com.google.gson.Gson
 import com.limelight.activity.WebViewActivity
 import com.limelight.common.AnalyticsManager
+import com.limelight.data.SalesDetails
+import com.limelight.data.statesList
+import com.limelight.screen.auth.StateLocationDropDownMenu
+import com.limelight.theme.BlueGradient
 import com.limelight.theme.heading
 import com.limelight.theme.light_grey
 import com.limelight.theme.mainTitle
 import com.limelight.theme.subtitle
+import com.limelight.viewmodel.AuthenticateViewModel
 import com.limelight.viewmodel.PricingViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -128,6 +139,7 @@ fun pricingNav(t: NavGraphBuilder, activity: NavActivity, updateToolbar: ((Strin
         LaunchedEffect(key1 = Unit) {
             viewModel.initializePricingState(GlobalData.getInstance().androidData.pricing)
             viewModel.getCheckPaymentAllowedData()
+            viewModel.getCheckForSale()
         }
         updateToolbar("Pricing")
         AnalyticsManager.pricingButton()
@@ -151,6 +163,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
     val createPricingOrderState  = viewModel.createPricingOrderState.value
     val verifyCouponCodeState = viewModel.verifyCouponCodeState.value
     val checkPaymentAllowedState = viewModel.checkPaymentAllowedState.value
+    val checkForSaleState = viewModel.checkForSaleState.value
     val updateLocationState = viewModel.updateLocationState.value
     val addToWaitListState = viewModel.addToWaitListState.value
     val refreshTokenState = userViewModel.refreshTokenState.value
@@ -255,8 +268,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
     when(checkPaymentAllowedState.success){
         1 -> {
             LaunchedEffect(Unit) {
-//                val jObject = checkPaymentAllowedState.message?.let { JSONObject(it) }
-//                viewModel.updatePaymentsAllowedState(jObject!!.getBoolean("active"))
+                 val jObject = JSONObject(checkPaymentAllowedState.message!!)
+                    viewModel.updatePaymentsAllowedState(jObject.getBoolean("active"))
             }
         }
         0 -> {
@@ -266,8 +279,25 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
             }
         }
     }
-    when(updateLocationState.success){
+    when(checkForSaleState.success){
+        1 -> {
+            LaunchedEffect(Unit) {
+                    val jObject = JSONObject(checkForSaleState.message!!)
+                    val details = jObject.getJSONArray("docs")
+                    val jDetails = details.getJSONObject(0)
+                    val salesDetails = Gson().fromJson(jDetails.toString(), SalesDetails::class.java)
+                    viewModel.updateSalesDetails(salesDetails)
+                }
 
+        }
+        0 -> {
+            LaunchedEffect(Unit) {
+                viewModel.updateSalesDetails(SalesDetails())
+                activity.makeToast(checkForSaleState.error)
+            }
+        }
+    }
+    when(updateLocationState.success){
         1 -> {
             if(globalInstance.updateLocation){
                 globalInstance.updateLocation = false
@@ -411,6 +441,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
     val showUpdateLocationInformation = remember { mutableStateOf(false) }
     val showWaitList = remember { mutableStateOf(viewModel.showWaitList) }
     val showIntroWarning = remember { mutableStateOf(viewModel.showIntroWarning)}
+    val showAdvWarning = remember { mutableStateOf(viewModel.showAdvWarning)}
+    val showSuperWarning = remember { mutableStateOf(viewModel.showSuperWarning)}
 
     var stateLocation by remember {
         mutableStateOf(viewModel.stateLocation)
@@ -442,6 +474,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
     val landscape = (screenWidth >= 600)
     var introUltimate: Boolean
     var advancedUltimate: Boolean
+    var superUltimate: Boolean
+    var superPremium: Boolean
 
     if (pricingData == null) {
         Loading()
@@ -451,6 +485,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
             callSubscriptionApi(intent, activity, onEventHandler)
         }*/
 
+        val authViewModel : AuthenticateViewModel = hiltViewModel()
         if (openDialogCustom.value) {
             CustomDialog(
                 openDialogCustom = openDialogCustom,
@@ -466,26 +501,24 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                 }
             }
         }
-        Column(
-            modifier = Modifier.fillMaxWidth()/*.verticalScroll(state = scrollState)*/,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            CustomDialog(
-                openDialogCustom = showCoupon,
-                label = "PG",
-                onDismiss = {
-                    if (checkingCoupon.value) {
-                        checkingCoupon.value = false
-                    }
-                    if (viewModel.showCouponError) {
-                        viewModel.updateShowCouponError(false)
-                    }
-                    viewModel.updateCouponState("")
-                }) {
-                Card(shape = RoundedCornerShape(10.dp),elevation = 28.dp) {
+        Column(modifier = Modifier.fillMaxWidth().verticalScroll(state = rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+            CustomDialog(openDialogCustom = showCoupon, label = "PG", onDismiss = {
+                if (checkingCoupon.value) {
+                    checkingCoupon.value = false
+                }
+                if (viewModel.showCouponError) {
+                    viewModel.updateShowCouponError(false)
+                }
+                viewModel.updateCouponState("")
+            }) {
+                Card(
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = 28.dp,
+                ) {
                     if (loading) {
                         Loading("Checking Coupon Validity ....", landscape = landscape)
                         checkingCoupon.value = true
-                    }else {
+                    } else {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth(if (landscape) 0.8f else 0.9f)
@@ -506,18 +539,24 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     color = MaterialTheme.colors.secondary,
                                     fontSize = if (landscape) 16.sp else 12.sp,
                                     textAlign = TextAlign.Start,
-                                    modifier = Modifier.padding(top = 15.dp, start = 10.dp, end = 10.dp),
-                                    style = subtitle)
-
+                                    modifier = Modifier.padding(
+                                        top = 15.dp,
+                                        start = 10.dp,
+                                        end = 10.dp
+                                    ),
+                                    style = subtitle
+                                )
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
                                         .padding(top = 20.dp, bottom = 5.dp),
                                     horizontalArrangement = Arrangement.SpaceEvenly,
-                                    verticalAlignment = Alignment.CenterVertically) {
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     InputCoupon(
                                         initialValue = coupon,
-                                        isError = viewModel.showCouponError) {
+                                        isError = viewModel.showCouponError
+                                    ) {
                                         viewModel.updateCouponState(it)
                                         if (viewModel.showCouponError) {
                                             viewModel.updateShowCouponError(false)
@@ -536,7 +575,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     textAlign = if(landscape) TextAlign.Center else TextAlign.Left,
                                     modifier = Modifier
                                         .fillMaxWidth(0.9f)
-                                        .padding(vertical = if (couponMessage) 15.dp else 5.dp))
+                                        .padding(vertical = if (couponMessage) 15.dp else 5.dp)
+                                )
                             }
                             Row(
                                 modifier = Modifier
@@ -553,7 +593,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     shape = RoundedCornerShape(if(landscape) 3.dp else 0.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         backgroundColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                                        disabledBackgroundColor = light_grey),
+                                        disabledBackgroundColor = light_grey
+                                    ),
                                     enabled = coupon.isNotEmpty(),
                                     onClick = {
                                         if(couponMessage) {
@@ -566,17 +607,13 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                             }
                                             viewModel.updateMessageState(false)
                                             viewModel.updateCouponState("")
-                                        }
-                                        else if (coupon.isNotEmpty()) {
+
+                                        } else if (coupon.isNotEmpty()) {
                                             viewModel.updateLoadingState(true)
-                                            GlobalData.getInstance().couponSubmit = true
+                                            globalInstance.couponSubmit = true
                                             globalInstance.traceCouponSubmit =  FirebasePerformance.getInstance().newTrace("coupon_submit_api")
                                             globalInstance.traceCouponSubmit.start()
-
                                             verifyCouponCodeApi(viewModel)
-
-
-
                                         }/* else {
                                             callSubscriptionApi(intent, activity, onEventHandler)
                                         }*/
@@ -594,11 +631,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                     }
                 }
             }
-            CustomDialog(
-                openDialogCustom = showPlanWarning,
-                label = "Plan Change Warning",
-                onDismiss = {}
-            ) {
+            CustomDialog(openDialogCustom = showPlanWarning, label = "Plan Change Warning", onDismiss = {}) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
                     elevation = 28.dp,
@@ -631,8 +664,11 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     .weight(0.4f)
                                     .padding(bottom = 20.dp),
                                 shape = RoundedCornerShape(3.dp),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = light_grey),
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = light_grey
+                                ),
                                 onClick = {
+                                    viewModel.selectedQuantity = 1
                                     showPlanWarning.value = false
                                     showRenewWarning.value = false
                                 }) {
@@ -652,68 +688,72 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                 shape = RoundedCornerShape(3.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                                    disabledBackgroundColor = light_grey),
+                                    disabledBackgroundColor = light_grey
+                                ),
                                 onClick = {
-//                                    val intent = Intent(activity, WebViewActivity::class.java)
-//                                    intent.putExtra("url", "https://antcloud.co/mobilePricing?planName=${viewModel.selectedPlan}&quantity=${viewModel.selectedQuantity}&couponCode=${viewModel.appliedCoupon}&idToken=${globalInstance.accountData.token}")
-//                                    intent.putExtra("page", "pricing")
-//                                    activity.startActivity(intent)
-//                                    viewModel.updateCouponState("")
-//                                    delayClose(viewModel)
-//                                    onPurcahsePlanClick(viewModel,activity)
-//                                    showPlanWarning.value = false
-//                                    showRenewWarning.value = false
+                                    if(viewModel.saleDetails.active && (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code)) {
+                                        if(!viewModel.bundleSelected){
+                                            viewModel.appliedCoupon = viewModel.saleDetails.coupon.uppercase()
+                                        } else {
+                                            viewModel.appliedCoupon = ""
+                                        }
+                                    }
+                                    onPurcahsePlanClick(viewModel,activity)
+                                    showPlanWarning.value = false
+                                    showRenewWarning.value = false
                                 }) {
                                 Text(
                                     text = "Proceed",
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colors.secondary,
                                     style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
-                                    modifier = Modifier.padding(vertical = 8.dp))
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
                             }
                             Spacer(Modifier.weight(0.07f))
                         }
                     }
                 }
             }
-
-
-            CustomDialog(
-                openDialogCustom = showWaitList,
-                label = "Join WaitList",
-                onDismiss = {}) {
+            CustomDialog(openDialogCustom = showWaitList, label = "Join WaitList", onDismiss = {}) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
-                    elevation = 28.dp) {
+                    elevation = 28.dp,
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(if (landscape) 0.8f else 0.9f)
                             .background(MaterialTheme.colors.surface),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
                             text = stringResource(id = R.string.join_waitList),
                             color = MaterialTheme.colors.secondary,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 20.dp, start = 15.dp, end = 15.dp),
-                            style = subtitle.copy(fontWeight = FontWeight.Normal))
-                        //verticalAlignment = Alignment.CenterVertically
+                            style = subtitle.copy(fontWeight = FontWeight.Normal)
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 15.dp),
                                 //.background(MaterialTheme.colors.primary.copy(alpha = 0.5f))
-                            horizontalArrangement = Arrangement.SpaceEvenly) {
+                                .padding(top = 15.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Spacer(Modifier.weight(0.07f))
-                            Button(modifier = Modifier
-                                .weight(0.4f)
-                                .padding(bottom = 20.dp),
+                            Button(
+                                modifier = Modifier
+                                    .weight(0.4f)
+                                    .padding(bottom = 20.dp),
                                 shape = RoundedCornerShape(3.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = MaterialTheme.colors.primary.copy(alpha = .6f),
-                                    disabledBackgroundColor = light_grey),
+                                    disabledBackgroundColor = light_grey
+                                ),
                                 onClick = {
-                                    GlobalData.getInstance().joinWaitList = true
+                                    globalInstance.joinWaitList = true
                                     globalInstance.traceJoinWaitList =  FirebasePerformance.getInstance().newTrace("add_user_to_wait_list_api")
                                     globalInstance.traceJoinWaitList.start()
                                     addToWaitListApi(viewModel)
@@ -723,7 +763,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colors.secondary,
                                     style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
-                                    modifier = Modifier.padding(vertical = 8.dp))
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
                             }
                             Spacer(Modifier.weight(0.06f))
                             Button(
@@ -750,11 +791,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                     }
                 }
             }
-            CustomDialog(
-                openDialogCustom = showUpdateLocationInformation,
-                label = "Update Location Information",
-                onDismiss = {}
-            ) {
+            CustomDialog(openDialogCustom = showUpdateLocationInformation, label = "Update Location Information", onDismiss = {}) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
                     elevation = 28.dp,
@@ -781,27 +818,40 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                             modifier = Modifier.padding(top = 15.dp, start = 10.dp, end = 10.dp),
                             style = subtitle.copy(fontWeight = FontWeight.Normal)
                         )
+                        var isErrorPincode by remember { mutableStateOf(false) }
                         Spacer(modifier = Modifier.size(10.dp))
-//                        StateLocationDropDownMenu(
-//                            selectedValue = stateLocation,
-//                            options = statesList,
-//                            label = "State"
-//                        ) {
-//                            viewModel.updateStateLocation(it)
-//                        }
-
+                        StateLocationDropDownMenu(state = stateLocation ,options = statesList, label = "State",authViewModel)
                         Spacer(modifier = Modifier.size(10.dp))
-
-//                        PinCodeTextField(initialValue = pinCode) {
-//                            if(pinCode.length == 7) return
-//                            viewModel.updatePinCodeState(pinCode)
-//                        }
-
+                        val pinCodeColor = if(isErrorPincode) Red else White
+                        var pincode by remember { mutableStateOf(authViewModel.pinCodeState) }
+                        BasicTextField(
+                            value = pincode,
+                            onValueChange = {
+                                pincode = it
+                                authViewModel.updatePincode(pincode)
+                                isErrorPincode = pincode != "" && !pincode.isPinCodeValid()
+                            },
+                            textStyle = TextStyle(color = White, fontSize = 14.sp ),
+                            cursorBrush = SolidColor(BlueGradient),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth(0.8f).border(1.dp, pinCodeColor, RoundedCornerShape(16.dp)).padding(12.dp),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                Box(Modifier.padding(start = 8.dp)) {
+                                    if (pincode.isEmpty()) {
+                                        androidx.compose.material3.Text("Pincode", color = Color.White)
+                                    }
+                                    innerTextField()
+                                } })
+                        Spacer(modifier = Modifier.height(10.dp))
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                //.background(MaterialTheme.colors.primary.copy(alpha = 0.5f))
                                 .padding(top = 15.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly) {
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Button(
                                 modifier = Modifier
                                     .weight(if (landscape) 0.3f else 1f)
@@ -813,50 +863,58 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                 ),
                                 enabled = stateLocation != "" && pinCode.isPinCodeValid(),
                                 onClick = {
-                                    showUpdateLocationInformation.value = false
+                                    globalInstance.updateLocation = true
+                                    globalInstance.traceUpdateLocation =  FirebasePerformance.getInstance().newTrace("update_location_api")
+                                    globalInstance.traceUpdateLocation.start()
                                     updateLocationApi(viewModel)
+                                    showUpdateLocationInformation.value = false
                                 }) {
                                 Text(
                                     text = "Update Information",
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colors.secondary,
                                     style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
-                                    modifier = Modifier.padding(vertical = 8.dp))
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
                             }
                         }
                     }
                 }
             }
-            CustomDialog(
-                openDialogCustom = showIntroWarning,
-                label = "Intro Plan Availability Warning",
-                onDismiss = {}) {
+            CustomDialog(openDialogCustom = showIntroWarning, label = "Intro Plan Availability Warning", onDismiss = {}) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
-                    elevation = 28.dp) {
+                    elevation = 28.dp,
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(if (landscape) 0.8f else 0.9f)
                             .background(MaterialTheme.colors.surface),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
                             text = stringResource(id = R.string.intro_warning),
                             color = MaterialTheme.colors.secondary,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 20.dp, start = 15.dp, end = 15.dp),
-                            style = subtitle.copy(fontWeight = FontWeight.Normal))
+                            style = subtitle.copy(fontWeight = FontWeight.Normal)
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                //.background(MaterialTheme.colors.primary.copy(alpha = 0.5f))
                                 .padding(top = 15.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly) {
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Button(
                                 modifier = Modifier
                                     .padding(bottom = 20.dp),
                                 shape = RoundedCornerShape(3.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = light_grey),
+                                    backgroundColor = light_grey
+                                ),
                                 onClick = {
                                     viewModel.updateShowIntroWarning(false)
                                 }) {
@@ -872,17 +930,114 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 15.dp)
-                    .background(Color.Transparent)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                for(i in pricingData.indices) {
-                    NavButton(viewModel, text = pricingData[i].name, id =  pricingData[i].id.toLongOrNull(), tabSelected = tabSelected)
+            CustomDialog(openDialogCustom = showAdvWarning, label = "Advanced Plan Availability Warning", onDismiss = {}) {
+                Card(
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = 28.dp,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(if (landscape) 0.8f else 0.9f)
+                            .background(MaterialTheme.colors.surface),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.adv_warning),
+                            color = MaterialTheme.colors.secondary,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 20.dp, start = 15.dp, end = 15.dp),
+                            style = subtitle.copy(fontWeight = FontWeight.Normal)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                //.background(MaterialTheme.colors.primary.copy(alpha = 0.5f))
+                                .padding(top = 15.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                modifier = Modifier
+                                    .padding(bottom = 20.dp),
+                                shape = RoundedCornerShape(3.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = light_grey
+                                ),
+                                onClick = {
+                                    viewModel.updateShowAdvWarning(false)
+                                }) {
+                                Text(
+                                    text = "OK",
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colors.secondary,
+                                    style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
+            CustomDialog(openDialogCustom = showSuperWarning, label = "Super Plan Availability Warning", onDismiss = {}) {
+                Card(
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = 28.dp,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(if (landscape) 0.8f else 0.9f)
+                            .background(MaterialTheme.colors.surface),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.super_warning),
+                            color = MaterialTheme.colors.secondary,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 20.dp, start = 15.dp, end = 15.dp),
+                            style = subtitle.copy(fontWeight = FontWeight.Normal)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                //.background(MaterialTheme.colors.primary.copy(alpha = 0.5f))
+                                .padding(top = 15.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            //verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                modifier = Modifier
+                                    .padding(bottom = 20.dp),
+                                shape = RoundedCornerShape(3.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = light_grey
+                                ),
+                                onClick = {
+                                    viewModel.updateShowSuperWarning(false)
+                                }) {
+                                Text(
+                                    text = "OK",
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colors.secondary,
+                                    style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Row(modifier = Modifier.padding(vertical = 15.dp).background(Color.Transparent).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
+                for(i in pricingData.indices) {
+                    NavButton(viewModel, text = pricingData[i].name, id =  pricingData[i].id.toLongOrNull(), tabSelected = tabSelected)
+
+                }
+            }
+
+
+
 
             val pageCount = pricingData[tabSelected - 1].items.size
             pagerState = rememberPagerState(pageCount = { pageCount })
@@ -940,8 +1095,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                 HorizontalPager(state = pagerState!!) { page ->
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ){
+                        verticalArrangement = Arrangement.SpaceBetween){
                         val item = pricingData[tabSelected - 1].items[page]
                         PricingItem(
                             viewModel,
@@ -949,75 +1103,166 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                             item = item,
                             modifier = Modifier.padding(end = if (item.id.toInt() == pricingData[tabSelected - 1].items.size) 15.dp else 0.dp),
                         ) {
-                            /*var introTier = (globalInstance.accountData.currentPlan == pricingData[0].items[0].userPlan || globalInstance.accountData.currentPlan == pricingData[0].items[1].userPlan)
-                            var advancedTier = (globalInstance.accountData.currentPlan == pricingData[1].items[0].userPlan || globalInstance.accountData.currentPlan == pricingData[1].items[1].userPlan)
-                            var selectedAdvancedTier = (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code)
-                            var selectedIntroTier = (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code)*/
-                            introUltimate = globalInstance.accountData.currentPlan == pricingData[0].items[1].userPlan
-                            advancedUltimate = globalInstance.accountData.currentPlan == pricingData[1].items[1].userPlan
+                            val introTierUser = pricingData[0].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
+                            val advancedTierUser = pricingData[1].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
+                            val superTierUser =  pricingData[2].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
+
+                            introUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[0].items[1].userPlan.lowercase()
+                            advancedUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[1].items[1].userPlan.lowercase()
+                            superUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[2].items[1].userPlan.lowercase()
+                            superPremium = globalInstance.accountData.currentPlan.lowercase() == pricingData[2].items[0].userPlan.lowercase()
+
 
                             if(globalInstance.accountData.location.State != "" && globalInstance.accountData.location.State != null){
                                 //allowing users with vmId to purchase
                                 if (viewModel.paymentsAllowed || (globalInstance.accountData.vmId != "" && globalInstance.accountData.vmId != null)) {
                                     viewModel.selectedPlan = item.code
-                                    if (item.code != "TopUp") {
-                                        viewModel.selectedQuantity = 1
-                                    } else {
-                                        if (viewModel.selectedQuantity <= 0) {
-                                            viewModel.selectedQuantity = 1
-                                        }
-                                    }
-                                    if (viewModel.selectedPlan == "TopUp" && globalInstance.accountData.currentPlan == "Basic") {
-                                        activity.makeToast("You're only allowed to purchase Monthly plans!")
-                                        delayClose(viewModel)
-                                    } else if (((globalInstance.accountData.currentPlan == pricingData[0].items[0].userPlan || globalInstance.accountData.currentPlan == pricingData[0].items[1].userPlan)
-                                                && (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code))
-                                        || ((globalInstance.accountData.currentPlan == pricingData[1].items[0].userPlan || globalInstance.accountData.currentPlan == pricingData[1].items[1].userPlan)
-                                                && (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code))
-                                        || ((globalInstance.accountData.currentPlan == "Basic" && globalInstance.accountData.subscriptionStatus == "expired")
-                                                && ((globalInstance.accountData.expiredPlan == pricingData[0].items[0].userPlan && (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code))
-                                                || (globalInstance.accountData.expiredPlan == pricingData[0].items[1].userPlan && (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code))
-                                                || (globalInstance.accountData.expiredPlan == pricingData[1].items[0].userPlan && (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code))
-                                                || (globalInstance.accountData.expiredPlan == pricingData[1].items[1].userPlan && (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code))
-                                                || (globalInstance.accountData.expiredPlan == "" || globalInstance.accountData.expiredPlan == null)
-                                                ))
-                                    ) {
-                                        viewModel.subOpenLoadingDialogState?.invoke(false)
-                                        showRenewWarning.value = false
-                                        showPlanWarning.value = true
-                                    } else if (viewModel.selectedPlan == globalInstance.accountData.currentPlan
-                                        || ((introUltimate && (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code))
-                                            || (advancedUltimate && (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code))
-                                           )
-                                        ) {
-                                        viewModel.subOpenLoadingDialogState?.invoke(false)
-                                        showRenewWarning.value = true
-                                        showPlanWarning.value = true
-                                    } else {
-                                        globalInstance.paymentPlan = viewModel.selectedPlan
-                                        if((viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code)) {
-                                            if(viewModel.selectedPlan == pricingData[0].items[0].code) {
-                                                globalInstance.paymentPrice = pricingData[0].items[0].price.toDouble()
-                                            } else if(viewModel.selectedPlan == pricingData[0].items[1].code) {
-                                                globalInstance.paymentPrice = pricingData[0].items[1].price.toDouble()
-                                            }
-                                        } else if((viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code)) {
-                                            if(viewModel.selectedPlan == pricingData[1].items[0].code) {
-                                                globalInstance.paymentPrice = pricingData[1].items[0].price.toDouble()
-                                            } else if(viewModel.selectedPlan == pricingData[1].items[1].code) {
-                                                globalInstance.paymentPrice = pricingData[1].items[1].price.toDouble()
-                                            }
-                                        } else if(viewModel.selectedPlan == pricingData[0].items[2].code) {//TopUp plan
-                                            globalInstance.paymentPrice = (pricingData[0].items[2].price * viewModel.selectedQuantity).toDouble()
-                                        }
-                                        onPurcahsePlanClick(viewModel , activity)
+                                    val selectedIntroTier = pricingData[0].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
+                                    val selectedAdvancedTier = pricingData[1].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
+                                    val selectedSuperTier = pricingData[2].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
+                                    val selectedSuperPremium = (viewModel.selectedPlan == pricingData[2].items[0].code)
+                                    val selectedSuperUltimate = (viewModel.selectedPlan == pricingData[2].items[1].code)
 
+                                    val expiredIntro = pricingData[0].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
+                                    val expiredAdvanced = pricingData[1].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
+                                    val expiredSuper = pricingData[2].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
+                                    val expiredSuperPremium = (globalInstance.accountData.expiredPlan == pricingData[2].items[0].userPlan)
+                                    val expiredSuperUltimate = (globalInstance.accountData.expiredPlan == pricingData[2].items[1].userPlan)
+
+                                    if(selectedIntroTier && (!introTierUser || !expiredIntro) && globalInstance.remoteDisableSwitchToIntroPlans) {
+                                        viewModel.updateShowIntroWarning(true)
+                                        delayClose(viewModel)
+                                    } else if(selectedAdvancedTier && (!advancedTierUser || !expiredAdvanced) && globalInstance.remoteDisableSwitchToAdvPlans) {
+                                        viewModel.updateShowAdvWarning(true)
+                                        delayClose(viewModel)
+                                    } else if(selectedSuperTier && (!superTierUser || !expiredSuper) && globalInstance.remoteDisableSwitchToSuperPlans) {
+                                        viewModel.updateShowSuperWarning(true)
+                                        delayClose(viewModel)
+                                    } else {
+                                        if (item.code != "TopUp") {
+                                            viewModel.selectedQuantity = 1
+                                            /*if(!item.name.contains("Bundle")) {
+                                                viewModel.selectedQuantity = 1
+                                                viewModel.bundleSelected = false
+                                            }else {
+                                                viewModel.selectedQuantity = 3
+                                                viewModel.bundleSelected = true
+                                            }
+                                        } else {
+                                            if (viewModel.selectedQuantity <= 0) {
+                                                viewModel.selectedQuantity = 1
+                                            }
+                                            viewModel.bundleSelected = false*/
+                                        }
+
+                                        if (viewModel.selectedPlan == "TopUp" && globalInstance.accountData.currentPlan == "Basic") {
+                                            currentActivity.makeToast("You're only allowed to purchase Monthly plans!")
+                                            delayClose(viewModel)
+                                        } else if (
+                                            (viewModel.selectedPlan != "TopUp")
+                                            && ((introTierUser && !selectedIntroTier)
+                                                    || (advancedTierUser && !selectedAdvancedTier)
+                                                    || (superTierUser && !selectedSuperTier)
+                                                    || ((superPremium && selectedSuperUltimate) || (superUltimate && selectedSuperPremium))
+                                                    || ((globalInstance.accountData.currentPlan == "Basic" && globalInstance.accountData.subscriptionStatus == "expired")
+                                                    && ((expiredIntro && !selectedIntroTier) || (expiredAdvanced && !selectedAdvancedTier) || (expiredSuper && !selectedSuperTier)
+                                                    || ((expiredSuperPremium && selectedSuperUltimate) || (expiredSuperUltimate && selectedSuperPremium))
+                                                    || (globalInstance.accountData.expiredPlan == "" || globalInstance.accountData.expiredPlan == null)
+                                                    )
+                                                    )
+                                                    )
+                                        ) {
+                                            viewModel.subOpenLoadingDialogState?.invoke(false)
+                                            showRenewWarning.value = false
+                                            showPlanWarning.value = true
+                                        } else if (viewModel.selectedPlan?.lowercase() == globalInstance.accountData.currentPlan?.lowercase() || ((introUltimate && selectedIntroTier) || (advancedUltimate && selectedAdvancedTier))
+                                        ) {
+                                            viewModel.subOpenLoadingDialogState?.invoke(false)
+                                            showRenewWarning.value = true
+                                            showPlanWarning.value = true
+                                        } else {
+                                            globalInstance.paymentPlan = viewModel.selectedPlan
+
+                                            /*if(!viewModel.bundleSelected) {
+                                                globalInstance.paymentPlan = viewModel.selectedPlan
+                                            } else {
+                                                globalInstance.paymentPlan = item.name
+                                                //no coupons for bundle
+                                                viewModel.appliedCoupon = ""
+                                            }*/
+
+                                            if(selectedIntroTier) {
+                                                pricingData[0].items.any { item ->
+                                                    viewModel.selectedPlan == item.code && item.let {
+                                                        globalInstance.paymentPrice = it.price.toDouble()
+                                                        true
+                                                    }
+                                                }
+                                                /*if(viewModel.selectedPlan == pricingData[0].items[0].code) {
+                                                    globalInstance.paymentPrice = pricingData[0].items[0].price.toDouble()
+                                                } else if(viewModel.selectedPlan == pricingData[0].items[1].code) {
+                                                    globalInstance.paymentPrice = pricingData[0].items[1].price.toDouble()
+                                                }*/
+                                            } else if(selectedAdvancedTier) {
+                                                pricingData[1].items.any { item ->
+                                                    viewModel.selectedPlan == item.code && item.let {
+                                                        globalInstance.paymentPrice = it.price.toDouble()
+                                                        true
+                                                    }
+                                                }
+                                                //can be simplified if bundle had its own code
+                                                /*if(viewModel.selectedPlan == pricingData[1].items[0].code) {
+                                                    globalInstance.paymentPrice = pricingData[1].items[0].price.toDouble()
+                                                } else if(viewModel.selectedPlan == pricingData[1].items[1].code) {
+                                                    if(!viewModel.bundleSelected) {
+                                                        globalInstance.paymentPrice = pricingData[1].items[1].price.toDouble()
+                                                    } else {
+                                                        globalInstance.paymentPrice = pricingData[1].items[2].price.toDouble()
+                                                    }
+                                                }*/
+                                            } else if(selectedSuperTier) {
+                                                pricingData[2].items.any { item ->
+                                                    viewModel.selectedPlan == item.code && item.let {
+                                                        globalInstance.paymentPrice = it.price.toDouble()
+                                                        true
+                                                    }
+                                                }
+                                            } else if(item.name == "TopUp") {//TopUp plan
+                                                pricingData[0].items.any { item ->
+                                                    viewModel.selectedPlan == item.code && item.let {
+                                                        globalInstance.paymentPrice = (it.price * viewModel.selectedQuantity).toDouble()
+                                                        true
+                                                    }
+                                                }
+                                                /*if(viewModel.selectedPlan == pricingData[0].items[2].code) {
+                                                    globalInstance.paymentPrice = (pricingData[0].items[2].price * viewModel.selectedQuantity).toDouble()
+                                                } else {
+                                                    globalInstance.paymentPrice = (pricingData[0].items[3].price * viewModel.selectedQuantity).toDouble()
+                                                }*/
+                                            }
+                                            if(viewModel.saleDetails.active && (selectedAdvancedTier || selectedSuperTier)) {
+                                                viewModel.appliedCoupon = viewModel.saleDetails.coupon.uppercase()
+                                                /*if(!viewModel.bundleSelected){
+                                                    viewModel.appliedCoupon = viewModel.saleDetails.coupon.uppercase()
+                                                } else {
+                                                    viewModel.appliedCoupon = ""
+                                                }*/
+                                            }
+                                            val intent = Intent(activity, WebViewActivity::class.java)
+                                            intent.putExtra("url", "https://antcloud.co/mobilePricing?planName=${viewModel.selectedPlan}&quantity=${viewModel.selectedQuantity}&couponCode=${viewModel.appliedCoupon}&idToken=${globalInstance.accountData.token}")
+                                            intent.putExtra("page", "pricing")
+                                            activity.startActivity(intent)
+                                            viewModel.updateCouponState("")
+                                            delayClose(viewModel)
+                                        }
                                     }
                                 } else {
                                     //currentActivity.makeToast("Sorry! We're not accepting any new members. Please follow our social media handles for any updates.")
                                     showWaitList.value = true
                                 }
-                            } else {
+                            }
+
+                            else {
                                 viewModel.subOpenLoadingDialogState?.invoke(false)
                                 showUpdateLocationInformation.value = true
                             }
@@ -1050,15 +1295,25 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
     }
 }
 
+fun delayClose(viewModel: PricingViewModel) {
+    coroutineScope.launch {
+        delay(2000)
+        viewModel.subOpenLoadingDialogState?.invoke(false)
+        viewModel.appliedCoupon = ""
+        viewModel.selectedQuantity = 1
+        viewModel.selectedPlan = ""
+        viewModel.bundleSelected = false
+    }
+}
 
 
 fun onPurcahsePlanClick(viewModel: PricingViewModel, activity: NavActivity) {
-//    val intent = Intent(activity, WebViewActivity::class.java)
-//    intent.putExtra("url", "https://antcloud.co/mobilePricing?planName=${viewModel.selectedPlan}&quantity=${viewModel.selectedQuantity}&couponCode=${viewModel.appliedCoupon}&idToken=${globalInstance.accountData.token}")
-//    intent.putExtra("page", "pricing")
-//    activity.startActivity(intent)
-//    viewModel.updateCouponState("")
-//    delayClose(viewModel)
+    val intent = Intent(activity, WebViewActivity::class.java)
+    intent.putExtra("url", "https://antcloud.co/mobilePricing?planName=${viewModel.selectedPlan}&quantity=${viewModel.selectedQuantity}&couponCode=${viewModel.appliedCoupon}&idToken=${globalInstance.accountData.token}")
+    intent.putExtra("page", "pricing")
+    activity.startActivity(intent)
+    viewModel.updateCouponState("")
+    delayClose(viewModel)
 }
 
 
@@ -1369,9 +1624,16 @@ fun NavButton(viewModel: PricingViewModel, text: String, id: Long?, tabSelected:
         ),
         shape = RoundedCornerShape(5.dp),
         onClick = {
-            if(text == "Intro" && !GlobalData.getInstance().remoteShowIntroPlans && (globalInstance.accountData.currentPlan == "Basic" && (globalInstance.accountData.subscriptionStatus == "" || globalInstance.accountData.subscriptionStatus == null))) {
+            if(text == "Intro" && !globalInstance.remoteShowIntroPlans && (globalInstance.accountData.currentPlan == "Basic" && ((globalInstance.accountData.subscriptionStatus == "" || globalInstance.accountData.subscriptionStatus == null) || (globalInstance.accountData.subscriptionStatus == "expired" && !globalInstance.accountData.expiredPlan.contains("Gtx"))) || (globalInstance.accountData.subscriptionStatus == "cancelled" && !globalInstance.remoteIntroOldUsersAllowed))) {
                 viewModel.updateShowIntroWarning(true)
-            } else {
+            }
+            else if(text == "Advanced" && !globalInstance.remoteShowAdvPlans && (globalInstance.accountData.currentPlan == "Basic" && ((globalInstance.accountData.subscriptionStatus == "" || globalInstance.accountData.subscriptionStatus == null) || (globalInstance.accountData.subscriptionStatus == "expired" && (globalInstance.accountData.expiredPlan.contains("Gtx") || globalInstance.accountData.expiredPlan.contains("Sup")))) || (globalInstance.accountData.subscriptionStatus == "cancelled" && !globalInstance.remoteAdvOldUsersAllowed))) {
+                viewModel.updateShowAdvWarning(true)
+            }
+            else if(text == "Super" && !globalInstance.remoteShowSuperPlans && (globalInstance.accountData.currentPlan == "Basic" && ((globalInstance.accountData.subscriptionStatus == "" || globalInstance.accountData.subscriptionStatus == null) || (globalInstance.accountData.subscriptionStatus == "expired" && !globalInstance.accountData.expiredPlan.contains("Super"))) || (globalInstance.accountData.subscriptionStatus == "cancelled" && !globalInstance.remoteSuperOldUsersAllowed))) {
+                viewModel.updateShowSuperWarning(true)
+            }
+            else {
                 viewModel.updateTabState(id)
                 viewModel.updatePageState(0)
                 AnalyticsManager.pricingTabButton(text)
@@ -1422,17 +1684,7 @@ fun InputCoupon(
 }
 
 
-fun delayClose(viewModel: PricingViewModel) {
-    coroutineScope.launch {
-        delay(2000)
-        viewModel.subOpenLoadingDialogState?.invoke(false)
-        viewModel.appliedCoupon = ""
-        viewModel.selectedQuantity = 1
-        viewModel.selectedPlan = ""
-    }
 
-
-}
 
 fun createPricingOrderApi(viewModel: PricingViewModel) {
     val dataModel = PricingReq(

@@ -313,6 +313,9 @@
     <string name="plan_warning">Warning: Switching from Intro to Advanced Tier, or vice versa, means your data will not transfer to your new PC.\n\nBe cautious as all information will not be accessible once you migrate to a different PC.</string>
     <string name="renew_warning">Warning: Your current subscription period isn\'t finished yet. \n\nIf you purchase this plan, it will get activated once your current period finishes. \n\nFor more hours, we recommend a Top up plan.</string>
     <string name="intro_warning">Note: Sorry! The Intro plan slots are currently full. \n\nYou can purchase the Advanced plans.</string>
+    <string name="adv_warning">Note: Sorry! The Advanced plan slots are currently full. \n\nYou can purchase other plans.</string>
+    <string name="super_warning">Note: Sorry! The Super plan slots are currently full. \n\nYou can purchase other plans.</string>
+
     <string name="coupon_dialog_title">Have a Coupon code?</string>
     <string name="coupon_dialog_body">After submitting the coupon code, select your intended plan to purchase it with the applied coupon code.</string>
     <string name="checkout_plans_button">Buy A Plan Now</string>

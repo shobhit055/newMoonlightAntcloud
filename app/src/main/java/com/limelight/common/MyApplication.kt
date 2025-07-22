@@ -131,6 +131,37 @@ class MyApplication: Application() {
                     globalInstance.remoteDataTutorial += listOf(tutorialData)
                 }
             }
+            if(key.contains("disableSwitchToIntroPlans")) {
+                globalInstance.remoteDisableSwitchToIntroPlans = false
+                val disableSwitchToIntroPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteDisableSwitchToIntroPlans = disableSwitchToIntroPlans
+            }
+            if(key.contains("disableSwitchToAdvPlans")) {
+                globalInstance.remoteDisableSwitchToAdvPlans = false
+                val disableSwitchToAdvPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteDisableSwitchToAdvPlans = disableSwitchToAdvPlans
+            }
+            if(key.contains("disableSwitchToSuperPlans")) {
+                globalInstance.remoteDisableSwitchToSuperPlans = false
+                val disableSwitchToSuperPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteDisableSwitchToSuperPlans = disableSwitchToSuperPlans
+            }
+            if(key.contains("introOldUsersAllowed")) {
+                globalInstance.remoteIntroOldUsersAllowed = false
+                val introOldUsersAllowed: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteIntroOldUsersAllowed = introOldUsersAllowed
+            }
+            if(key.contains("advOldUsersAllowed")) {
+                globalInstance.remoteAdvOldUsersAllowed = false
+                val advOldUsersAllowed: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteAdvOldUsersAllowed = advOldUsersAllowed
+            }
+            if(key.contains("superOldUsersAllowed")) {
+                globalInstance.remoteSuperOldUsersAllowed = false
+                val superOldUsersAllowed: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteSuperOldUsersAllowed = superOldUsersAllowed
+            }
+
             if(key.contains("playVersion")) {
                 globalInstance.remotePlayVersion = 0.0
                 val play: Double = Gson().fromJson(dataJson, Double::class.java)
@@ -142,7 +173,16 @@ class MyApplication: Application() {
                 val showIntroPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
                 globalInstance.remoteShowIntroPlans = showIntroPlans
             }
-
+            if(key.contains("showAdvPlans")) {
+                globalInstance.remoteShowAdvPlans = false
+                val showAdvPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteShowAdvPlans = showAdvPlans
+            }
+            if(key.contains("showSuperPlans")) {
+                globalInstance.remoteShowSuperPlans = false
+                val showSuperPlans: Boolean = Gson().fromJson(dataJson, Boolean::class.java)
+                globalInstance.remoteShowSuperPlans = showSuperPlans
+            }
             if(key.contains("gamesMaintenance")) {
                 globalInstance.remoteGamesMaintenance = listOf()
                 val gamesMaintenance: Array<GamesMaintenance> = Gson().fromJson(dataJson, Array<GamesMaintenance>::class.java)

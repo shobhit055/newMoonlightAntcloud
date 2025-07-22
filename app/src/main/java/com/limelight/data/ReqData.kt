@@ -164,6 +164,14 @@ data class GemsHistoryData(val id: Int, val productName: String, val price: Int 
 
 data class ListModel(val gameName: String, val gameImage: Int)
 
+data class SalesDetails(
+    @SerializedName("title") var title: String = "",
+    @SerializedName("active") var active: Boolean = false,
+    @SerializedName("saleType") var saleType: String = "",
+    @SerializedName("discountAmount") var discountAmount: Int = 0,
+    @SerializedName("coupon") var coupon: String = ""
+)
+
 data class AppViewUiState(
     val pendingPairComputer: ComputerDetails? = null,
     val computerName: String? = null,

@@ -153,38 +153,6 @@
         android:scaleType="centerCrop"
         android:background="@drawable/ic_settings" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:visibility="gone"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <CheckBox
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:textColor="@color/white"
-            android:buttonTint="@color/white"
-            android:text="@string/title_enable_perf_overlay"
-            android:id="@+id/cbPerformanceStats"
-            tools:ignore="MissingConstraints"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-
-    <CheckBox
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cbPerformanceStats"
-        android:textColor="@color/white"
-        android:buttonTint="@color/white"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="5dp"
-        android:text="OnScreen Controller"
-        android:id="@+id/cbController"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
     <TextView

@@ -38,8 +38,21 @@ class GlobalData {
     var paymentPlan : String = ""
     var paymentPrice : Double = 0.0
     var remotePlayVersion : Double = 0.0
+
     var remoteShowIntroPlans : Boolean = false
+    var remoteShowAdvPlans : Boolean = false
+    var remoteShowSuperPlans : Boolean = false
+
+    var remoteDisableSwitchToIntroPlans: Boolean = false
+    var remoteDisableSwitchToAdvPlans: Boolean = false
+    var remoteDisableSwitchToSuperPlans: Boolean = false
+
+    var remoteIntroOldUsersAllowed: Boolean = false
+    var remoteAdvOldUsersAllowed: Boolean = false
+    var remoteSuperOldUsersAllowed: Boolean = false
+
     var remoteAppMessage : List<AppMessage> = listOf()
+    var remoteGamesMaintenance: List<GamesMaintenance> = listOf()
     var imageLoading : Boolean = false
     var paymentStatus : Boolean = false
     var paymentPcTimerMins : Int = 1
@@ -49,7 +62,6 @@ class GlobalData {
     var gemsHistoryFlag : Int = 0
     var vmIP : String = ""
     lateinit  var socket: Socket
-    var remoteGamesMaintenance: List<GamesMaintenance> = listOf()
 
     var checkUserApi: Boolean = false
     var appStartToken: Boolean = false

@@ -10,16 +10,19 @@ import androidx.lifecycle.viewModelScope
 import com.limelight.logic.pricing.CreatePricingOrderLogic
 import com.limelight.common.Resource
 import com.limelight.data.AddToWaitListState
+import com.limelight.data.CheckForSaleState
 import com.limelight.data.CheckPaymentState
 import com.limelight.data.CreatePricingOrderState
 import com.limelight.data.ForgotPasswordReq
 import com.limelight.data.PricingGroups
 import com.limelight.data.PricingReq
+import com.limelight.data.SalesDetails
 import com.limelight.data.UpdateLocationReq
 import com.limelight.data.UpdateLocationState
 import com.limelight.data.VerifyCouponCodeState
 import com.limelight.logic.pricing.AddToWaitListLogic
 import com.limelight.logic.pricing.CheckPaymentAllowLogic
+import com.limelight.logic.pricing.CheckSaleLogic
 import com.limelight.logic.pricing.UpdateLocationLogic
 import com.limelight.logic.pricing.VerifyCouponCodeLogic
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +45,7 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
                                            private val checkPaymentAllowedLogic : CheckPaymentAllowLogic,
                                            private val updateLocationLogic: UpdateLocationLogic,
                                            private val addToWaitListLogic : AddToWaitListLogic,
+                                           private val checkSaleLogic : CheckSaleLogic,
                                            @ApplicationContext val context: Context): ViewModel() {
 
     private var job: Job? = null
@@ -55,6 +59,9 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     val updateLocationState: State<UpdateLocationState> = _updateLocationState
     private val _addToWaitListState = mutableStateOf(AddToWaitListState())
     val addToWaitListState: State<AddToWaitListState> = _addToWaitListState
+
+    private val _checkForSaleState = mutableStateOf(CheckForSaleState())
+    val checkForSaleState: State<CheckForSaleState> = _checkForSaleState
     var pricingData: List<PricingGroups>? = null
     var idToken: String = ""
     var subIdToken: ((String) -> Unit)? = null
@@ -69,6 +76,7 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     var showCouponError: Boolean = false
     var subShowCouponError: ((Boolean) -> Unit)? = null
     var selectedPlan: String = ""
+    var bundleSelected: Boolean = false
     var selectedQuantity: Int = 1
     var appliedCoupon: String = ""
     var messageState: Boolean = false
@@ -85,6 +93,14 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     var subShowWaitList: ((Boolean) -> Unit)? = null
     var showIntroWarning: Boolean = false
     var subShowIntroWarning: ((Boolean) -> Unit)? = null
+    var showAdvWarning: Boolean = false
+    var subShowAdvWarning: ((Boolean) -> Unit)? = null
+
+    var showSuperWarning: Boolean = false
+    var subShowSuperWarning: ((Boolean) -> Unit)? = null
+    var saleDetails : SalesDetails = SalesDetails()
+    var subSaleDetails: ((SalesDetails) -> Unit)? = null
+
 
     fun initializePricingState(data: List<PricingGroups>) {
         pricingData = data
@@ -152,6 +168,19 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     fun updateShowIntroWarning(res: Boolean) {
         showIntroWarning = res
         subShowIntroWarning?.invoke(res)
+    }
+    fun updateShowAdvWarning(res: Boolean) {
+        showAdvWarning = res
+        subShowAdvWarning?.invoke(res)
+    }
+
+    fun updateShowSuperWarning(res: Boolean) {
+        showSuperWarning = res
+        subShowSuperWarning?.invoke(res)
+    }
+    fun updateSalesDetails(res: SalesDetails) {
+        saleDetails = res
+        subSaleDetails?.invoke(res)
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -226,6 +255,33 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
                     is Resource.Error -> {
                         delay(200)
                         _checkPaymentAllowedState.value = CheckPaymentState(
+                            error = result.message!!.toString(),
+                            success = 0,
+                            errorCode = result.errorCode!!,
+                            isLoading = false)
+                    }
+                }
+            }.launchIn(viewModelScope)
+        }
+    }
+
+    fun getCheckForSale() {
+        job?.cancel()
+        job = viewModelScope.launch(Dispatchers.IO) {
+            checkSaleLogic().onEach { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _checkForSaleState.value = CheckForSaleState(isLoading = true)
+                    }
+                    is Resource.Success -> {
+                        _checkForSaleState.value = checkForSaleState.value.copy(
+                            message = result.data?.body()?.string(),
+                            isLoading = false,
+                            success = 1)
+                    }
+                    is Resource.Error -> {
+                        delay(200)
+                        _checkForSaleState.value = CheckForSaleState(
                             error = result.message!!.toString(),
                             success = 0,
                             errorCode = result.errorCode!!,

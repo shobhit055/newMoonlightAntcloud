@@ -115,6 +115,10 @@ interface ApiService {
     suspend fun checkPaymentAllowed(): Response<ResponseBody>
 
     @Headers("Content-Type: application/json")
+    @GET("sales")
+    fun checkForSale(): Response<ResponseBody>
+
+    @Headers("Content-Type: application/json")
     @GET("coupons/verify")
     suspend fun verifyCouponCode(@Header("Authorization") token : String, @Query("code") code: String) : Response<ResponseBody>
 

@@ -236,8 +236,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         keybord_icon =  findViewById(R.id.keybord_icon);
         loadingText =  findViewById(R.id.loadingText);
         errorBackBtn =  findViewById(R.id.error_backBtn);
-        cbPerformanceStats =  findViewById(R.id.cbPerformanceStats);
-        cbController =  findViewById(R.id.cbController);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         pref = new PreferenceManger(this);
         performanceOverlayView = findViewById(R.id.performanceOverlay);
@@ -262,21 +260,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Read the stream preferences
         prefConfig = PreferenceConfiguration.readPreferences(this);
         prefConfig.onscreenController = true;
-//        gamepadMask = ControllerHandler.getAttachedControllerMask(this);
-//        gamepadMask |= 1;
         tombstonePrefs = Game.this.getSharedPreferences("DecoderTombstone", 0);
         setPreferredOrientationForCurrentDisplay();
 
-        cbPerformanceStats.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                prefConfig.enablePerfOverlay = true;
-                performanceOverlayView.setVisibility(View.VISIBLE);
-
-            } else {
-                prefConfig.enablePerfOverlay = false;
-                performanceOverlayView.setVisibility(View.GONE);
-            }
-        });
         setting_icon.setOnClickListener(v -> {
             if(dialog!=null && dialog.isShowing())
                 dialog.dismiss();
@@ -288,17 +274,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             toggleKeyboard();
         });
 
-        cbController.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                virtualController = new VirtualController(controllerHandler, (FrameLayout)streamView.getParent(), this);
-                virtualController.refreshLayout();
-                virtualController.show();
-            } else {
-                virtualController.hide();
-            }
-        });
 
-        Log.i("test" , "testing" + prefConfig.width+ prefConfig.height + "fps" + prefConfig.fps + "bitrate "  +prefConfig.bitrate);
         if (prefConfig.stretchVideo || shouldIgnoreInsetsForResolution(prefConfig.width, prefConfig.height)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;

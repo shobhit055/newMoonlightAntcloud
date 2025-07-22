@@ -61,6 +61,7 @@ interface AuthRepositoryInterface {
     // Pricing  Api ....
     suspend fun createPricingOrder(@Header("Authorization") token : String, @Body body: PricingReq): Response<PricingRespData>
     suspend fun checkPaymentAllowed(): Response<ResponseBody>
+    suspend fun checkForSale(): Response<ResponseBody>
     suspend fun verifyCouponCode(@Header("Authorization") token : String, @Query("code") code: String) : Response<ResponseBody>
     suspend fun addToWaitList(@Header("Authorization") token : String, @Body body: ForgotPasswordReq): Response<ResponseBody>
 
