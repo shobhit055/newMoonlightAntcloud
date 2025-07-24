@@ -30,89 +30,88 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
-import com.limelight.R
-import com.limelight.components.Play
-import com.limelight.common.DrawerScreens
-import com.limelight.components.VerticalGrid
-import com.limelight.components.makeToast
-import com.limelight.data.Game
-import com.limelight.viewmodel.UserViewModel
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.TextButton
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
-import androidx.core.content.res.ResourcesCompat
 import com.google.firebase.Firebase
 import com.google.firebase.inappmessaging.inAppMessaging
 import com.google.firebase.perf.FirebasePerformance
-
-import com.limelight.components.CustomDialog
-import com.limelight.common.GlobalData
-import com.limelight.components.signOut
-import com.limelight.theme.subtitle
+import com.limelight.R
 import com.limelight.activity.NavActivity
 import com.limelight.common.AnalyticsManager
 import com.limelight.common.AppUtils.Companion.saveRefreshTokenData
+import com.limelight.common.DrawerScreens
+import com.limelight.common.GlobalData
+import com.limelight.components.CustomDialog
+import com.limelight.components.Play
+import com.limelight.components.VerticalGrid
+import com.limelight.components.makeToast
+import com.limelight.components.signOut
+import com.limelight.data.Game
 import com.limelight.data.PreferenceManger
 import com.limelight.screen.price.globalInstance
 import com.limelight.theme.dark_grey
 import com.limelight.theme.heading
 import com.limelight.theme.mainTitle
 import com.limelight.theme.primaryGreen
+import com.limelight.theme.subtitle
 import com.limelight.ui.AppView
+import com.limelight.viewmodel.UserViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -279,7 +278,7 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
     val pref = PreferenceManger(currentAct)
     showUpdateDialog.value = (currentAppVersion < globalInstance.androidData.playVersion)
 
-    val showCard: @Composable (Int, Int,  Unit, Int, Boolean) -> Unit = { imageRes: Int, textRes: Int, clickRes: Unit, buttonTextRes: Int, landscape: Boolean ->
+    val showCard: @Composable (Int, Int,  String, Int, Boolean) -> Unit = { imageRes: Int, textRes: Int, value: String, buttonTextRes: Int, landscape: Boolean ->
         Spacer(modifier = Modifier.size(15.dp))
         androidx.compose.material3.Card(
             modifier = if (landscape) Modifier.padding(10.dp) else Modifier.padding(
@@ -338,13 +337,17 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
                         containerColor = androidx.compose.material.MaterialTheme.colors.primary
                     ),
                     onClick = {
-                        clickRes
-                    }
-                ) {
-                    androidx.compose.material.Text(
-                        text = stringResource(id = buttonTextRes),
-                        color = androidx.compose.material.MaterialTheme.colors.secondary
-                    )
+                        if(value=="pricing")
+                            navigate(DrawerScreens.Pricing.route)
+                        else
+                            navigate(DrawerScreens.Report.route)
+                    }) {
+                        androidx.compose.material.Text(
+                            text = stringResource(id = buttonTextRes),
+                            color = androidx.compose.material.MaterialTheme.colors.secondary,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center)
+
                 }
             }
         }
@@ -567,11 +570,11 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
                 daysLeft = -1
                 daysLeftP = 0.0
 
-                showCard(R.drawable.onhold_banner, R.string.plan_hold_text, navigate(DrawerScreens.Report.route), R.string.plan_hold_button, landscape)
+                showCard(R.drawable.onhold_banner, R.string.plan_hold_text, "report", R.string.plan_hold_button, landscape)
             }
         }
         else {
-            showCard(R.drawable.basic_banner, R.string.basic_banner_text,   navigate(DrawerScreens.Pricing.route) , R.string.checkout_plans_button, landscape)
+            showCard(R.drawable.basic_banner, R.string.basic_banner_text,   "pricing" , R.string.checkout_plans_button, landscape)
         }
     }
 
@@ -975,7 +978,7 @@ fun GameTile(game: Game, modifier: Modifier, expand: Boolean = false, orientatio
             .wrapContentSize()
             .padding(vertical = 10.dp, horizontal = 7.dp)
             .clickable {
-                    AnalyticsManager.gameButton(game.gameId)
+                AnalyticsManager.gameButton(game.gameId)
                 onClick()
             }) {
         globalInstance.imageLoading = true

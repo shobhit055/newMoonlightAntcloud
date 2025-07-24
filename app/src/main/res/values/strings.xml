@@ -310,26 +310,20 @@
     <string name="plan_update_location_note">For invoicing purposes, we need your accurate location.</string>
     <string name="plan_update_location">Please update your location</string>
     <string name="join_waitList">Sorry! We\'re not accepting any new members. Please follow our social media handles for any updates.</string>
-    <string name="plan_warning">Warning: Switching from Intro to Advanced Tier, or vice versa, means your data will not transfer to your new PC.\n\nBe cautious as all information will not be accessible once you migrate to a different PC.</string>
+    <string name="plan_warning">Warning: Purchasing this plan means your data will not transfer to your new PC.\n\nBe cautious as all information will not be accessible once you migrate to a different PC.</string>
     <string name="renew_warning">Warning: Your current subscription period isn\'t finished yet. \n\nIf you purchase this plan, it will get activated once your current period finishes. \n\nFor more hours, we recommend a Top up plan.</string>
     <string name="intro_warning">Note: Sorry! The Intro plan slots are currently full. \n\nYou can purchase the Advanced plans.</string>
-    <string name="adv_warning">Note: Sorry! The Advanced plan slots are currently full. \n\nYou can purchase other plans.</string>
-    <string name="super_warning">Note: Sorry! The Super plan slots are currently full. \n\nYou can purchase other plans.</string>
-
     <string name="coupon_dialog_title">Have a Coupon code?</string>
     <string name="coupon_dialog_body">After submitting the coupon code, select your intended plan to purchase it with the applied coupon code.</string>
     <string name="checkout_plans_button">Buy A Plan Now</string>
-    
     <string name="vm_connection_issue_title">There was an issue starting your PC.\n kindly try the following points to troubleshoot
     your issue </string>
 <!--    <string name="vm_connection_issue_msg1">Please refresh your page, wait for 3-4 mins &amp; try again. Your PC will be reset in that time</string>-->
 <!--    <string name="vm_connection_issue_msg2">Kindly ensure that you are not connected to any VPN services</string>-->
 <!--    <string name="vm_connection_issue_msg3">if the above two point did not help click below for raising a support request</string>-->
     <string name="vm_connection_issue_msg">"• Please refresh your page, wait for 3-4 mins &amp; try again. Your PC will be reset in that time.\n\n• Kindly ensure that you are not connected to any VPN services.\n\n• If the above two points did not help, click below for raising a support request."</string>
-
     <string name ="contact_support">Contact Support</string>
     <string name ="goback">Go Back</string>
-
     <string name ="one_min_issue_msg">You seem to be unable to start a video connection with the PC. Please check your internet connection once and try again.</string>
     <string name="plan">Plan</string>
     <string name="plan_hold_text">Your payment is on hold!</string>

@@ -101,7 +101,6 @@ import com.limelight.data.UpdatePhoneReq
 import com.limelight.data.UpdateResolutionReq
 import com.limelight.screen.auth.LoginComplete
 import com.limelight.viewmodel.UserViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.perf.FirebasePerformance
 import com.limelight.activity.NavActivity
 import com.limelight.common.AnalyticsManager
@@ -132,7 +131,6 @@ fun accountNav(
     navigate: ((String) -> Unit)) {
     return navGraph.composable(DrawerScreens.Account.route) {
         val viewModel: UserViewModel = hiltViewModel()
-        val systemUiController = rememberSystemUiController()
         val bottomSheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden, animationSpec = tween(
                 durationMillis = 200, delayMillis = 0, easing = FastOutLinearInEasing))
@@ -175,10 +173,7 @@ fun accountNav(
                 AccountScreen(activity = activity, viewModel = viewModel, navigate = navigate, toggle)
                 BackHandler(enabled = bottomSheetState.isVisible) {
                     coroutineScope.launch {
-
                         bottomSheetState.hide()
-
-
                     }
                 }
             }

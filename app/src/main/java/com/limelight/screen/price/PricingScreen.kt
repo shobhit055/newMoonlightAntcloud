@@ -501,7 +501,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                 }
             }
         }
-        Column(modifier = Modifier.fillMaxWidth().verticalScroll(state = rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.fillMaxWidth()/*.verticalScroll(state = rememberScrollState())*/, horizontalAlignment = Alignment.CenterHorizontally) {
             CustomDialog(openDialogCustom = showCoupon, label = "PG", onDismiss = {
                 if (checkingCoupon.value) {
                     checkingCoupon.value = false
@@ -762,9 +762,10 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     text = "Join WaitList",
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colors.secondary,
-                                    style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
+                                    style = MaterialTheme.typography.button.copy(fontSize = 14.sp),
+                                    modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
+                                    textAlign = TextAlign.Center)
+
                             }
                             Spacer(Modifier.weight(0.06f))
                             Button(
@@ -782,9 +783,10 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     text = "Go Back",
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colors.secondary,
-                                    style = MaterialTheme.typography.button.copy(fontSize = 16.sp),
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
+                                    style = MaterialTheme.typography.button.copy(fontSize = 14.sp),
+                                    modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth(),
+                                    textAlign = TextAlign.Center)
+
                             }
                             Spacer(Modifier.weight(0.07f))
                         }
@@ -930,7 +932,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                     }
                 }
             }
-            CustomDialog(openDialogCustom = showAdvWarning, label = "Advanced Plan Availability Warning", onDismiss = {}) {
+           /* CustomDialog(openDialogCustom = showAdvWarning, label = "Advanced Plan Availability Warning", onDismiss = {}) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
                     elevation = 28.dp,
@@ -1027,7 +1029,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                         }
                     }
                 }
-            }
+            }*/
             Row(modifier = Modifier.padding(vertical = 15.dp).background(Color.Transparent).fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
                 for(i in pricingData.indices) {
@@ -1095,7 +1097,8 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                 HorizontalPager(state = pagerState!!) { page ->
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceBetween){
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ){
                         val item = pricingData[tabSelected - 1].items[page]
                         PricingItem(
                             viewModel,
@@ -1105,13 +1108,11 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                         ) {
                             val introTierUser = pricingData[0].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
                             val advancedTierUser = pricingData[1].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
-                            val superTierUser =  pricingData[2].items.any { item -> globalInstance.accountData.currentPlan.lowercase() == item.userPlan?.lowercase() }
-
+                            /*var selectedAdvancedTier = (viewModel.selectedPlan == pricingData[1].items[0].code || viewModel.selectedPlan == pricingData[1].items[1].code)
+                            var selectedIntroTier = (viewModel.selectedPlan == pricingData[0].items[0].code || viewModel.selectedPlan == pricingData[0].items[1].code)*/
                             introUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[0].items[1].userPlan.lowercase()
                             advancedUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[1].items[1].userPlan.lowercase()
-                            superUltimate = globalInstance.accountData.currentPlan.lowercase() == pricingData[2].items[1].userPlan.lowercase()
-                            superPremium = globalInstance.accountData.currentPlan.lowercase() == pricingData[2].items[0].userPlan.lowercase()
-
+                            val superPlanUser =  pricingData[1].items.any { item -> item.name == "Super" && item.let{ globalInstance.accountData.currentPlan.lowercase() == item.userPlan.lowercase()}}
 
                             if(globalInstance.accountData.location.State != "" && globalInstance.accountData.location.State != null){
                                 //allowing users with vmId to purchase
@@ -1119,24 +1120,10 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     viewModel.selectedPlan = item.code
                                     val selectedIntroTier = pricingData[0].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
                                     val selectedAdvancedTier = pricingData[1].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
-                                    val selectedSuperTier = pricingData[2].items.any { item -> viewModel.selectedPlan == item.code && item.code != "TopUp" }
-                                    val selectedSuperPremium = (viewModel.selectedPlan == pricingData[2].items[0].code)
-                                    val selectedSuperUltimate = (viewModel.selectedPlan == pricingData[2].items[1].code)
+                                    val selectedSuperPlan = pricingData[1].items.any { item -> item.name == "Super" && viewModel.selectedPlan == item.code }
 
-                                    val expiredIntro = pricingData[0].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
-                                    val expiredAdvanced = pricingData[1].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
-                                    val expiredSuper = pricingData[2].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
-                                    val expiredSuperPremium = (globalInstance.accountData.expiredPlan == pricingData[2].items[0].userPlan)
-                                    val expiredSuperUltimate = (globalInstance.accountData.expiredPlan == pricingData[2].items[1].userPlan)
-
-                                    if(selectedIntroTier && (!introTierUser || !expiredIntro) && globalInstance.remoteDisableSwitchToIntroPlans) {
+                                    if(selectedIntroTier && advancedTierUser && globalInstance.remoteDisableSwitchToIntroPlans) {
                                         viewModel.updateShowIntroWarning(true)
-                                        delayClose(viewModel)
-                                    } else if(selectedAdvancedTier && (!advancedTierUser || !expiredAdvanced) && globalInstance.remoteDisableSwitchToAdvPlans) {
-                                        viewModel.updateShowAdvWarning(true)
-                                        delayClose(viewModel)
-                                    } else if(selectedSuperTier && (!superTierUser || !expiredSuper) && globalInstance.remoteDisableSwitchToSuperPlans) {
-                                        viewModel.updateShowSuperWarning(true)
                                         delayClose(viewModel)
                                     } else {
                                         if (item.code != "TopUp") {
@@ -1155,27 +1142,26 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                             viewModel.bundleSelected = false*/
                                         }
 
+                                        val expiredIntro = pricingData[0].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
+                                        val expiredAdvanced = pricingData[1].items.any {item -> globalInstance.accountData.expiredPlan == item.userPlan }
+
                                         if (viewModel.selectedPlan == "TopUp" && globalInstance.accountData.currentPlan == "Basic") {
                                             currentActivity.makeToast("You're only allowed to purchase Monthly plans!")
                                             delayClose(viewModel)
                                         } else if (
-                                            (viewModel.selectedPlan != "TopUp")
-                                            && ((introTierUser && !selectedIntroTier)
-                                                    || (advancedTierUser && !selectedAdvancedTier)
-                                                    || (superTierUser && !selectedSuperTier)
-                                                    || ((superPremium && selectedSuperUltimate) || (superUltimate && selectedSuperPremium))
+                                            ((introTierUser && selectedAdvancedTier)
+                                                    || (advancedTierUser && selectedIntroTier)
                                                     || ((globalInstance.accountData.currentPlan == "Basic" && globalInstance.accountData.subscriptionStatus == "expired")
-                                                    && ((expiredIntro && !selectedIntroTier) || (expiredAdvanced && !selectedAdvancedTier) || (expiredSuper && !selectedSuperTier)
-                                                    || ((expiredSuperPremium && selectedSuperUltimate) || (expiredSuperUltimate && selectedSuperPremium))
+                                                    && ((expiredIntro && selectedAdvancedTier) || (expiredAdvanced && selectedIntroTier)
                                                     || (globalInstance.accountData.expiredPlan == "" || globalInstance.accountData.expiredPlan == null)
                                                     )
                                                     )
-                                                    )
+                                                    ) || ((!superPlanUser && selectedSuperPlan) || (superPlanUser && !selectedSuperPlan))
                                         ) {
                                             viewModel.subOpenLoadingDialogState?.invoke(false)
                                             showRenewWarning.value = false
                                             showPlanWarning.value = true
-                                        } else if (viewModel.selectedPlan?.lowercase() == globalInstance.accountData.currentPlan?.lowercase() || ((introUltimate && selectedIntroTier) || (advancedUltimate && selectedAdvancedTier))
+                                        } else if (viewModel.selectedPlan == globalInstance.accountData.currentPlan || ((introUltimate && selectedIntroTier) || (advancedUltimate && selectedAdvancedTier))
                                         ) {
                                             viewModel.subOpenLoadingDialogState?.invoke(false)
                                             showRenewWarning.value = true
@@ -1220,13 +1206,6 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                                         globalInstance.paymentPrice = pricingData[1].items[2].price.toDouble()
                                                     }
                                                 }*/
-                                            } else if(selectedSuperTier) {
-                                                pricingData[2].items.any { item ->
-                                                    viewModel.selectedPlan == item.code && item.let {
-                                                        globalInstance.paymentPrice = it.price.toDouble()
-                                                        true
-                                                    }
-                                                }
                                             } else if(item.name == "TopUp") {//TopUp plan
                                                 pricingData[0].items.any { item ->
                                                     viewModel.selectedPlan == item.code && item.let {
@@ -1240,7 +1219,7 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                                     globalInstance.paymentPrice = (pricingData[0].items[3].price * viewModel.selectedQuantity).toDouble()
                                                 }*/
                                             }
-                                            if(viewModel.saleDetails.active && (selectedAdvancedTier || selectedSuperTier)) {
+                                            if(viewModel.saleDetails.active && selectedAdvancedTier) {
                                                 viewModel.appliedCoupon = viewModel.saleDetails.coupon.uppercase()
                                                 /*if(!viewModel.bundleSelected){
                                                     viewModel.appliedCoupon = viewModel.saleDetails.coupon.uppercase()
@@ -1248,21 +1227,15 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                                     viewModel.appliedCoupon = ""
                                                 }*/
                                             }
-                                            val intent = Intent(activity, WebViewActivity::class.java)
-                                            intent.putExtra("url", "https://antcloud.co/mobilePricing?planName=${viewModel.selectedPlan}&quantity=${viewModel.selectedQuantity}&couponCode=${viewModel.appliedCoupon}&idToken=${globalInstance.accountData.token}")
-                                            intent.putExtra("page", "pricing")
-                                            activity.startActivity(intent)
-                                            viewModel.updateCouponState("")
-                                            delayClose(viewModel)
+                                            onPurcahsePlanClick(viewModel,activity)
+
                                         }
                                     }
                                 } else {
                                     //currentActivity.makeToast("Sorry! We're not accepting any new members. Please follow our social media handles for any updates.")
                                     showWaitList.value = true
                                 }
-                            }
-
-                            else {
+                            } else {
                                 viewModel.subOpenLoadingDialogState?.invoke(false)
                                 showUpdateLocationInformation.value = true
                             }
@@ -1502,9 +1475,8 @@ fun PricingItemCard(
 
         Button(
             onClick = {
-                if(viewModel.paymentsAllowed || (globalInstance.accountData.vmId != "" && globalInstance.accountData.vmId != null)) {
+                if(viewModel.paymentsAllowed || (globalInstance.accountData.vmId != "" && globalInstance.accountData.vmId != null)){
                     viewModel.subOpenLoadingDialogState?.invoke(true)
-
                     globalInstance.purchasePlan = true
                     globalInstance.tracePurchasePlan =
                         FirebasePerformance.getInstance().newTrace("purchase_plan")

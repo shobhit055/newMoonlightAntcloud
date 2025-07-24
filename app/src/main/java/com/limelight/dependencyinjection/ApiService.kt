@@ -116,7 +116,7 @@ interface ApiService {
 
     @Headers("Content-Type: application/json")
     @GET("sales")
-    fun checkForSale(): Response<ResponseBody>
+    suspend fun checkForSale(): Response<ResponseBody>
 
     @Headers("Content-Type: application/json")
     @GET("coupons/verify")

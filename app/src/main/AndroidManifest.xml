@@ -115,6 +115,12 @@
         </activity>
 
         <activity
+            android:name=".activity.WebViewActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Antcloud_App">
+        </activity>
+        <activity
             android:name=".activity.LoginActivity"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Antcloud_App"

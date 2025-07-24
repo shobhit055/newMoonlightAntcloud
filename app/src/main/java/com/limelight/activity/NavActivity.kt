@@ -3,6 +3,7 @@ package com.limelight.activity
 
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -289,6 +290,16 @@ class NavActivity : ComponentActivity() {
         super.onRestart()
         if(globalInstance.openSupportScreen)
             resumedFlag.value = true
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if(intent.hasExtra("route")){
+            navigationRoute = navigationRoutes(intent.getStringExtra("route").toString())
+        }
+        if(intent.hasExtra("gameId")) {
+            gameId = intent.getStringExtra("gameId").toString()
+        }
+        finishLoading()
     }
 }
 

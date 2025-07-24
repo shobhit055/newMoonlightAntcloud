@@ -27,9 +27,9 @@ android {
         jvmTarget = "11"
     }
 
-    firebaseCrashlytics {
-        mappingFileUploadEnabled false
-    }
+//    firebaseCrashlytics {
+//        mappingFileUploadEnabled false
+//    }
 
     flavorDimensions.add("root")
     buildFeatures {

@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.util.DisplayMetrics
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -1040,7 +1041,7 @@ fun EnterOTP(activity : SignupActivity, viewModel: AuthenticateViewModel, landsc
                 modifier = Modifier.clickable {
                     if(!resentOTPText) {
                         viewModel.updateResendText(true)
-                        val dataModel = PhoneOtpReq("+91${viewModel.phoneNumberState.trim()}", false)
+                        val dataModel = PhoneOtpReq("+91${viewModel.phoneNumberState.trim()}", true)
                         viewModel.getPostPhoneOtpData(dataModel, "signup")
                     }
                 })

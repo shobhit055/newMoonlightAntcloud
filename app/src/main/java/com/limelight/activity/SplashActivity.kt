@@ -89,7 +89,7 @@ class SplashActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
         FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = false
         FirebaseApp.initializeApp(applicationContext)
         Firebase.messaging.isAutoInitEnabled = true
@@ -113,6 +113,27 @@ class SplashActivity : ComponentActivity(){
         setContent {
             RegisterActivityResult()
             viewModel = hiltViewModel()
+            if (!updateAvailable) {
+                if (globalInstance.accountData.token != "") {
+                    LaunchedEffect(Unit) {
+                        globalInstance.appStartToken = true
+                        globalInstance.traceAppStartToken =
+                            FirebasePerformance.getInstance().newTrace("app_start_with_token")
+                        globalInstance.traceAppStartToken.start()
+
+                        globalInstance.checkUserApi = true
+                        globalInstance.traceCheckUserApi = FirebasePerformance.getInstance().newTrace("check_user_api")
+                        globalInstance.traceCheckUserApi.start()
+                        viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+                    }
+                } else {
+                    globalInstance.appStartWithoutToken = true
+                    globalInstance.traceAppStartWithoutToken =
+                        FirebasePerformance.getInstance().newTrace("app_start_without_token")
+                    globalInstance.traceAppStartWithoutToken.start()
+                    callMainScreen(activity, flag, apiResp)
+                }
+            }
             val checkUserState = viewModel.checkUserState.value
             val refreshTokenState = viewModel.refreshTokenState.value
             when (checkUserState.success) {
@@ -227,28 +248,7 @@ class SplashActivity : ComponentActivity(){
                 }
             }
 
-            if (!updateAvailable) {
-                if (globalInstance.accountData.token != "") {
 
-                    LaunchedEffect(Unit) {
-                        globalInstance.appStartToken = true
-                        globalInstance.traceAppStartToken =
-                            FirebasePerformance.getInstance().newTrace("app_start_with_token")
-                        globalInstance.traceAppStartToken.start()
-
-                        globalInstance.checkUserApi = true
-                        globalInstance.traceCheckUserApi = FirebasePerformance.getInstance().newTrace("check_user_api")
-                        globalInstance.traceCheckUserApi.start()
-                        viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
-                    }
-                } else {
-                    globalInstance.appStartWithoutToken = true
-                    globalInstance.traceAppStartWithoutToken =
-                        FirebasePerformance.getInstance().newTrace("app_start_without_token")
-                    globalInstance.traceAppStartWithoutToken.start()
-                    callMainScreen(activity, flag, apiResp)
-                }
-            }
         }
         if(::activityResultLauncher.isInitialized){
             appUpdateManager = AppUpdateManagerFactory.create(this)
