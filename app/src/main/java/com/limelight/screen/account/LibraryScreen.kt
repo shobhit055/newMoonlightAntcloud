@@ -131,7 +131,16 @@ fun libraryNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
     return navGraph.composable(DrawerScreens.Library.route) {
         currentAct =  activity
 
-        libraryScreen(navigate ,activity)
+        val userViewModel: UserViewModel = hiltViewModel()
+        LaunchedEffect(key1 = Unit) {
+            globalInstance.checkUserApi = true
+            globalInstance.traceCheckUserApi=  FirebasePerformance.getInstance().newTrace("check_user_api")
+            globalInstance.traceCheckUserApi.start()
+            userViewModel.getCheckUserData("JWT ${GlobalData.getInstance().accountData.token}")
+            Firebase.inAppMessaging.triggerEvent("in_app_msg")
+        }
+
+        libraryScreen(navigate ,activity,userViewModel)
 
         if(globalInstance.appStartToken){
             globalInstance.traceAppStartToken.stop()
@@ -155,7 +164,7 @@ fun libraryNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
+fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewModel: UserViewModel) {
     var timeLeft : Int
     var timeLeftP : Int
     var timeLeftString : String
@@ -163,15 +172,8 @@ fun libraryScreen(navigate: ((String) -> Unit) , activity: NavActivity) {
     var daysLeft : Long
     var imageHeight = (LocalConfiguration.current.screenWidthDp / 1.5)
     var calledRefresh = false
-    val userViewModel: UserViewModel = hiltViewModel()
 
-    LaunchedEffect(key1 = Unit) {
-        globalInstance.checkUserApi = true
-        globalInstance.traceCheckUserApi=  FirebasePerformance.getInstance().newTrace("check_user_api")
-        globalInstance.traceCheckUserApi.start()
-        userViewModel.getCheckUserData("JWT ${GlobalData.getInstance().accountData.token}")
-        Firebase.inAppMessaging.triggerEvent("in_app_msg")
-    }
+
     val checkUserState = userViewModel.checkUserState.value
     val refreshTokenState = userViewModel.refreshTokenState.value
 

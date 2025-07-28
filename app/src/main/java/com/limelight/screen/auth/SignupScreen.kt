@@ -215,6 +215,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
     when (postPhoneOtpState.success) {
         1 -> {
             LaunchedEffect(Unit) {
+                viewModel.updateTitleText("Enter OTP")
                 globalInstance.traceGenerateOTPApi.stop()
                 if (!viewModel.flag) {
                     viewModel.updateSignUpState("otp")
@@ -280,6 +281,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                     globalInstance.traceVerifyOTPBtn.stop()
                 }
                 viewModel.otpState = ""
+                viewModel.updateTitleText("Enter OTP")
                 viewModel.updateSignUpState("otp")
                 when (postPhoneVerifyState.errorCode) {
                     400 -> {
@@ -357,11 +359,18 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                             modifier = Modifier
                                 .pointerInput(Unit) {
                                     detectTapGestures { offset ->
-                                        val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                        val layoutResult =
+                                            textLayoutResult ?: return@detectTapGestures
                                         val position = layoutResult.getOffsetForPosition(offset)
-                                        annotatedString.getStringAnnotations(start = position, end = position).forEach { annotation ->
-                                            if(annotation.tag.isNotEmpty()) {
-                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                        annotatedString.getStringAnnotations(
+                                            start = position,
+                                            end = position
+                                        ).forEach { annotation ->
+                                            if (annotation.tag.isNotEmpty()) {
+                                                val intent = Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    Uri.parse(annotation.item)
+                                                )
                                                 currentActivity.startActivity(intent)
                                             }
                                         }
@@ -428,11 +437,21 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
             }
         }
     }
+    var textTitle by remember {
+        mutableStateOf(viewModel.titleText)
+    }
+
+    viewModel.subTitleText = {
+        textTitle = it
+    }
 
     if(!landscape) {
+        
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         Column(
-            modifier = Modifier.padding().fillMaxSize()
+            modifier = Modifier
+                .padding()
+                .fillMaxSize()
                 .background(brush = Brush.horizontalGradient(colors = gradientColors)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -519,7 +538,9 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                 verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    modifier = Modifier.wrapContentWidth().padding(top = 20.dp),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(top = 20.dp),
                     painter = painterResource(id = R.drawable.ant_cloud_white_icon),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds
@@ -527,7 +548,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
 
                 Text(
                     modifier = Modifier,
-                    text = "Create an Account",
+                    text = textTitle,
                     style = titleText.copy(fontSize = 16.sp)
                 )
 
@@ -553,7 +574,10 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
     else{
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         Column(
-            modifier = Modifier.padding().fillMaxSize().verticalScroll(rememberScrollState())
+            modifier = Modifier
+                .padding()
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .background(brush = Brush.horizontalGradient(colors = gradientColors)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -640,7 +664,9 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                 verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    modifier = Modifier.wrapContentWidth().padding(top = 10.dp),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(top = 10.dp),
                     painter = painterResource(id = R.drawable.ant_cloud_white_icon),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds
@@ -648,7 +674,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
 
                 Text(
                     modifier = Modifier,
-                    text = "Create an Account",
+                    text = textTitle,
                     style = titleText.copy(fontSize = 16.sp)
                 )
 
@@ -733,7 +759,9 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
     var isErrorDate by remember { mutableStateOf(false) }
     var isErrorPassword by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(top = 10.dp),
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
 
         val nameColor = if(isErrorName || signupError == SignupErrors.USERNAME_TAKEN) Red else White
@@ -749,7 +777,10 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
             textStyle = TextStyle(color = White, fontSize = 14.sp),
             cursorBrush = SolidColor(BlueGradient),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.fillMaxWidth(0.8f).border(1.dp, nameColor, RoundedCornerShape(16.dp)).padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .border(1.dp, nameColor, RoundedCornerShape(16.dp))
+                .padding(12.dp),
             singleLine = true,
             decorationBox = { innerTextField ->
                 Box(Modifier.padding(start = 8.dp)) {
@@ -763,9 +794,10 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
         val wrongNumber = (signupError == SignupErrors.NUMBER_TAKEN || signupError == SignupErrors.WRONG_NUMBER)
 
         val phoneColor  = if(isErrorPhone||wrongNumber) Red else White
-        Row(modifier = Modifier.fillMaxWidth(0.8f).
-                        border(1.dp, phoneColor, RoundedCornerShape(16.dp)).
-                padding(12.dp)) {
+        Row(modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .border(1.dp, phoneColor, RoundedCornerShape(16.dp))
+            .padding(12.dp)) {
             Text(modifier = Modifier.padding(start = 8.dp), text = "+91 ", color = White, fontSize = 14.sp)
             BasicTextField(
                 value = phoneNumber,
@@ -804,7 +836,10 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
             textStyle = TextStyle(color = White, fontSize = 14.sp ),
             cursorBrush = SolidColor(BlueGradient),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth(0.8f).border(1.dp, emailColor, RoundedCornerShape(16.dp)).padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .border(1.dp, emailColor, RoundedCornerShape(16.dp))
+                .padding(12.dp),
             singleLine = true,
             decorationBox = { innerTextField ->
                 Box(Modifier.padding(start = 8.dp)) {
@@ -816,7 +851,10 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
 
         Spacer(modifier = Modifier.height(10.dp))
 
-            Box(modifier = Modifier.fillMaxWidth(0.8f).border(1.dp, White, RoundedCornerShape(16.dp)).padding(8.dp)){
+            Box(modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .border(1.dp, White, RoundedCornerShape(16.dp))
+                .padding(8.dp)){
                 StateLocationDropDownMenu(state ,options = statesList, label = "State",viewModel)
             }
 
@@ -833,7 +871,10 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
             textStyle = TextStyle(color = White, fontSize = 14.sp ),
             cursorBrush = SolidColor(BlueGradient),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth(0.8f).border(1.dp, pinCodeColor, RoundedCornerShape(16.dp)).padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .border(1.dp, pinCodeColor, RoundedCornerShape(16.dp))
+                .padding(12.dp),
             singleLine = true,
             decorationBox = { innerTextField ->
                 Box(Modifier.padding(start = 8.dp)) {
@@ -896,7 +937,9 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
                 .fillMaxWidth(0.8f)
                 .border(
                     1.dp,
-                   passColor, RoundedCornerShape(16.dp)).padding(12.dp),
+                    passColor, RoundedCornerShape(16.dp)
+                )
+                .padding(12.dp),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             decorationBox = { innerTextField ->
                 Row(
@@ -957,7 +1000,9 @@ fun EnterInfo(emailMobileValue: String, activity: SignupActivity, showPassword: 
                     viewModel.getPostPhoneOtpData(dataModel, "signup")
                 }
             },
-            modifier = Modifier.fillMaxWidth(.8f).padding(top = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth(.8f)
+                .padding(top = 10.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = White) ) {
             Text(text = "Signup", style = subtitle.copy(color = Black))
@@ -1064,7 +1109,9 @@ fun EnterOTP(activity : SignupActivity, viewModel: AuthenticateViewModel, landsc
                 viewModel.getPostPhoneVerifyData(dataModel, "signup")
             }
         },
-            modifier = Modifier.fillMaxWidth(.8f).padding(top = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth(.8f)
+                .padding(top = 10.dp),
             contentPadding = PaddingValues(vertical = 12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             /*disabledContainerColor = Color.White)*/
@@ -1094,10 +1141,15 @@ fun LoginComplete(landscape: Boolean = false) {
             Image(
                 painter = rememberAsyncImagePainter(R.drawable.complete, imageLoader),
                 contentDescription = null,
-                modifier = Modifier.width(if(landscape) (LocalConfiguration.current.screenWidthDp / 1.5).dp
-                else (LocalConfiguration.current.screenWidthDp).dp)
-                    .height(if(landscape) (LocalConfiguration.current.screenWidthDp / 4.5).dp
-                    else (LocalConfiguration.current.screenWidthDp).dp)
+                modifier = Modifier
+                    .width(
+                        if (landscape) (LocalConfiguration.current.screenWidthDp / 1.5).dp
+                        else (LocalConfiguration.current.screenWidthDp).dp
+                    )
+                    .height(
+                        if (landscape) (LocalConfiguration.current.screenWidthDp / 4.5).dp
+                        else (LocalConfiguration.current.screenWidthDp).dp
+                    )
                 // .then(size)
                 ,
                 contentScale = ContentScale.Crop
@@ -1148,7 +1200,10 @@ fun StateLocationDropDownMenu(
                     text = newText
                     expanded = true
                 },
-                modifier = Modifier.fillMaxWidth().menuAnchor().padding(start = 12.dp, top = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+                    .padding(start = 12.dp, top = 4.dp),
                 textStyle = TextStyle(color = White, fontSize = 14.sp),
                 singleLine = true)
         }

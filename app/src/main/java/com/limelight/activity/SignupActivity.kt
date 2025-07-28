@@ -34,8 +34,10 @@ class SignupActivity : ComponentActivity() {
 
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
-        if(viewModel.signUpStateText=="otp")
+        if(viewModel.signUpStateText=="otp") {
             viewModel.updateSignUpState("email")
+            viewModel.updateTitleText("Create an Account")
+        }
         else {
             viewModel._checkUserInDBState.value =  ForgotState(success = -1)
             navigateSplashActivity(this@SignupActivity)

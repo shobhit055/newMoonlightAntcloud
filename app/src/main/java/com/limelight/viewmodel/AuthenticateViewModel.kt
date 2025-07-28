@@ -51,6 +51,11 @@ class AuthenticateViewModel @Inject constructor(private val loginLogic: LoginLog
                                                 private val forgotLogic: ForgotLogic?,
                                                 @ApplicationContext val context: Context): ViewModel() {
 
+
+
+    var titleText: String = "Create an Account"
+    var subTitleText: ((String) -> Unit)? = null
+
     var flag: Boolean = false
     var signUpStateText: String = "email"
     var subSignUpStateText: ((String) -> Unit)? = null
@@ -88,6 +93,11 @@ class AuthenticateViewModel @Inject constructor(private val loginLogic: LoginLog
     fun updateSignUpLoadingText(loadingText: String) {
         signupLoadingTextState = loadingText
         signupSubLoadingState?.invoke(loadingText)
+    }
+
+    fun updateTitleText(value: String) {
+        titleText = value
+        subTitleText?.invoke(value)
     }
 
     fun updateLoginLoadingText(loadingText: String) {
