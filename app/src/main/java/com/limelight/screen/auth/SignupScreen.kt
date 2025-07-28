@@ -1057,7 +1057,7 @@ fun EnterOTP(activity : SignupActivity, viewModel: AuthenticateViewModel, landsc
 
         Spacer(modifier = Modifier.size(20.dp))
         var text by remember { mutableStateOf("") }
-        var totalTime: Int = 60
+        val totalTime: Int = 60
         if(resentOTPText){
             var timeRemaining by remember { mutableStateOf(totalTime) }
             var isTimerRunning by remember { mutableStateOf(true) }

@@ -1330,12 +1330,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         (float)lastTwo.framesLost / lastTwo.totalFrames * 100)).append('\n');
                 sb.append(context.getString(R.string.perf_overlay_netlatency,
                         (int)(rttInfo >> 32), (int)rttInfo)).append('\n');
-                if (lastTwo.framesWithHostProcessingLatency > 0) {
-                    sb.append(context.getString(R.string.perf_overlay_hostprocessinglatency,
-                            (float)lastTwo.minHostProcessingLatency / 10,
-                            (float)lastTwo.maxHostProcessingLatency / 10,
-                            (float)lastTwo.totalHostProcessingLatency / 10 / lastTwo.framesWithHostProcessingLatency)).append('\n');
-                }
+//                if (lastTwo.framesWithHostProcessingLatency > 0) {
+//                    sb.append(context.getString(R.string.perf_overlay_hostprocessinglatency,
+//                            (float)lastTwo.minHostProcessingLatency / 10,
+//                            (float)lastTwo.maxHostProcessingLatency / 10,
+//                            (float)lastTwo.totalHostProcessingLatency / 10 / lastTwo.framesWithHostProcessingLatency)).append('\n');
+//                }
 
                 perfListener.onPerfUpdate(sb.toString());
             }

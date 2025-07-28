@@ -59,7 +59,6 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     val updateLocationState: State<UpdateLocationState> = _updateLocationState
     private val _addToWaitListState = mutableStateOf(AddToWaitListState())
     val addToWaitListState: State<AddToWaitListState> = _addToWaitListState
-
     private val _checkForSaleState = mutableStateOf(CheckForSaleState())
     val checkForSaleState: State<CheckForSaleState> = _checkForSaleState
     var pricingData: List<PricingGroups>? = null
@@ -95,7 +94,6 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
     var subShowIntroWarning: ((Boolean) -> Unit)? = null
     var showAdvWarning: Boolean = false
     var subShowAdvWarning: ((Boolean) -> Unit)? = null
-
     var showSuperWarning: Boolean = false
     var subShowSuperWarning: ((Boolean) -> Unit)? = null
     var saleDetails : SalesDetails = SalesDetails()
@@ -169,6 +167,7 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
         showIntroWarning = res
         subShowIntroWarning?.invoke(res)
     }
+
     fun updateShowAdvWarning(res: Boolean) {
         showAdvWarning = res
         subShowAdvWarning?.invoke(res)
@@ -178,6 +177,7 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
         showSuperWarning = res
         subShowSuperWarning?.invoke(res)
     }
+
     fun updateSalesDetails(res: SalesDetails) {
         saleDetails = res
         subSaleDetails?.invoke(res)
@@ -340,6 +340,5 @@ class PricingViewModel @Inject constructor(private val createPricingOrderLogic: 
             }.launchIn(viewModelScope)
         }
     }
-
 
 }
