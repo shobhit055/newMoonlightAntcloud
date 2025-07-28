@@ -112,6 +112,8 @@ import com.limelight.theme.primaryGreen
 import com.limelight.theme.subtitle
 import com.limelight.ui.AppView
 import com.limelight.viewmodel.UserViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -136,7 +138,10 @@ fun libraryNav(navGraph: NavGraphBuilder, activity: NavActivity, updateToolbar: 
             globalInstance.checkUserApi = true
             globalInstance.traceCheckUserApi=  FirebasePerformance.getInstance().newTrace("check_user_api")
             globalInstance.traceCheckUserApi.start()
-            userViewModel.getCheckUserData("JWT ${GlobalData.getInstance().accountData.token}")
+            launch {
+                delay(1000)
+                userViewModel.getCheckUserData("JWT ${GlobalData.getInstance().accountData.token}")
+            }
             Firebase.inAppMessaging.triggerEvent("in_app_msg")
         }
 
@@ -192,6 +197,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
                 GlobalData.getInstance().accountData.token = checkUserState.token!!
                 userViewModel.updateUserInfo(GlobalData.getInstance().accountData)
                 Log.i("test ", "userdata" + checkUserState.userData)
+
             }
         }
 
@@ -259,6 +265,9 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
 
     val userData = remember {
         mutableStateOf(viewModel.userData)
+    }
+    viewModel.subUserData = {
+        userData.value = it
     }
     val showUpgradePlan = remember {
         mutableStateOf(false)

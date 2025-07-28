@@ -81,7 +81,6 @@ import java.net.URISyntaxException
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Collections
-
 @Suppress("DEPRECATION")
 @AndroidEntryPoint
 class AppView : AppCompatActivity() {
