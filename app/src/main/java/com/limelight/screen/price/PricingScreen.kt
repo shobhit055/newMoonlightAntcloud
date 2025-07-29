@@ -1138,13 +1138,13 @@ fun PricingScreen(activity: NavActivity, viewModel: PricingViewModel, navigate: 
                                     val expiredSuperPremium = (globalInstance.accountData.expiredPlan == pricingData[2].items[0].userPlan)
                                     val expiredSuperUltimate = (globalInstance.accountData.expiredPlan == pricingData[2].items[1].userPlan)
 
-                                    if(selectedIntroTier && (!introTierUser || !expiredIntro) && globalInstance.remoteDisableSwitchToIntroPlans) {
+                                    if(selectedIntroTier && (!introTierUser && !expiredIntro) && globalInstance.remoteDisableSwitchToIntroPlans) {
                                         viewModel.updateShowIntroWarning(true)
                                         delayClose(viewModel)
-                                    } else if(selectedAdvancedTier && (!advancedTierUser || !expiredAdvanced) && globalInstance.remoteDisableSwitchToAdvPlans) {
+                                    } else if(selectedAdvancedTier && (!advancedTierUser && !expiredAdvanced) && globalInstance.remoteDisableSwitchToAdvPlans) {
                                         viewModel.updateShowAdvWarning(true)
                                         delayClose(viewModel)
-                                    } else if(selectedSuperTier && (!superTierUser || !expiredSuper) && globalInstance.remoteDisableSwitchToSuperPlans) {
+                                    } else if(selectedSuperTier && (!superTierUser && !expiredSuper) && globalInstance.remoteDisableSwitchToSuperPlans) {
                                         viewModel.updateShowSuperWarning(true)
                                         delayClose(viewModel)
                                     } else {

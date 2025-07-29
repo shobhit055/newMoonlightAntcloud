@@ -62,13 +62,14 @@ class SplashActivity : ComponentActivity(){
      private var apiResp = false
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private var gameId = ""
-    private lateinit var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
     private var updateAvailable = false
-    private lateinit var appUpdateManager: AppUpdateManager
+    private var appUpdateManager: AppUpdateManager? = null
+
 
     @Composable
-    fun RegisterActivityResult() {
-        activityResultLauncher  = rememberLauncherForActivityResult(
+    fun RegisterActivityResult(onResult: (ActivityResultLauncher<IntentSenderRequest>) -> Unit) {
+        val res  = rememberLauncherForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult()
         ) { result: ActivityResult ->
             when (result.resultCode) {
@@ -83,6 +84,7 @@ class SplashActivity : ComponentActivity(){
                 }
             }
         }
+        onResult(res)
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -111,7 +113,42 @@ class SplashActivity : ComponentActivity(){
         })
         getToken()
         setContent {
-            RegisterActivityResult()
+            RegisterActivityResult { res ->
+                activityResultLauncher = res
+                appUpdateManager = AppUpdateManagerFactory.create(this)
+                if(activityResultLauncher != null) {
+
+                    val appUpdateInfoTask = appUpdateManager?.appUpdateInfo
+                    //check for update
+                    appUpdateInfoTask?.addOnSuccessListener { appUpdateInfo ->
+                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                        ) {
+                            //start update
+                            updateAvailable = true
+                            appUpdateManager?.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                activityResultLauncher!!,
+                                AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                            )
+                        }
+                    }
+                }
+            }
+            if(appUpdateManager != null && activityResultLauncher != null){
+                appUpdateManager?.appUpdateInfo?.addOnSuccessListener { appUpdateInfo ->
+                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                        //start update
+                        appUpdateManager?.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            activityResultLauncher!!,
+                            AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                        )
+                    }/* else if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
+
+            }*/
+                }
+            }
             viewModel = hiltViewModel()
             if (!updateAvailable) {
                 if (globalInstance.accountData.token != "") {
@@ -247,24 +284,6 @@ class SplashActivity : ComponentActivity(){
                     }
                 }
             }
-
-
-        }
-        if(::activityResultLauncher.isInitialized){
-            appUpdateManager = AppUpdateManagerFactory.create(this)
-            val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-                ) {
-                    updateAvailable = true
-                    appUpdateManager.startUpdateFlowForResult(
-                        appUpdateInfo,
-                        activityResultLauncher,
-                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
-                    )
-                }
-            }
         }
     }
 
@@ -329,19 +348,6 @@ class SplashActivity : ComponentActivity(){
 
     override fun onResume() {
         super.onResume()
-        if(::activityResultLauncher.isInitialized){
-            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                    appUpdateManager.startUpdateFlowForResult(
-                        appUpdateInfo,
-                        activityResultLauncher,
-                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
-                    )
-                }/* else if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
-
-            }*/
-            }
-        }
 
     }
 

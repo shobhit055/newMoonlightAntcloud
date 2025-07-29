@@ -53,7 +53,7 @@ fun libraryDetailsNav(navGraph: NavGraphBuilder, activity: NavActivity, updateTo
                 .padding(bottom = 20.dp)) {
             LazyVerticalGrid(columns = GridCells.Fixed(1), state = gridState) {
                 items(games, key = { it.gameId }) {
-                    GameTileAllGames(game = it, modifier = Modifier.animateItemPlacement(), false, orientationLandscape = false) {
+                    GameTileAllGames(game = it, modifier = Modifier.animateItem(), false, orientationLandscape = false) {
                         GlobalData.getInstance().gameId= it.gameId
                         navigate(DrawerScreens.GameDetails.route)
                     }

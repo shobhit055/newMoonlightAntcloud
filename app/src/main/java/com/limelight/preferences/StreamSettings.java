@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 
 import com.limelight.ui.LimeLog;
-import com.limelight.ui.PcView;
 import com.limelight.R;
 import com.limelight.binding.video.MediaCodecHelper;
 import com.limelight.utils.Dialog;
@@ -110,9 +109,9 @@ public class StreamSettings extends Activity {
             PreferenceConfiguration newPrefs = PreferenceConfiguration.readPreferences(this);
             if (!newPrefs.language.equals(previousPrefs.language)) {
                 // Restart the PC view to apply UI changes
-                Intent intent = new Intent(this, PcView.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent, null);
+//                Intent intent = new Intent(this, PcView.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(intent, null);
             }
         }
     }

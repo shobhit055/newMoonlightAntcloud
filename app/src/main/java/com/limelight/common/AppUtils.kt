@@ -112,11 +112,14 @@ class AppUtils {
         private fun getEncryptedDataPair(data: String): Pair<ByteArray, ByteArray>? {
             val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
             val key = getKey() ?: return null
+            if(key!=null)
             cipher.init(Cipher.ENCRYPT_MODE, key)
             val iv: ByteArray = cipher.iv
             val encryptedData = cipher.doFinal(data.toByteArray(Charsets.UTF_8))
             return Pair(iv, encryptedData)
         }
+
+
 
         fun decryptData(iv: ByteArray, encData: ByteArray): String {
             val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")

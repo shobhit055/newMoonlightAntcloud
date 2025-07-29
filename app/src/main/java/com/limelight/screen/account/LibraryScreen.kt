@@ -954,7 +954,7 @@ fun GamesRow(navigate: ((String) -> Unit),orientationLandscape: Boolean, games: 
         else {
             LazyRow {
                 items(games, key = { it.gameId }) {
-                    GameTile(game = it, modifier = Modifier.animateItemPlacement()) {
+                    GameTile(game = it, modifier = Modifier.animateItem()) {
                         if(games.isNotEmpty() && it.gameId!="") {
                             GlobalData.getInstance().gameId= it.gameId
                             navigate(DrawerScreens.GameDetails.route)
@@ -965,7 +965,7 @@ fun GamesRow(navigate: ((String) -> Unit),orientationLandscape: Boolean, games: 
                         }
                     }
                     if (it.expandable) {
-                        GameTile(game = it, modifier = Modifier.animateItemPlacement(), expand = true) {
+                        GameTile(game = it, modifier = Modifier.animateItem(), expand = true) {
                             navigate(DrawerScreens.LibraryDetails.route)
                         }
                     }

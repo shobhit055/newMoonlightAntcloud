@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 
-import com.limelight.ui.HelpActivity;
-
 public class HelpLauncher {
     public static void launchUrl(Context context, String url) {
         // Try to launch the default browser
@@ -32,9 +30,9 @@ public class HelpLauncher {
 
         // This platform has no browser (possibly a leanback device)
         // We'll launch our WebView activity
-        Intent i = new Intent(context, HelpActivity.class);
-        i.setData(Uri.parse(url));
-        context.startActivity(i);
+//        Intent i = new Intent(context, HelpActivity.class);
+//        i.setData(Uri.parse(url));
+//        context.startActivity(i);
     }
 
     public static void launchSetupGuide(Context context) {

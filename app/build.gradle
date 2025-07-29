@@ -12,13 +12,13 @@ plugins {
 
 android {
     ndkVersion "27.0.12077973"
-    compileSdk 34
+    compileSdk 35
     namespace 'com.limelight'
 
     defaultConfig {
-        minSdk 21
-        targetSdk 34
-        versionName "12.1"
+        minSdk 24
+        targetSdk 35
+        versionName "1.23"
         versionCode = 314
         ndk.debugSymbolLevel = 'FULL'
     }
@@ -115,21 +115,15 @@ dependencies {
     implementation 'com.github.cgutman:ShieldControllerExtensions:1.0.1'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation("com.google.dagger:hilt-android:2.52")
-    implementation 'com.google.firebase:firebase-database-ktx:21.0.0'
-    implementation 'com.google.firebase:firebase-config-ktx:22.1.2'
     kapt("com.google.dagger:hilt-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
-    implementation(platform("androidx.compose:compose-bom:2025.03.01"))
+    implementation(platform("androidx.compose:compose-bom:2025.07.00"))
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -148,13 +142,24 @@ dependencies {
     implementation("io.socket:socket.io-client:2.0.1") {
         exclude group: 'org.json', module: 'json'
     }
-    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.0'
-    implementation 'com.google.firebase:firebase-core:21.1.1'
-    implementation 'com.google.firebase:firebase-perf'
-    implementation 'com.google.firebase:firebase-config'
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.1'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
     implementation("com.google.firebase:firebase-inappmessaging-display")
+    implementation 'com.google.firebase:firebase-core:21.1.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.firebase:firebase-perf'
+    implementation 'com.google.firebase:firebase-config'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    implementation platform('com.google.firebase:firebase-bom:33.16.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging-ktx:24.1.2")
+    implementation 'com.google.firebase:firebase-database-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-config-ktx:22.1.2'
+
 }
