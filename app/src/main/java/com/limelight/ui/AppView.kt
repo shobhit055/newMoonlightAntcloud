@@ -274,6 +274,7 @@ class AppView : AppCompatActivity() {
         prefs!!.edit().putBoolean(PreferenceConfiguration.ONSCREEN_CONTROLLER_PREF_STRING,false).apply();
         val viewModel: StreamViewModel by viewModels()
         prefManager = PreferenceManger(this)
+
         getVmipState = viewModel.getVMIPState.value
         loadingLayout =  findViewById(R.id.loadingLayout)
         resolutionLayout=  findViewById(R.id.resolutionLayout)
@@ -360,8 +361,10 @@ class AppView : AppCompatActivity() {
             viewModel.disConnTimeLeft.collect { time ->
                 if(time == "00:00"){
                     viewModel.stopDisconnectTimer()
-                    if(errorTimerFlag=="vmip")
+                    if(errorTimerFlag=="vmip") {
+                        Log.i("test" , "test111")
                         errorText.text = resources.getString(R.string.one_min_issue_msg)
+                    }
                     else
                         errorText.text = resources.getString(R.string.stream_end_issue)
                     pcExit()
@@ -766,6 +769,7 @@ class AppView : AppCompatActivity() {
             }
         }else if (!success) {
             withContext(Dispatchers.Main) {
+                Log.i("test" , "test1244")
                 errorText.text =  resources.getString(R.string.one_min_issue_msg)
                 pcExit()
                 loadingLayout.visibility = View.INVISIBLE

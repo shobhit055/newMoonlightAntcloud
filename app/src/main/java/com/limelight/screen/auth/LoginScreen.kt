@@ -953,7 +953,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                 modifier = Modifier
                                     .fillMaxWidth(0.8f)
                                     .background(White,RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
                                 color = MaterialTheme.colors.error,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.body1.copy(
@@ -1089,9 +1089,10 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                             containerSize = 48.dp,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             strokeColor = colorStroke!!,
-                            charColor = White
-                        )
+                            charColor = White)
+
                         Spacer(modifier = Modifier.size(20.dp))
+
                         var text by remember { mutableStateOf("") }
                         val totalTime: Int = 60
                         if (resentOTPText) {

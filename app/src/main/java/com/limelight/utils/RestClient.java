@@ -66,7 +66,7 @@ public class RestClient {
                     InputStream is = null;
                     String authorizationValue = apiToken;
                     try {
-                        URL url = new URL("https://ocelot-fitting-treefrog.ngrok-free.app/api/" + postUrl); //+ postUrl
+                        URL url = new URL("https://api.antcloud.co/api/" + postUrl); //+ postUrl
                         HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
                         con.setRequestProperty("Accept", "application/json");

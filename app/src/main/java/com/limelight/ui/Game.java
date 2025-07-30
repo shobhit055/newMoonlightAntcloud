@@ -2477,7 +2477,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     private void checkConnectionStatus() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://ocelot-fitting-treefrog.ngrok-free.app/api/vm/checkConnectionStatus";
+        String url = "https://api.antcloud.co/api/vm/checkConnectionStatus";
         String token = "JWT " + GlobalData.Companion.getInstance().getAccountData().getToken();
         Request request = new Request.Builder()
                 .url(url)

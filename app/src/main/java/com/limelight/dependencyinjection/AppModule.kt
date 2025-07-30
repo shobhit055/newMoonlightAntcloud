@@ -13,8 +13,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 @InstallIn(SingletonComponent::class)
 @Module
 object AppModule {
-//    private const val BASE_URL = "https://api.antcloud.co/api/"
-    private const val BASE_URL = "https://ocelot-fitting-treefrog.ngrok-free.app/api/"
+    private const val BASE_URL = "https://api.antcloud.co/api/"
+//  private const val BASE_URL = "https://ocelot-fitting-treefrog.ngrok-free.app/api/"
     @Singleton
     @Provides
     fun apiRepository(api: ApiService) = AuthRepository(api) as AuthRepositoryInterface

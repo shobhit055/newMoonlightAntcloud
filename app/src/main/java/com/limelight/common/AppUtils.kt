@@ -23,6 +23,7 @@ import com.limelight.activity.LoginActivity
 import com.limelight.activity.NavActivity
 import com.limelight.activity.SignupActivity
 import com.limelight.activity.SplashActivity
+import com.limelight.components.signOut
 import com.limelight.viewmodel.AppViewModel
 import java.io.File
 import java.security.KeyStore
@@ -64,7 +65,7 @@ class AppUtils {
             val data = encryptWithKeyStore(token)
             if(data == null) {
                 activity.makeToast("Error 901: Something Went Wrong.")
-                // signOut(activity)
+                //signOut(activity)
                 return
             }
             fos.write(data.first.size)
@@ -112,7 +113,6 @@ class AppUtils {
         private fun getEncryptedDataPair(data: String): Pair<ByteArray, ByteArray>? {
             val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
             val key = getKey() ?: return null
-            if(key!=null)
             cipher.init(Cipher.ENCRYPT_MODE, key)
             val iv: ByteArray = cipher.iv
             val encryptedData = cipher.doFinal(data.toByteArray(Charsets.UTF_8))

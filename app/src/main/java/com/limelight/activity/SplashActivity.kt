@@ -301,14 +301,14 @@ class SplashActivity : ComponentActivity(){
         if (file.exists()) {
             globalInstance.accountData.token = getUserToken(file)
             if (globalInstance.accountData.token == "") {
-                activity.makeToast("Error 901 : Something Went Wrong.")
+               // activity.makeToast("Error 901 : Something Went Wrong.")
                 clearCheck(activity)
             }
         }
         if (file2.exists()) {
             globalInstance.accountData.refreshToken = getUserToken(file2)
             if (globalInstance.accountData.refreshToken == "") {
-                activity.makeToast("Error 901 : Something Went Wrong.")
+               // activity.makeToast("Error 901 : Something Went Wrong.")
                 clearCheck(activity)
             }
         }

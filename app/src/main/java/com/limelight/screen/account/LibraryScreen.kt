@@ -1,7 +1,6 @@
 package com.limelight.screen.account
 
 
-
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
@@ -439,6 +438,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
                 plan = userData.value.currentPlan
             }
 
+
             if(daysLeft>=0) {
                 daysLeftP = 100 - ((30 - daysLeft.toDouble()) / 30 * 100)
 
@@ -581,8 +581,8 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
             else {
                 daysLeft = -1
                 daysLeftP = 0.0
-
-                showCard(R.drawable.onhold_banner, R.string.plan_hold_text, "report", R.string.plan_hold_button, landscape)
+                showCard(R.drawable.onhold_banner, R.string.plan_hold_text, "report",
+                    R.string.plan_hold_button, landscape)
             }
         }
         else {
@@ -591,12 +591,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
     }
 
 
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .background(dark_grey)
-    ) {
+    Column(Modifier.fillMaxWidth().fillMaxHeight().background(dark_grey)) {
         val displayMetrics: DisplayMetrics = currentAct.resources.displayMetrics
         val screenWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
         val screenHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt()
@@ -609,7 +604,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
         }*/
 
         if(screenWidth < 600) {
-            currentAct.requestedOrientation= ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            currentAct.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             PortraitLayoutLibrary(imageHeight = imageHeight, navigate = navigate, handlePcClick = handlePcClick, profileCard)
         } else {
             val modifierRow = Modifier.weight(if(screenHeight < 1200) 0.5f else 0.55f, true)
