@@ -66,33 +66,32 @@ public class VirtualController {
         this.handler = new Handler(Looper.getMainLooper());
 
         buttonConfigure = new Button(context);
-        buttonConfigure.setAlpha(0.25f);
+        buttonConfigure.setAlpha(0.75f);
         buttonConfigure.setFocusable(false);
         buttonConfigure.setBackgroundResource(R.drawable.ic_settings);
-        buttonConfigure.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String message;
+        buttonConfigure.setOnClickListener(v -> {
+            String message;
 
-                if (currentMode == ControllerMode.Active){
-                    currentMode = ControllerMode.MoveButtons;
-                    message = "Entering configuration mode (Move buttons)";
-                } else if (currentMode == ControllerMode.MoveButtons) {
-                    currentMode = ControllerMode.ResizeButtons;
-                    message = "Entering configuration mode (Resize buttons)";
-                } else {
-                    currentMode = ControllerMode.Active;
-                    VirtualControllerConfigurationLoader.saveProfile(VirtualController.this, context);
-                    message = "Exiting configuration mode";
-                }
+            if (currentMode == ControllerMode.Active){
+                currentMode = ControllerMode.MoveButtons;
+                message = "Entering configuration mode (Move buttons)";
+            }
+            else if (currentMode == ControllerMode.MoveButtons) {
+                currentMode = ControllerMode.ResizeButtons;
+                message = "Entering configuration mode (Resize buttons)";
+            }
+            else {
+                currentMode = ControllerMode.Active;
+                VirtualControllerConfigurationLoader.saveProfile(VirtualController.this, context);
+                message = "Exiting configuration mode";
+            }
 
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
-                buttonConfigure.invalidate();
+            buttonConfigure.invalidate();
 
-                for (VirtualControllerElement element : elements) {
-                    element.invalidate();
-                }
+            for (VirtualControllerElement element : elements) {
+                element.invalidate();
             }
         });
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -74,12 +75,12 @@ fun Drawer(
     val userData = remember {
         mutableStateOf(viewModel.userData)
     }
-    Column(modifier.fillMaxWidth()
+    Column(modifier.fillMaxWidth().statusBarsPadding()
         .fillMaxHeight()
         .padding(top = 0.dp).background(Black),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
-            modifier = Modifier.weight(.8f).padding(top = 10.dp),
+            modifier = Modifier.weight(.8f).padding(top = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)){
                 Image(

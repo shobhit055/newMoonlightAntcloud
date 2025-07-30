@@ -1050,9 +1050,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(pcStream) {
-            pcExit();
-        }
 
         if (controllerHandler != null) {
             controllerHandler.destroy();
@@ -1082,23 +1079,26 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     @Override
     protected void onPause() {
+        Log.i("test" , "onPause");
         if (isFinishing()) {
             // Stop any further input device notifications before we lose focus (and pointer capture)
             if (controllerHandler != null) {
                 controllerHandler.stop();
             }
-
+            GlobalData.Companion.getInstance().socket.disconnect();
             // Ungrab input to prevent further input device notifications
             setInputGrabState(false);
         }
 
         super.onPause();
+        Log.i("test" , "onPause22");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
+        Log.i("test" , "onStop");
+        GlobalData.Companion.getInstance().socket.disconnect();
         loadingLayout.setVisibility(View.GONE);
 //        SpinnerDialog.closeDialogs(this);
 //        Dialog.closeDialogs();
@@ -2762,7 +2762,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         });
         btnYes.setOnClickListener(v -> {
             dialog.dismiss();
-            pcExit();
+
             startActivity(new Intent(Game.this, AppView.class));
             finish();
 

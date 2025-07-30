@@ -37,6 +37,7 @@ import com.limelight.binding.crypto.AndroidCryptoProvider
 import com.limelight.common.AppUtils
 import com.limelight.common.FPSSpinnerAdapter
 import com.limelight.common.GlobalData
+import com.limelight.common.GlobalData.Companion.getInstance
 import com.limelight.common.ResolutionSpinnerAdapter
 import com.limelight.computers.ComputerManagerService
 import com.limelight.computers.ComputerManagerService.ApplistPoller
@@ -306,7 +307,7 @@ class AppView : AppCompatActivity() {
         }
         onBackPressedDispatcher.addCallback(this) {
             viewModel.onBackPressed()
-            pcExit()
+          //  pcExit()
             this.remove()
             onBackPressedDispatcher.onBackPressed()
         }
@@ -614,6 +615,10 @@ class AppView : AppCompatActivity() {
         super.onPause()
         stopComputerUpdates()
         stopComputerUpdates1(true)
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
 

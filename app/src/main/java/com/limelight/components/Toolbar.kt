@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -30,7 +31,7 @@ fun Toolbar(modifier: Modifier, text: String, iconName: ImageVector, viewModel: 
 @Composable
 fun Toolbar(modifier: Modifier, text: String, viewModel: GameViewModel, navigate: ((String) -> Unit), iconName: ImageVector,
                        openDrawer: () -> Unit, icon: @Composable () -> Unit) {
-    TopAppBar(modifier = modifier,
+    TopAppBar(modifier = modifier.statusBarsPadding(),
         backgroundColor = Color.Black,
         contentColor = Color.White,
         elevation = 0.dp,
@@ -40,7 +41,7 @@ fun Toolbar(modifier: Modifier, text: String, viewModel: GameViewModel, navigate
                 IconButton(
                     onClick = openDrawer, modifier = Modifier.align(Alignment.TopStart)
                         .size(45.dp)
-                        .padding(top = 12.dp)) {
+                        .padding(top = 6.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         contentDescription = "",
