@@ -13,13 +13,13 @@ plugins {
 android {
     ndkVersion "27.0.12077973"
     compileSdk 35
-    namespace 'com.limelight'
+    namespace 'com.antcloud.app'
 
     defaultConfig {
         minSdk 24
         targetSdk 35
-        versionName "1.23"
-        versionCode = 314
+        versionName "1.25"
+        versionCode 30
         ndk.debugSymbolLevel = 'FULL'
     }
 
@@ -44,7 +44,7 @@ android {
                 }
             }
 
-            applicationId "com.limelight.root"
+            applicationId "com.antcloud.app.root"
             dimension "root"
             buildConfigField "boolean", "ROOT_BUILD", "true"
         }
@@ -56,7 +56,7 @@ android {
                 }
             }
 
-            applicationId "com.limelight"
+            applicationId "com.antcloud.app"
             dimension "root"
             buildConfigField "boolean", "ROOT_BUILD", "false"
         }
@@ -84,17 +84,14 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".debug"
             resValue "string", "app_label", "AntCloudNew"
-            resValue "string", "app_label_root", "Moonlight (Root Debug)"
+            resValue "string", "app_label_root", "AntCloudNew (Root Debug)"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
-            applicationIdSuffix ".unofficial"
-            resValue "string", "app_label", "Moonlight"
-            resValue "string", "app_label_root", "Moonlight (Root)"
-
+            resValue "string", "app_label", "AntCloudNew"
+            resValue "string", "app_label_root", "AntCloudNew (Root)"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

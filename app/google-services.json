@@ -1,40 +1,21 @@
 {
   "project_info": {
-    "project_number": "467961416934",
-    "project_id": "antplay-new",
-    "storage_bucket": "antplay-new.firebasestorage.app"
+    "project_number": "94883566289",
+    "project_id": "antcloud-d26d0",
+    "storage_bucket": "antcloud-d26d0.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:467961416934:android:494119ffe1a214afe83f27",
+        "mobilesdk_app_id": "1:94883566289:android:5e6ce11a8557bae8ce6bf0",
         "android_client_info": {
-          "package_name": "com.example.antcloudnewflow"
+          "package_name": "com.antcloud.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAJ1sCL_-pOgtS9Sw5HNmaCjotXeLEyCsQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:467961416934:android:3d6738a8bd192e35e83f27",
-        "android_client_info": {
-          "package_name": "com.limelight.debug"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAJ1sCL_-pOgtS9Sw5HNmaCjotXeLEyCsQ"
+          "current_key": "AIzaSyBVMrsfwyzH3eLlNG2WyRs1-skpsLW1lWo"
         }
       ],
       "services": {
