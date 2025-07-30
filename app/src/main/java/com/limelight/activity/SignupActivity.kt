@@ -25,6 +25,7 @@ class SignupActivity : ComponentActivity() {
         if(intent.hasExtra("email")){
             emailMobileValue = intent.getStringExtra("email").toString()
         }
+
         setContent {
             hideStatusBar(this@SignupActivity)
             viewModel = hiltViewModel()

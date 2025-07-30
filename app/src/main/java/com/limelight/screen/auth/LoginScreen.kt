@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.SolidColor
@@ -486,9 +487,10 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                 }
                             })
 
-                        Spacer(modifier = Modifier.height(10.dp))
+
                         val passColor = if (isErrorPassword) Red else White
                         if (isTextVisible) {
+                            Spacer(modifier = Modifier.height(10.dp))
                             BasicTextField(
                                 value = password,
                                 onValueChange = {
@@ -533,17 +535,20 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                             Spacer(modifier = Modifier.height(10.dp))
                             if (viewModel.loginError == LoginErrors.WRONG_PASSWORD) {
                                 androidx.compose.material.Text(
-                                    text = "The email or password provided is incorrect",
+                                    text = stringResource(id = R.string.incorrect_email_pass),
                                     modifier = Modifier
-                                        .fillMaxWidth(.8f)
-                                        .padding(top = 0.dp),
+                                        .fillMaxWidth(0.8f)
+                                        .background(White,RoundedCornerShape(12.dp))
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
                                     color = MaterialTheme.colors.error,
+                                    textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.body1.copy(
                                         fontSize = 12.sp,
                                         textAlign = TextAlign.Start,
                                         fontWeight = FontWeight.Light
                                     )
                                 )
+                                Spacer(modifier = Modifier.height(10.dp))
                             }
 
                             Row(
@@ -560,6 +565,22 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                         viewModel.updateType("forgot")
                                     })
                             }
+                        }
+
+                        if (successText && type == "forgot") {
+                            Spacer(modifier = Modifier.size(10.dp))
+                            androidx.compose.material.Text(text = stringResource(id = R.string.email_sent),
+                                modifier = Modifier.fillMaxWidth(0.8f)
+                                    .background(White,RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                color = MaterialTheme.colors.error,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.body1.copy(
+                                    fontSize = 12.sp,
+                                    textAlign = TextAlign.Start,
+                                    fontWeight = FontWeight.Light
+                                )
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -611,19 +632,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                             Text(text = text, style = subtitle.copy(color = Color.Black))
                         }
 
-                        if (successText && type == "forgot") {
-                            androidx.compose.material.Text(text = "An e-mail with the reset link has been sent. Please check your registered Email",
-                                style = mainTitle.copy(
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colors.primary
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth(.8f)
-                                    .clickable {
-                                        //onEventHandler(LoginEvent.OnForgotPasswsordClicked)
-                                    }
-                                    .padding(top = 20.dp, start = 10.dp, end = 10.dp))
-                        }
+
 
                         Row(
                             modifier = Modifier
@@ -940,17 +949,20 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                         Spacer(modifier = Modifier.height(10.dp))
                         if (viewModel.loginError == LoginErrors.WRONG_PASSWORD) {
                             androidx.compose.material.Text(
-                                text = "The email or password provided is incorrect",
+                                text = stringResource(id = R.string.incorrect_email_pass),
                                 modifier = Modifier
-                                    .fillMaxWidth(.8f)
-                                    .padding(top = 0.dp),
+                                    .fillMaxWidth(0.8f)
+                                    .background(White,RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 color = MaterialTheme.colors.error,
+                                textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.body1.copy(
                                     fontSize = 12.sp,
                                     textAlign = TextAlign.Start,
                                     fontWeight = FontWeight.Light
                                 )
                             )
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
 
                         Row(
@@ -967,6 +979,20 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                     viewModel.updateType("forgot")
                                 })
                         }
+                    }
+
+                    if (successText && type == "forgot") {
+                        Spacer(modifier = Modifier.size(10.dp))
+                        androidx.compose.material.Text(text = stringResource(id = R.string.email_sent),
+                            modifier = Modifier.fillMaxWidth(0.8f).background(White,RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 8.dp),
+                            color = MaterialTheme.colors.error,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body1.copy(
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Start,
+                                fontWeight = FontWeight.Light
+                            )
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -1018,19 +1044,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                         Text(text = text, style = subtitle.copy(color = Color.Black))
                     }
 
-                    if (successText && type == "forgot") {
-                        androidx.compose.material.Text(text = "An e-mail with the reset link has been sent. Please check your registered Email",
-                            style = mainTitle.copy(
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colors.primary
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth(.8f)
-                                .clickable {
-                                    //onEventHandler(LoginEvent.OnForgotPasswsordClicked)
-                                }
-                                .padding(top = 20.dp, start = 10.dp, end = 10.dp))
-                    }
+
 
                     Row(
                         modifier = Modifier

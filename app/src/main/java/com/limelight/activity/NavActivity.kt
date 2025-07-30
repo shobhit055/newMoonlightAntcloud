@@ -1,8 +1,5 @@
 package com.limelight.activity
 
-
-
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -59,7 +56,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 
 @AndroidEntryPoint

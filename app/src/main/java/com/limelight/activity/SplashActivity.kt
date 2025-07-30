@@ -60,11 +60,12 @@ class SplashActivity : ComponentActivity(){
      lateinit var viewModel: UserViewModel
      private var flag = 0
      private var apiResp = false
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
-    private var gameId = ""
-    private var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
-    private var updateAvailable = false
-    private var appUpdateManager: AppUpdateManager? = null
+     private lateinit var firebaseAnalytics: FirebaseAnalytics
+     private var gameId = ""
+     private var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+     private var updateAvailable = false
+     private var appUpdateManager: AppUpdateManager? = null
+
 
 
     @Composable
