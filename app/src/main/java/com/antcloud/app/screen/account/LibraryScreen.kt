@@ -280,7 +280,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
         mutableStateOf(temp)
     }
 
-    val currentAppVersion = 1.25
+    val currentAppVersion = 1.26
 
     viewModel.subShowMaintenanceDialog = {
         showMaintenanceDialog.value = it
