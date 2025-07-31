@@ -41,7 +41,7 @@ import com.antcloud.app.binding.input.driver.UsbDriverService;
 import com.antcloud.app.nvstream.NvConnection;
 import com.antcloud.app.nvstream.input.ControllerPacket;
 import com.antcloud.app.nvstream.input.MouseButtonPacket;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 import com.antcloud.app.preferences.PreferenceConfiguration;
 import com.antcloud.app.ui.GameGestures;
 import com.antcloud.app.utils.Vector2d;
@@ -601,7 +601,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         // We can't use the platform API, so we'll have to just guess based on the gamepad type.
         // If this is a PlayStation controller with a touchpad, we know it has a clickpad.
-        return type == MoonBridge.LI_CTYPE_PS;
+        return type == AntBridge.LI_CTYPE_PS;
     }
 
     private static boolean isExternal(InputDevice dev) {
@@ -726,8 +726,8 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         // These aren't always present in the Android key layout files, so they won't show up
         // in our normal InputDevice.hasKeys() probing.
-        context.hasPaddles = MoonBridge.guessControllerHasPaddles(context.vendorId, context.productId);
-        context.hasShare = MoonBridge.guessControllerHasShareButton(context.vendorId, context.productId);
+        context.hasPaddles = AntBridge.guessControllerHasPaddles(context.vendorId, context.productId);
+        context.hasShare = AntBridge.guessControllerHasShareButton(context.vendorId, context.productId);
 
         // Try to use the InputDevice's associated vibrators first
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && hasQuadAmplitudeControlledRumbleVibrators(dev.getVibratorManager())) {
@@ -1156,23 +1156,23 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
             switch (currentBatteryStatus) {
                 case BatteryState.STATUS_UNKNOWN:
-                    state = MoonBridge.LI_BATTERY_STATE_UNKNOWN;
+                    state = AntBridge.LI_BATTERY_STATE_UNKNOWN;
                     break;
 
                 case BatteryState.STATUS_CHARGING:
-                    state = MoonBridge.LI_BATTERY_STATE_CHARGING;
+                    state = AntBridge.LI_BATTERY_STATE_CHARGING;
                     break;
 
                 case BatteryState.STATUS_DISCHARGING:
-                    state = MoonBridge.LI_BATTERY_STATE_DISCHARGING;
+                    state = AntBridge.LI_BATTERY_STATE_DISCHARGING;
                     break;
 
                 case BatteryState.STATUS_NOT_CHARGING:
-                    state = MoonBridge.LI_BATTERY_STATE_NOT_CHARGING;
+                    state = AntBridge.LI_BATTERY_STATE_NOT_CHARGING;
                     break;
 
                 case BatteryState.STATUS_FULL:
-                    state = MoonBridge.LI_BATTERY_STATE_FULL;
+                    state = AntBridge.LI_BATTERY_STATE_FULL;
                     break;
 
                 default:
@@ -1180,7 +1180,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             }
 
             if (Float.isNaN(currentBatteryCapacity)) {
-                percentage = MoonBridge.LI_BATTERY_PERCENTAGE_UNKNOWN;
+                percentage = AntBridge.LI_BATTERY_PERCENTAGE_UNKNOWN;
             }
             else {
                 percentage = (byte)(currentBatteryCapacity * 100);
@@ -1674,7 +1674,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
         return conn.sendControllerTouchEvent((byte)context.controllerNumber, touchType,
                 event.getPointerId(pointerIndex),
-                normalizedX, normalizedY, normalizedPressure) != MoonBridge.LI_ERR_UNSUPPORTED;
+                normalizedX, normalizedY, normalizedPressure) != AntBridge.LI_ERR_UNSUPPORTED;
     }
 
     public boolean tryHandleTouchpadEvent(MotionEvent event) {
@@ -1718,21 +1718,21 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                touchType = MoonBridge.LI_TOUCH_EVENT_DOWN;
+                touchType = AntBridge.LI_TOUCH_EVENT_DOWN;
                 break;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if ((event.getFlags() & MotionEvent.FLAG_CANCELED) != 0) {
-                    touchType = MoonBridge.LI_TOUCH_EVENT_CANCEL;
+                    touchType = AntBridge.LI_TOUCH_EVENT_CANCEL;
                 }
                 else {
-                    touchType = MoonBridge.LI_TOUCH_EVENT_UP;
+                    touchType = AntBridge.LI_TOUCH_EVENT_UP;
                 }
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                touchType = MoonBridge.LI_TOUCH_EVENT_MOVE;
+                touchType = AntBridge.LI_TOUCH_EVENT_MOVE;
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -1740,7 +1740,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 // rather than CANCEL. For a single pointer cancellation, that's indicated via
                 // FLAG_CANCELED on a ACTION_POINTER_UP.
                 // https://developer.android.com/develop/ui/views/touch-and-input/gestures/multi
-                touchType = MoonBridge.LI_TOUCH_EVENT_CANCEL_ALL;
+                touchType = AntBridge.LI_TOUCH_EVENT_CANCEL_ALL;
                 break;
 
             case MotionEvent.ACTION_BUTTON_PRESS:
@@ -1789,8 +1789,8 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
         else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             // Cancel impacts all active pointers
-            return conn.sendControllerTouchEvent((byte)context.controllerNumber, MoonBridge.LI_TOUCH_EVENT_CANCEL_ALL,
-                    0, 0, 0, 0) != MoonBridge.LI_ERR_UNSUPPORTED;
+            return conn.sendControllerTouchEvent((byte)context.controllerNumber, AntBridge.LI_TOUCH_EVENT_CANCEL_ALL,
+                    0, 0, 0, 0) != AntBridge.LI_ERR_UNSUPPORTED;
         }
         else {
             // Down and Up events impact the action index pointer
@@ -2201,7 +2201,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     }
                 }
 
-                if (motionType == MoonBridge.LI_MOTION_TYPE_GYRO) {
+                if (motionType == AntBridge.LI_MOTION_TYPE_GYRO) {
                     // Convert from rad/s to deg/s
                     conn.sendControllerMotionEvent((byte) controllerNumber,
                             motionType,
@@ -2241,10 +2241,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 // sensors disappear and reappear. By storing the desired report rate, we can
                 // reapply the desired motion sensor configuration after they reappear.
                 switch (motionType) {
-                    case MoonBridge.LI_MOTION_TYPE_ACCEL:
+                    case AntBridge.LI_MOTION_TYPE_ACCEL:
                         deviceContext.accelReportRateHz = reportRateHz;
                         break;
-                    case MoonBridge.LI_MOTION_TYPE_GYRO:
+                    case AntBridge.LI_MOTION_TYPE_GYRO:
                         deviceContext.gyroReportRateHz = reportRateHz;
                         break;
                 }
@@ -2257,7 +2257,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 }
 
                 switch (motionType) {
-                    case MoonBridge.LI_MOTION_TYPE_ACCEL:
+                    case AntBridge.LI_MOTION_TYPE_ACCEL:
                         if (deviceContext.accelListener != null) {
                             sm.unregisterListener(deviceContext.accelListener);
                             deviceContext.accelListener = null;
@@ -2270,7 +2270,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                             sm.registerListener(deviceContext.accelListener, accelSensor, 1000000 / reportRateHz);
                         }
                         break;
-                    case MoonBridge.LI_MOTION_TYPE_GYRO:
+                    case AntBridge.LI_MOTION_TYPE_GYRO:
                         if (deviceContext.gyroListener != null) {
                             sm.unregisterListener(deviceContext.gyroListener);
                             deviceContext.gyroListener = null;
@@ -3020,10 +3020,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             public void run() {
                 // Turn back on any sensors that should be reporting but are currently unregistered
                 if (accelReportRateHz != 0 && accelListener == null) {
-                    handleSetMotionEventState(controllerNumber, MoonBridge.LI_MOTION_TYPE_ACCEL, accelReportRateHz);
+                    handleSetMotionEventState(controllerNumber, AntBridge.LI_MOTION_TYPE_ACCEL, accelReportRateHz);
                 }
                 if (gyroReportRateHz != 0 && gyroListener == null) {
-                    handleSetMotionEventState(controllerNumber, MoonBridge.LI_MOTION_TYPE_GYRO, gyroReportRateHz);
+                    handleSetMotionEventState(controllerNumber, AntBridge.LI_MOTION_TYPE_GYRO, gyroReportRateHz);
                 }
             }
         };
@@ -3062,17 +3062,17 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             byte type;
             switch (inputDevice.getVendorId()) {
                 case 0x045e: // Microsoft
-                    type = MoonBridge.LI_CTYPE_XBOX;
+                    type = AntBridge.LI_CTYPE_XBOX;
                     break;
                 case 0x054c: // Sony
-                    type = MoonBridge.LI_CTYPE_PS;
+                    type = AntBridge.LI_CTYPE_PS;
                     break;
                 case 0x057e: // Nintendo
-                    type = MoonBridge.LI_CTYPE_NINTENDO;
+                    type = AntBridge.LI_CTYPE_NINTENDO;
                     break;
                 default:
                     // Consult SDL's controller type list to see if it knows
-                    type = MoonBridge.guessControllerType(inputDevice.getVendorId(), inputDevice.getProductId());
+                    type = AntBridge.guessControllerType(inputDevice.getVendorId(), inputDevice.getProductId());
                     break;
             }
 
@@ -3107,10 +3107,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             // Most of the advanced InputDevice capabilities came in Android S
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (quadVibrators) {
-                    capabilities |= MoonBridge.LI_CCAP_RUMBLE | MoonBridge.LI_CCAP_TRIGGER_RUMBLE;
+                    capabilities |= AntBridge.LI_CCAP_RUMBLE | AntBridge.LI_CCAP_TRIGGER_RUMBLE;
                 }
                 else if (vibratorManager != null || vibrator != null) {
-                    capabilities |= MoonBridge.LI_CCAP_RUMBLE;
+                    capabilities |= AntBridge.LI_CCAP_RUMBLE;
                 }
 
                 // Calling InputDevice.getBatteryState() to see if a battery is present
@@ -3119,35 +3119,35 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 // external gamepad devices on Android S. If it turns out that no battery
                 // is actually present, we'll just report unknown battery state to the host.
                 if (external) {
-                    capabilities |= MoonBridge.LI_CCAP_BATTERY_STATE;
+                    capabilities |= AntBridge.LI_CCAP_BATTERY_STATE;
                 }
 
                 // Light.hasRgbControl() was totally broken prior to Android 14.
                 // It always returned true because LIGHT_CAPABILITY_RGB was defined as 0,
                 // so we will just guess RGB is supported if it's a PlayStation controller.
-                if (hasRgbLed && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE || type == MoonBridge.LI_CTYPE_PS)) {
-                    capabilities |= MoonBridge.LI_CCAP_RGB_LED;
+                if (hasRgbLed && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE || type == AntBridge.LI_CTYPE_PS)) {
+                    capabilities |= AntBridge.LI_CCAP_RGB_LED;
                 }
             }
 
             // Report analog triggers if we have at least one trigger axis
             if (leftTriggerAxis != -1 || rightTriggerAxis != -1) {
-                capabilities |= MoonBridge.LI_CCAP_ANALOG_TRIGGERS;
+                capabilities |= AntBridge.LI_CCAP_ANALOG_TRIGGERS;
             }
 
             // Report sensors if the input device has them or we're using built-in sensors for a built-in controller
             if (sensorManager != null && sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-                capabilities |= MoonBridge.LI_CCAP_ACCEL;
+                capabilities |= AntBridge.LI_CCAP_ACCEL;
             }
             if (sensorManager != null && sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-                capabilities |= MoonBridge.LI_CCAP_GYRO;
+                capabilities |= AntBridge.LI_CCAP_GYRO;
             }
 
             byte reportedType;
-            if (type != MoonBridge.LI_CTYPE_PS && sensorManager != null) {
+            if (type != AntBridge.LI_CTYPE_PS && sensorManager != null) {
                 // Override the detected controller type if we're emulating motion sensors on an Xbox controller
                 Toast.makeText(activityContext, activityContext.getResources().getText(R.string.toast_controller_type_changed), Toast.LENGTH_LONG).show();
-                reportedType = MoonBridge.LI_CTYPE_UNKNOWN;
+                reportedType = AntBridge.LI_CTYPE_UNKNOWN;
 
                 // Remember that we should enable the clickpad emulation combo (Select+LB) for this device
                 needsClickpadEmulation = true;
@@ -3159,16 +3159,16 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
             // We can perform basic rumble with any vibrator
             if (vibrator != null) {
-                capabilities |= MoonBridge.LI_CCAP_RUMBLE;
+                capabilities |= AntBridge.LI_CCAP_RUMBLE;
             }
 
             // Shield controllers use special APIs for rumble and battery state
             if (sceManager.isRecognizedDevice(inputDevice)) {
-                capabilities |= MoonBridge.LI_CCAP_RUMBLE | MoonBridge.LI_CCAP_BATTERY_STATE;
+                capabilities |= AntBridge.LI_CCAP_RUMBLE | AntBridge.LI_CCAP_BATTERY_STATE;
             }
 
             if ((inputDevice.getSources() & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {
-                capabilities |= MoonBridge.LI_CCAP_TOUCHPAD;
+                capabilities |= AntBridge.LI_CCAP_TOUCHPAD;
 
                 // Use the platform API or internal heuristics to determine if this has a clickpad
                 if (hasButtonUnderTouchpad(inputDevice, type)) {
@@ -3227,7 +3227,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 gyroListener = null;
 
                 // Send a gyro event to ensure the virtual controller is stationary
-                conn.sendControllerMotionEvent((byte) controllerNumber, MoonBridge.LI_MOTION_TYPE_GYRO, 0.f, 0.f, 0.f);
+                conn.sendControllerMotionEvent((byte) controllerNumber, AntBridge.LI_MOTION_TYPE_GYRO, 0.f, 0.f, 0.f);
             }
             if (accelListener != null) {
                 sensorManager.unregisterListener(accelListener);

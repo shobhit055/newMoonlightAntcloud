@@ -32,7 +32,7 @@ import com.antcloud.app.nvstream.http.NvApp;
 import com.antcloud.app.nvstream.http.NvHTTP;
 import com.antcloud.app.nvstream.input.KeyboardPacket;
 import com.antcloud.app.nvstream.input.MouseButtonPacket;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 import com.antcloud.app.preferences.GlPreferences;
 import com.antcloud.app.preferences.PreferenceConfiguration;
 import com.antcloud.app.utils.ServerHelper;
@@ -453,17 +453,17 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
 
         // H.264 is always supported
-        int supportedVideoFormats = MoonBridge.VIDEO_FORMAT_H264;
+        int supportedVideoFormats = AntBridge.VIDEO_FORMAT_H264;
         if (decoderRenderer.isHevcSupported()) {
-            supportedVideoFormats |= MoonBridge.VIDEO_FORMAT_H265;
+            supportedVideoFormats |= AntBridge.VIDEO_FORMAT_H265;
             if (willStreamHdr && decoderRenderer.isHevcMain10Hdr10Supported()) {
-                supportedVideoFormats |= MoonBridge.VIDEO_FORMAT_H265_MAIN10;
+                supportedVideoFormats |= AntBridge.VIDEO_FORMAT_H265_MAIN10;
             }
         }
         if (decoderRenderer.isAv1Supported()) {
-            supportedVideoFormats |= MoonBridge.VIDEO_FORMAT_AV1_MAIN8;
+            supportedVideoFormats |= AntBridge.VIDEO_FORMAT_AV1_MAIN8;
             if (willStreamHdr && decoderRenderer.isAv1Main10Supported()) {
-                supportedVideoFormats |= MoonBridge.VIDEO_FORMAT_AV1_MAIN10;
+                supportedVideoFormats |= AntBridge.VIDEO_FORMAT_AV1_MAIN10;
             }
         }
 
@@ -1132,20 +1132,20 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 if (message != null) {
                     message += " [";
 
-                    if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H264) != 0) {
+                    if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H264) != 0) {
                         message += "H.264";
                     }
-                    else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H265) != 0) {
+                    else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H265) != 0) {
                         message += "HEVC";
                     }
-                    else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
+                    else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
                         message += "AV1";
                     }
                     else {
                         message += "UNKNOWN";
                     }
 
-                    if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0) {
+                    if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_10BIT) != 0) {
                         message += " HDR";
                     }
 
@@ -1404,7 +1404,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
 
             conn.sendKeyboardInput(translated, KeyboardPacket.KEY_DOWN, getModifierState(event),
-                    keyboardTranslator.hasNormalizedMapping(event.getKeyCode(), event.getDeviceId()) ? 0 : MoonBridge.SS_KBE_FLAG_NON_NORMALIZED);
+                    keyboardTranslator.hasNormalizedMapping(event.getKeyCode(), event.getDeviceId()) ? 0 : AntBridge.SS_KBE_FLAG_NON_NORMALIZED);
         }
 
         return true;
@@ -1468,7 +1468,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
 
             conn.sendKeyboardInput(translated, KeyboardPacket.KEY_UP, getModifierState(event),
-                    keyboardTranslator.hasNormalizedMapping(event.getKeyCode(), event.getDeviceId()) ? 0 : MoonBridge.SS_KBE_FLAG_NON_NORMALIZED);
+                    keyboardTranslator.hasNormalizedMapping(event.getKeyCode(), event.getDeviceId()) ? 0 : AntBridge.SS_KBE_FLAG_NON_NORMALIZED);
         }
 
         return true;
@@ -1517,37 +1517,37 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                return MoonBridge.LI_TOUCH_EVENT_DOWN;
+                return AntBridge.LI_TOUCH_EVENT_DOWN;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if ((event.getFlags() & MotionEvent.FLAG_CANCELED) != 0) {
-                    return MoonBridge.LI_TOUCH_EVENT_CANCEL;
+                    return AntBridge.LI_TOUCH_EVENT_CANCEL;
                 }
                 else {
-                    return MoonBridge.LI_TOUCH_EVENT_UP;
+                    return AntBridge.LI_TOUCH_EVENT_UP;
                 }
 
             case MotionEvent.ACTION_MOVE:
-                return MoonBridge.LI_TOUCH_EVENT_MOVE;
+                return AntBridge.LI_TOUCH_EVENT_MOVE;
 
             case MotionEvent.ACTION_CANCEL:
                 // ACTION_CANCEL applies to *all* pointers in the gesture, so it maps to CANCEL_ALL
                 // rather than CANCEL. For a single pointer cancellation, that's indicated via
                 // FLAG_CANCELED on a ACTION_POINTER_UP.
                 // https://developer.android.com/develop/ui/views/touch-and-input/gestures/multi
-                return MoonBridge.LI_TOUCH_EVENT_CANCEL_ALL;
+                return AntBridge.LI_TOUCH_EVENT_CANCEL_ALL;
 
             case MotionEvent.ACTION_HOVER_ENTER:
             case MotionEvent.ACTION_HOVER_MOVE:
-                return MoonBridge.LI_TOUCH_EVENT_HOVER;
+                return AntBridge.LI_TOUCH_EVENT_HOVER;
 
             case MotionEvent.ACTION_HOVER_EXIT:
-                return MoonBridge.LI_TOUCH_EVENT_HOVER_LEAVE;
+                return AntBridge.LI_TOUCH_EVENT_HOVER_LEAVE;
 
             case MotionEvent.ACTION_BUTTON_PRESS:
             case MotionEvent.ACTION_BUTTON_RELEASE:
-                return MoonBridge.LI_TOUCH_EVENT_BUTTON_ONLY;
+                return AntBridge.LI_TOUCH_EVENT_BUTTON_ONLY;
 
             default:
                return -1;
@@ -1613,7 +1613,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 return rotationDegrees;
             }
         }
-        return MoonBridge.LI_ROT_UNKNOWN;
+        return AntBridge.LI_ROT_UNKNOWN;
     }
 
     private static float[] polarToCartesian(float r, float theta) {
@@ -1674,13 +1674,13 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     private boolean sendPenEventForPointer(View view, MotionEvent event, byte eventType, byte toolType, int pointerIndex) {
         byte penButtons = 0;
         if ((event.getButtonState() & MotionEvent.BUTTON_STYLUS_PRIMARY) != 0) {
-            penButtons |= MoonBridge.LI_PEN_BUTTON_PRIMARY;
+            penButtons |= AntBridge.LI_PEN_BUTTON_PRIMARY;
         }
         if ((event.getButtonState() & MotionEvent.BUTTON_STYLUS_SECONDARY) != 0) {
-            penButtons |= MoonBridge.LI_PEN_BUTTON_SECONDARY;
+            penButtons |= AntBridge.LI_PEN_BUTTON_SECONDARY;
         }
 
-        byte tiltDegrees = MoonBridge.LI_TILT_UNKNOWN;
+        byte tiltDegrees = AntBridge.LI_TILT_UNKNOWN;
         InputDevice dev = event.getDevice();
         if (dev != null) {
             if (dev.getMotionRange(MotionEvent.AXIS_TILT, event.getSource()) != null) {
@@ -1694,17 +1694,17 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 normalizedCoords[0], normalizedCoords[1],
                 getPressureOrDistance(event, pointerIndex),
                 normalizedContactArea[0], normalizedContactArea[1],
-                getRotationDegrees(event, pointerIndex), tiltDegrees) != MoonBridge.LI_ERR_UNSUPPORTED;
+                getRotationDegrees(event, pointerIndex), tiltDegrees) != AntBridge.LI_ERR_UNSUPPORTED;
     }
 
     private static byte convertToolTypeToStylusToolType(MotionEvent event, int pointerIndex) {
         switch (event.getToolType(pointerIndex)) {
             case MotionEvent.TOOL_TYPE_ERASER:
-                return MoonBridge.LI_TOOL_TYPE_ERASER;
+                return AntBridge.LI_TOOL_TYPE_ERASER;
             case MotionEvent.TOOL_TYPE_STYLUS:
-                return MoonBridge.LI_TOOL_TYPE_PEN;
+                return AntBridge.LI_TOOL_TYPE_PEN;
             default:
-                return MoonBridge.LI_TOOL_TYPE_UNKNOWN;
+                return AntBridge.LI_TOOL_TYPE_UNKNOWN;
         }
     }
 
@@ -1719,7 +1719,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             boolean handledStylusEvent = false;
             for (int i = 0; i < event.getPointerCount(); i++) {
                 byte toolType = convertToolTypeToStylusToolType(event, i);
-                if (toolType == MoonBridge.LI_TOOL_TYPE_UNKNOWN) {
+                if (toolType == AntBridge.LI_TOOL_TYPE_UNKNOWN) {
                     // Not a stylus pointer, so skip it
                     continue;
                 }
@@ -1737,14 +1737,14 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
         else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             // Cancel impacts all active pointers
-            return conn.sendPenEvent(MoonBridge.LI_TOUCH_EVENT_CANCEL_ALL, MoonBridge.LI_TOOL_TYPE_UNKNOWN, (byte)0,
+            return conn.sendPenEvent(AntBridge.LI_TOUCH_EVENT_CANCEL_ALL, AntBridge.LI_TOOL_TYPE_UNKNOWN, (byte)0,
                     0, 0, 0, 0, 0,
-                    MoonBridge.LI_ROT_UNKNOWN, MoonBridge.LI_TILT_UNKNOWN) != MoonBridge.LI_ERR_UNSUPPORTED;
+                    AntBridge.LI_ROT_UNKNOWN, AntBridge.LI_TILT_UNKNOWN) != AntBridge.LI_ERR_UNSUPPORTED;
         }
         else {
             // Up, Down, and Hover events are specific to the action index
             byte toolType = convertToolTypeToStylusToolType(event, event.getActionIndex());
-            if (toolType == MoonBridge.LI_TOOL_TYPE_UNKNOWN) {
+            if (toolType == AntBridge.LI_TOOL_TYPE_UNKNOWN) {
                 // Not a stylus event
                 return false;
             }
@@ -1759,7 +1759,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                 normalizedCoords[0], normalizedCoords[1],
                 getPressureOrDistance(event, pointerIndex),
                 normalizedContactArea[0], normalizedContactArea[1],
-                getRotationDegrees(event, pointerIndex)) != MoonBridge.LI_ERR_UNSUPPORTED;
+                getRotationDegrees(event, pointerIndex)) != AntBridge.LI_ERR_UNSUPPORTED;
     }
 
     private boolean trySendTouchEvent(View view, MotionEvent event) {
@@ -1779,9 +1779,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
         else if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             // Cancel impacts all active pointers
-            return conn.sendTouchEvent(MoonBridge.LI_TOUCH_EVENT_CANCEL_ALL, 0,
+            return conn.sendTouchEvent(AntBridge.LI_TOUCH_EVENT_CANCEL_ALL, 0,
                     0, 0, 0, 0, 0,
-                    MoonBridge.LI_ROT_UNKNOWN) != MoonBridge.LI_ERR_UNSUPPORTED;
+                    AntBridge.LI_ROT_UNKNOWN) != AntBridge.LI_ERR_UNSUPPORTED;
         }
         else {
             // Up, Down, and Hover events are specific to the action index
@@ -2257,7 +2257,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     public void stageFailed(final String stage, final int portFlags, final int errorCode) {
         // Perform a connection test if the failure could be due to a blocked port
         // This does network I/O, so don't do it on the main thread.
-        final int portTestResult = MoonBridge.testClientConnectivity(ServerHelper.CONNECTION_TEST_SERVER, 443, portFlags);
+        final int portTestResult = AntBridge.testClientConnectivity(ServerHelper.CONNECTION_TEST_SERVER, 443, portFlags);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -2281,10 +2281,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
                     if (portFlags != 0) {
                         dialogText += "\n\n" + getResources().getString(R.string.check_ports_msg) + "\n" +
-                                MoonBridge.stringifyPortFlags(portFlags, "\n");
+                                AntBridge.stringifyPortFlags(portFlags, "\n");
                     }
 
-                    if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0)  {
+                    if (portTestResult != AntBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0)  {
                         dialogText += "\n\n" + getResources().getString(R.string.nettest_text_blocked);
                     }
                     String finalDialogText = dialogText;
@@ -2302,8 +2302,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     public void connectionTerminated(final int errorCode) {
         // Perform a connection test if the failure could be due to a blocked port
         // This does network I/O, so don't do it on the main thread.
-        final int portFlags = MoonBridge.getPortFlagsFromTerminationErrorCode(errorCode);
-        final int portTestResult = MoonBridge.testClientConnectivity(ServerHelper.CONNECTION_TEST_SERVER,443, portFlags);
+        final int portFlags = AntBridge.getPortFlagsFromTerminationErrorCode(errorCode);
+        final int portTestResult = AntBridge.testClientConnectivity(ServerHelper.CONNECTION_TEST_SERVER,443, portFlags);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -2324,29 +2324,29 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
                     // Display the error dialog if it was an unexpected termination.
                     // Otherwise, just finish the activity immediately.
-                    if (errorCode != MoonBridge.ML_ERROR_GRACEFUL_TERMINATION) {
+                    if (errorCode != AntBridge.ML_ERROR_GRACEFUL_TERMINATION) {
                         String message;
 
-                        if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0) {
+                        if (portTestResult != AntBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0) {
                             // If we got a blocked result, that supersedes any other error message
                             message = getResources().getString(R.string.nettest_text_blocked);
                         }
                         else {
                             switch (errorCode) {
-                                case MoonBridge.ML_ERROR_NO_VIDEO_TRAFFIC:
+                                case AntBridge.ML_ERROR_NO_VIDEO_TRAFFIC:
                                     message = getResources().getString(R.string.no_video_received_error);
                                     break;
 
-                                case MoonBridge.ML_ERROR_NO_VIDEO_FRAME:
+                                case AntBridge.ML_ERROR_NO_VIDEO_FRAME:
                                     message = getResources().getString(R.string.no_frame_received_error);
                                     break;
 
-                                case MoonBridge.ML_ERROR_UNEXPECTED_EARLY_TERMINATION:
-                                case MoonBridge.ML_ERROR_PROTECTED_CONTENT:
+                                case AntBridge.ML_ERROR_UNEXPECTED_EARLY_TERMINATION:
+                                case AntBridge.ML_ERROR_PROTECTED_CONTENT:
                                     message = getResources().getString(R.string.early_termination_error);
                                     break;
 
-                                case MoonBridge.ML_ERROR_FRAME_CONVERSION:
+                                case AntBridge.ML_ERROR_FRAME_CONVERSION:
                                     message = getResources().getString(R.string.frame_conversion_error);
                                     break;
 
@@ -2367,7 +2367,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
                         if (portFlags != 0) {
                             message += "\n\n" + getResources().getString(R.string.check_ports_msg) + "\n" +
-                                    MoonBridge.stringifyPortFlags(portFlags, "\n");
+                                    AntBridge.stringifyPortFlags(portFlags, "\n");
                         }
                         String finalMessage = message;
 
@@ -2397,7 +2397,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                     return;
                 }
 
-                if (connectionStatus == MoonBridge.CONN_STATUS_POOR) {
+                if (connectionStatus == AntBridge.CONN_STATUS_POOR) {
                     if (prefConfig.bitrate > 5000) {
                         notificationOverlayView.setText(getResources().getString(R.string.slow_connection_msg));
                     }
@@ -2407,7 +2407,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
                     requestedNotificationOverlayVisibility = View.VISIBLE;
                 }
-                else if (connectionStatus == MoonBridge.CONN_STATUS_OKAY) {
+                else if (connectionStatus == AntBridge.CONN_STATUS_OKAY) {
                     requestedNotificationOverlayVisibility = View.GONE;
                 }
 

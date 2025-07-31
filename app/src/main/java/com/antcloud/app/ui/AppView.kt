@@ -38,6 +38,7 @@ import com.antcloud.app.common.AppUtils
 import com.antcloud.app.common.FPSSpinnerAdapter
 import com.antcloud.app.common.GlobalData
 import com.antcloud.app.common.ResolutionSpinnerAdapter
+import com.antcloud.app.components.makeToast
 import com.antcloud.app.computers.ComputerManagerService
 import com.antcloud.app.computers.ComputerManagerService.ApplistPoller
 import com.antcloud.app.computers.ComputerManagerService.ComputerManagerBinder
@@ -52,14 +53,13 @@ import com.antcloud.app.nvstream.http.NvApp
 import com.antcloud.app.nvstream.http.NvHTTP
 import com.antcloud.app.nvstream.http.PairingManager
 import com.antcloud.app.nvstream.http.PairingManager.PairState
-import com.antcloud.app.nvstream.jni.MoonBridge
+import com.antcloud.app.nvstream.jni.AntBridge
 import com.antcloud.app.preferences.PreferenceConfiguration
 import com.antcloud.app.utils.CacheHelper
 import com.antcloud.app.utils.RestClient
 import com.antcloud.app.utils.ServerHelper
 import com.antcloud.app.utils.ShortcutHelper
 import com.antcloud.app.utils.SpinnerDialog
-import com.antcloud.app.utils.UiHelper
 import com.antcloud.app.viewmodel.StreamViewModel
 import com.antcloud.app.viewmodel.VMStatus
 import dagger.hilt.android.AndroidEntryPoint
@@ -184,7 +184,7 @@ class AppView : AppCompatActivity() {
                 this@AppView.runOnUiThread {
                     Toast.makeText(
                         this@AppView,
-                        resources.getText(R.string.lost_connection),
+                        "connection lost",
                         Toast.LENGTH_SHORT
                     ).show()
                     finish()
@@ -580,14 +580,7 @@ class AppView : AppCompatActivity() {
         }
     }
 
-    private fun loadAppsBlocking() {
-        blockingLoadSpinner = SpinnerDialog.displayDialog(
-            this,
-            resources.getString(R.string.applist_refresh_title),
-            resources.getString(R.string.applist_refresh_msg),
-            true
-        )
-    }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -605,7 +598,6 @@ class AppView : AppCompatActivity() {
     override fun onResume() {
         Log.i("test", "onResume")
         super.onResume()
-        UiHelper.showDecoderCrashDialog(this)
         inForeground = true
     }
 
@@ -746,11 +738,11 @@ class AppView : AppCompatActivity() {
         }
 
         val portTestResult =
-            if (!success && !wrongSiteLocal && !invalidInput) MoonBridge.testClientConnectivity(
+            if (!success && !wrongSiteLocal && !invalidInput) AntBridge.testClientConnectivity(
                 ServerHelper.CONNECTION_TEST_SERVER, 443,
-                MoonBridge.ML_PORT_FLAG_TCP_47984 or MoonBridge.ML_PORT_FLAG_TCP_47989
+                AntBridge.ML_PORT_FLAG_TCP_47984 or AntBridge.ML_PORT_FLAG_TCP_47989
             )
-            else MoonBridge.ML_TEST_RESULT_INCONCLUSIVE
+            else AntBridge.ML_TEST_RESULT_INCONCLUSIVE
 
         if (invalidInput) {
             withContext(Dispatchers.Main) {
@@ -876,19 +868,7 @@ class AppView : AppCompatActivity() {
                     handlerThread.start()
                     val pm = httpConn.pairingManager
                     val pairState = pm.pair(httpConn.getServerInfo(true), pinStr)
-                    if (pairState == PairState.PIN_WRONG) {
-                        message = resources.getString(R.string.pair_incorrect_pin)
-                    } else if (pairState == PairState.FAILED) {
-                        message = if (computer.runningGameId != 0) {
-                            resources.getString(R.string.pair_pc_ingame)
-                        } else {
-                            resources.getString(R.string.pair_fail)
-                        }
-                    } else if (pairState == PairState.ALREADY_IN_PROGRESS) {
-                        message = resources.getString(R.string.pair_already_in_progress)
-                    }
-
-                    else if (pairState == PairState.PAIRED) {
+                   if (pairState == PairState.PAIRED) {
                         message = null
                         success = true
                         Log.i("test", "qldchnbq")
@@ -897,8 +877,7 @@ class AppView : AppCompatActivity() {
                         managerBinder1!!.getComputer(computer.uuid).serverCert = pm.pairedCert
                         managerBinder1!!.invalidateStateForComputer(computer.uuid)
                     } else {
-                        message = null
-
+                       message = resources.getString(R.string.pairing_fail)
                 }
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -907,8 +886,7 @@ class AppView : AppCompatActivity() {
             val toastSuccess = success
             runOnUiThread {
                 if (toastMessage != null) {
-                    Toast.makeText(this@AppView, toastMessage, Toast.LENGTH_LONG)
-                        .show()
+                    makeToast(toastMessage)
                 }
                 if (toastSuccess) {
                     computerName = computer.name

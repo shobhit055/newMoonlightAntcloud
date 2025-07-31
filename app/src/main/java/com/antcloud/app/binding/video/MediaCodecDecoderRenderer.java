@@ -17,7 +17,7 @@ import com.antcloud.app.BuildConfig;
 import com.antcloud.app.ui.LimeLog;
 import com.antcloud.app.R;
 import com.antcloud.app.nvstream.av.video.VideoDecoderRenderer;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 import com.antcloud.app.preferences.PreferenceConfiguration;
 
 import android.annotation.TargetApi;
@@ -373,19 +373,19 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
     public int getPreferredColorSpace() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || hevcDecoder != null || av1Decoder != null) {
-            return MoonBridge.COLORSPACE_REC_709;
+            return AntBridge.COLORSPACE_REC_709;
         }
         else {
-            return MoonBridge.COLORSPACE_REC_601;
+            return AntBridge.COLORSPACE_REC_601;
         }
     }
 
     public int getPreferredColorRange() {
         if (prefs.fullRange) {
-            return MoonBridge.COLOR_RANGE_FULL;
+            return AntBridge.COLOR_RANGE_FULL;
         }
         else {
-            return MoonBridge.COLOR_RANGE_LIMITED;
+            return AntBridge.COLOR_RANGE_LIMITED;
         }
     }
 
@@ -412,18 +412,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             videoFormat.setInteger(MediaFormat.KEY_COLOR_RANGE,
-                    getPreferredColorRange() == MoonBridge.COLOR_RANGE_FULL ?
+                    getPreferredColorRange() == AntBridge.COLOR_RANGE_FULL ?
                     MediaFormat.COLOR_RANGE_FULL : MediaFormat.COLOR_RANGE_LIMITED);
-            if ((getActiveVideoFormat() & MoonBridge.VIDEO_FORMAT_MASK_10BIT) == 0) {
+            if ((getActiveVideoFormat() & AntBridge.VIDEO_FORMAT_MASK_10BIT) == 0) {
                 videoFormat.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
                 switch (getPreferredColorSpace()) {
-                    case MoonBridge.COLORSPACE_REC_601:
+                    case AntBridge.COLORSPACE_REC_601:
                         videoFormat.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT601_NTSC);
                         break;
-                    case MoonBridge.COLORSPACE_REC_709:
+                    case AntBridge.COLORSPACE_REC_709:
                         videoFormat.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
                         break;
-                    case MoonBridge.COLORSPACE_REC_2020:
+                    case AntBridge.COLORSPACE_REC_2020:
                         videoFormat.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT2020);
                         break;
                 }
@@ -516,7 +516,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         String mimeType;
         MediaCodecInfo selectedDecoderInfo;
 
-        if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H264) != 0) {
+        if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H264) != 0) {
             mimeType = "video/avc";
             selectedDecoderInfo = avcDecoder;
 
@@ -549,7 +549,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
             refFrameInvalidationActive = refFrameInvalidationAvc;
         }
-        else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H265) != 0) {
+        else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H265) != 0) {
             mimeType = "video/hevc";
             selectedDecoderInfo = hevcDecoder;
 
@@ -560,7 +560,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
             refFrameInvalidationActive = refFrameInvalidationHevc;
         }
-        else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
+        else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
             mimeType = "video/av01";
             selectedDecoderInfo = av1Decoder;
 
@@ -1281,7 +1281,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                                 long receiveTimeMs, long enqueueTimeMs) {
         if (stopping) {
             // Don't bother if we're stopping
-            return MoonBridge.DR_OK;
+            return AntBridge.DR_OK;
         }
 
         if (lastFrameNumber == 0) {
@@ -1295,7 +1295,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
 
         // Reset CSD data for each IDR frame
-        if (lastFrameNumber != frameNumber && frameType == MoonBridge.FRAME_TYPE_IDR) {
+        if (lastFrameNumber != frameNumber && frameType == AntBridge.FRAME_TYPE_IDR) {
             vpsBuffers.clear();
             spsBuffers.clear();
             ppsBuffers.clear();
@@ -1312,18 +1312,18 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                 VideoStatsFps fps = lastTwo.getFps();
                 String decoder;
 
-                if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H264) != 0) {
+                if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H264) != 0) {
                     decoder = avcDecoder.getName();
-                } else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H265) != 0) {
+                } else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_H265) != 0) {
                     decoder = hevcDecoder.getName();
-                } else if ((videoFormat & MoonBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
+                } else if ((videoFormat & AntBridge.VIDEO_FORMAT_MASK_AV1) != 0) {
                     decoder = av1Decoder.getName();
                 } else {
                     decoder = "(unknown)";
                 }
 
                 float decodeTimeMs = (float)lastTwo.decoderTimeMs / lastTwo.totalFramesReceived;
-                long rttInfo = MoonBridge.getEstimatedRttInfo();
+                long rttInfo = AntBridge.getEstimatedRttInfo();
                 StringBuilder sb = new StringBuilder();
                 sb.append(context.getString(R.string.perf_overlay_streamdetails, initialWidth + "x" + initialHeight, fps.totalFps)).append('\n');
                 sb.append(context.getString(R.string.perf_overlay_netdrops,
@@ -1349,9 +1349,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         boolean csdSubmittedForThisFrame = false;
 
         // IDR frames require special handling for CSD buffer submission
-        if (frameType == MoonBridge.FRAME_TYPE_IDR) {
+        if (frameType == AntBridge.FRAME_TYPE_IDR) {
             // H264 SPS
-            if (decodeUnitType == MoonBridge.BUFFER_TYPE_SPS && (videoFormat & MoonBridge.VIDEO_FORMAT_MASK_H264) != 0) {
+            if (decodeUnitType == AntBridge.BUFFER_TYPE_SPS && (videoFormat & AntBridge.VIDEO_FORMAT_MASK_H264) != 0) {
                 numSpsIn++;
 
                 ByteBuffer spsBuf = ByteBuffer.wrap(decodeUnitData);
@@ -1483,42 +1483,42 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
 
                 // Batch this to submit together with other CSD per AOSP docs
                 spsBuffers.add(naluBuffer);
-                return MoonBridge.DR_OK;
+                return AntBridge.DR_OK;
             }
-            else if (decodeUnitType == MoonBridge.BUFFER_TYPE_VPS) {
+            else if (decodeUnitType == AntBridge.BUFFER_TYPE_VPS) {
                 numVpsIn++;
 
                 // Batch this to submit together with other CSD per AOSP docs
                 byte[] naluBuffer = new byte[decodeUnitLength];
                 System.arraycopy(decodeUnitData, 0, naluBuffer, 0, decodeUnitLength);
                 vpsBuffers.add(naluBuffer);
-                return MoonBridge.DR_OK;
+                return AntBridge.DR_OK;
             }
             // Only the HEVC SPS hits this path (H.264 is handled above)
-            else if (decodeUnitType == MoonBridge.BUFFER_TYPE_SPS) {
+            else if (decodeUnitType == AntBridge.BUFFER_TYPE_SPS) {
                 numSpsIn++;
 
                 // Batch this to submit together with other CSD per AOSP docs
                 byte[] naluBuffer = new byte[decodeUnitLength];
                 System.arraycopy(decodeUnitData, 0, naluBuffer, 0, decodeUnitLength);
                 spsBuffers.add(naluBuffer);
-                return MoonBridge.DR_OK;
+                return AntBridge.DR_OK;
             }
-            else if (decodeUnitType == MoonBridge.BUFFER_TYPE_PPS) {
+            else if (decodeUnitType == AntBridge.BUFFER_TYPE_PPS) {
                 numPpsIn++;
 
                 // Batch this to submit together with other CSD per AOSP docs
                 byte[] naluBuffer = new byte[decodeUnitLength];
                 System.arraycopy(decodeUnitData, 0, naluBuffer, 0, decodeUnitLength);
                 ppsBuffers.add(naluBuffer);
-                return MoonBridge.DR_OK;
+                return AntBridge.DR_OK;
             }
-            else if ((videoFormat & (MoonBridge.VIDEO_FORMAT_MASK_H264 | MoonBridge.VIDEO_FORMAT_MASK_H265)) != 0) {
+            else if ((videoFormat & (AntBridge.VIDEO_FORMAT_MASK_H264 | AntBridge.VIDEO_FORMAT_MASK_H265)) != 0) {
                 // If this is the first CSD blob or we aren't supporting fused IDR frames, we will
                 // submit the CSD blob in a separate input buffer for each IDR frame.
                 if (!submittedCsd || !fusedIdrFrame) {
                     if (!fetchNextInputBuffer()) {
-                        return MoonBridge.DR_NEED_IDR;
+                        return AntBridge.DR_NEED_IDR;
                     }
 
                     // Submit all CSD when we receive the first non-CSD blob in an IDR frame
@@ -1533,7 +1533,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     }
 
                     if (!queueNextInputBuffer(0, MediaCodec.BUFFER_FLAG_CODEC_CONFIG)) {
-                        return MoonBridge.DR_NEED_IDR;
+                        return AntBridge.DR_NEED_IDR;
                     }
 
                     // Remember that we already submitted CSD for this frame, so we don't do it
@@ -1547,7 +1547,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         needsBaselineSpsHack = false;
 
                         if (!replaySps()) {
-                            return MoonBridge.DR_NEED_IDR;
+                            return AntBridge.DR_NEED_IDR;
                         }
 
                         LimeLog.info("SPS replay complete");
@@ -1578,12 +1578,12 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         }
 
         if (!fetchNextInputBuffer()) {
-            return MoonBridge.DR_NEED_IDR;
+            return AntBridge.DR_NEED_IDR;
         }
 
         int codecFlags = 0;
 
-        if (frameType == MoonBridge.FRAME_TYPE_IDR) {
+        if (frameType == AntBridge.FRAME_TYPE_IDR) {
             codecFlags |= MediaCodec.BUFFER_FLAG_SYNC_FRAME;
 
             // If we are using fused IDR frames, submit the CSD with each IDR frame
@@ -1624,10 +1624,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         nextInputBuffer.put(decodeUnitData, 0, decodeUnitLength);
 
         if (!queueNextInputBuffer(timestampUs, codecFlags)) {
-            return MoonBridge.DR_NEED_IDR;
+            return AntBridge.DR_NEED_IDR;
         }
 
-        return MoonBridge.DR_OK;
+        return AntBridge.DR_OK;
     }
 
     private boolean replaySps() {
@@ -1661,22 +1661,22 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         int capabilities = 0;
 
         // Request the optimal number of slices per frame for this decoder
-        capabilities |= MoonBridge.CAPABILITY_SLICES_PER_FRAME(optimalSlicesPerFrame);
+        capabilities |= AntBridge.CAPABILITY_SLICES_PER_FRAME(optimalSlicesPerFrame);
 
         // Enable reference frame invalidation on supported hardware
         if (refFrameInvalidationAvc) {
-            capabilities |= MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC;
+            capabilities |= AntBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC;
         }
         if (refFrameInvalidationHevc) {
-            capabilities |= MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
+            capabilities |= AntBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
         }
         if (refFrameInvalidationAv1) {
-            capabilities |= MoonBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
+            capabilities |= AntBridge.CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
         }
 
         // Enable direct submit on supported hardware
         if (directSubmit) {
-            capabilities |= MoonBridge.CAPABILITY_DIRECT_SUBMIT;
+            capabilities |= AntBridge.CAPABILITY_DIRECT_SUBMIT;
         }
 
         return capabilities;

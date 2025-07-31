@@ -9,7 +9,7 @@ import android.os.SystemClock;
 
 import com.antcloud.app.ui.LimeLog;
 import com.antcloud.app.nvstream.input.ControllerPacket;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,8 +27,8 @@ public abstract class AbstractXboxController extends AbstractController {
         super(deviceId, listener, device.getVendorId(), device.getProductId());
         this.device = device;
         this.connection = connection;
-        this.type = MoonBridge.LI_CTYPE_XBOX;
-        this.capabilities = MoonBridge.LI_CCAP_ANALOG_TRIGGERS | MoonBridge.LI_CCAP_RUMBLE;
+        this.type = AntBridge.LI_CTYPE_XBOX;
+        this.capabilities = AntBridge.LI_CCAP_ANALOG_TRIGGERS | AntBridge.LI_CCAP_RUMBLE;
         this.buttonFlags =
                 ControllerPacket.A_FLAG | ControllerPacket.B_FLAG | ControllerPacket.X_FLAG | ControllerPacket.Y_FLAG |
                         ControllerPacket.UP_FLAG | ControllerPacket.DOWN_FLAG | ControllerPacket.LEFT_FLAG | ControllerPacket.RIGHT_FLAG |

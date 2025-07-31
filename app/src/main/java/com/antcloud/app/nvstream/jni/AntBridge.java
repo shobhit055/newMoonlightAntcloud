@@ -4,7 +4,7 @@ import com.antcloud.app.nvstream.NvConnectionListener;
 import com.antcloud.app.nvstream.av.audio.AudioRenderer;
 import com.antcloud.app.nvstream.av.video.VideoDecoderRenderer;
 
-public class MoonBridge {
+public class AntBridge {
 
     public static final AudioConfiguration AUDIO_CONFIGURATION_STEREO = new AudioConfiguration(2, 0x3);
     public static final AudioConfiguration AUDIO_CONFIGURATION_51_SURROUND = new AudioConfiguration(6, 0x3F);
@@ -326,15 +326,15 @@ public class MoonBridge {
     }
 
     public static void setupBridge(VideoDecoderRenderer videoRenderer, AudioRenderer audioRenderer, NvConnectionListener connectionListener) {
-        MoonBridge.videoRenderer = videoRenderer;
-        MoonBridge.audioRenderer = audioRenderer;
-        MoonBridge.connectionListener = connectionListener;
+        AntBridge.videoRenderer = videoRenderer;
+        AntBridge.audioRenderer = audioRenderer;
+        AntBridge.connectionListener = connectionListener;
     }
 
     public static void cleanupBridge() {
-        MoonBridge.videoRenderer = null;
-        MoonBridge.audioRenderer = null;
-        MoonBridge.connectionListener = null;
+        AntBridge.videoRenderer = null;
+        AntBridge.audioRenderer = null;
+        AntBridge.connectionListener = null;
     }
 
     public static native int startConnection(String address, String appVersion, String gfeVersion,

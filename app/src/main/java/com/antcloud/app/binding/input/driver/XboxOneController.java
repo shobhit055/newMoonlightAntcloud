@@ -6,7 +6,7 @@ import android.hardware.usb.UsbDeviceConnection;
 
 import com.antcloud.app.ui.LimeLog;
 import com.antcloud.app.nvstream.input.ControllerPacket;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -62,7 +62,7 @@ public class XboxOneController extends AbstractXboxController {
 
     public XboxOneController(UsbDevice device, UsbDeviceConnection connection, int deviceId, UsbDriverListener listener) {
         super(device, connection, deviceId, listener);
-        capabilities |= MoonBridge.LI_CCAP_TRIGGER_RUMBLE;
+        capabilities |= AntBridge.LI_CCAP_TRIGGER_RUMBLE;
     }
 
     private void processButtons(ByteBuffer buffer) {

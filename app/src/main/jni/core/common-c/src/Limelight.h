@@ -487,8 +487,8 @@ void LiInitializeConnectionCallbacks(PCONNECTION_LISTENER_CALLBACKS clCallbacks)
 #define SCM_H264        0x00001
 #define SCM_HEVC        0x00100
 #define SCM_HEVC_MAIN10 0x00200
-#define SCM_AV1_MAIN8   0x10000 // Sunshine extension
-#define SCM_AV1_MAIN10  0x20000 // Sunshine extension
+#define SCM_AV1_MAIN8   0x10000
+#define SCM_AV1_MAIN10  0x20000
 
 // SCM masks to identify various codec capabilities
 #define SCM_MASK_H264   SCM_H264
@@ -587,7 +587,7 @@ int LiSendMouseMoveAsMousePositionEvent(short deltaX, short deltaY, short refere
 // Error return value to indicate that the requested functionality is not supported by the host
 #define LI_ERR_UNSUPPORTED -5501
 
-// This function allows multi-touch input to be sent directly to Sunshine hosts. The x and y values
+
 // are normalized device coordinates stretching top-left corner (0.0, 0.0) to bottom-right corner
 // (1.0, 1.0) of the video area.
 //
@@ -679,7 +679,7 @@ int LiSendKeyboardEvent(short keyCode, char keyAction, char modifiers);
 
 // Similar to LiSendKeyboardEvent() but allows the client to inform the host that
 // the keycode was not mapped to a standard US English scancode and should be
-// interpreted as-is. This is a Sunshine protocol extension.
+
 #define SS_KBE_FLAG_NON_NORMALIZED 0x01
 int LiSendKeyboardEvent2(short keyCode, char keyAction, char modifiers, char flags);
 
@@ -703,7 +703,7 @@ int LiSendUtf8TextEvent(const char *text, unsigned int length);
 #define RS_CLK_FLAG  0x0080
 #define SPECIAL_FLAG 0x0400
 
-// Extended buttons (Sunshine only)
+
 #define PADDLE1_FLAG  0x010000
 #define PADDLE2_FLAG  0x020000
 #define PADDLE3_FLAG  0x040000
@@ -718,12 +718,12 @@ int LiSendControllerEvent(int buttonFlags, unsigned char leftTrigger, unsigned c
 
 // This function queues a controller event to be sent to the remote server. The controllerNumber
 // parameter is a zero-based index of which controller this event corresponds to. The largest legal
-// controller number is 3 for GFE hosts and 15 for Sunshine hosts. On generation 3 servers (GFE 2.1.x),
+
 // these will be sent as controller 0 regardless of the controllerNumber parameter.
 //
 // The activeGamepadMask parameter is a bitfield with bits set for each controller present.
 // On GFE, activeGamepadMask is limited to a maximum of 4 bits (0xF).
-// On Sunshine, it is limited to 16 bits (0xFFFF).
+
 //
 // To indicate arrival of a gamepad, you may send an empty event with the controller number
 // set to the new controller and the bit of the new controller set in the active gamepad mask.
@@ -807,7 +807,7 @@ int LiSendHighResScrollEvent(short scrollAmount);
 
 // These functions send horizontal scroll events to the host which are
 // analogous to LiSendScrollEvent() and LiSendHighResScrollEvent().
-// This is a Sunshine protocol extension.
+
 int LiSendHScrollEvent(signed char scrollClicks);
 int LiSendHighResHScrollEvent(short scrollAmount);
 
@@ -928,7 +928,7 @@ typedef struct _SS_HDR_METADATA {
 
 // This function populates the provided mastering metadata struct with the HDR metadata
 // from the host PC's monitor and content (if available). It is only valid to call this
-// function when HDR mode is active on the host. This is a Sunshine protocol extension.
+
 bool LiGetHdrMetadata(PSS_HDR_METADATA metadata);
 
 // This function requests an IDR frame from the host. Typically this is done using DR_NEED_IDR, but clients

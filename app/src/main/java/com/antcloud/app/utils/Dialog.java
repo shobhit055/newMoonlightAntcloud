@@ -70,7 +70,7 @@ public class Dialog implements Runnable {
 
               }
         });
-        alert.setButton(AlertDialog.BUTTON_NEUTRAL, activity.getResources().getText(R.string.help), new DialogInterface.OnClickListener() {
+        alert.setButton(AlertDialog.BUTTON_NEUTRAL, "Help", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 synchronized (rundownDialogs) {
                     rundownDialogs.remove(Dialog.this);

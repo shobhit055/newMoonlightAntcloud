@@ -47,7 +47,7 @@ import com.antcloud.app.BuildConfig;
 import com.antcloud.app.ui.LimeLog;
 import com.antcloud.app.nvstream.ConnectionContext;
 import com.antcloud.app.nvstream.http.PairingManager.PairState;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -368,7 +368,6 @@ public class NvHTTP {
         // FIXME: Do we want to use the current port?
         details.localAddress = makeTuple(getXmlString(serverInfo, "LocalIP", false), baseUrlHttp.port());
 
-        // This is missing on on recent GFE versions, but it's present on Sunshine
         details.externalPort = getExternalPort(serverInfo);
         details.remoteAddress = makeTuple(getXmlString(serverInfo, "ExternalIP", false), details.externalPort);
 
@@ -566,12 +565,10 @@ public class NvHTTP {
     }
 
     public int getExternalPort(String serverInfo) {
-        // This is an extension which is not present in GFE. It is present for Sunshine to be able
         // to support dynamic HTTP WAN ports without requiring the user to manually enter the port.
         try {
             return Integer.parseInt(getXmlString(serverInfo, "ExternalPort", true));
         } catch (XmlPullParserException e) {
-            // Expected on non-Sunshine servers
             return baseUrlHttp.port();
         } catch (IOException e) {
             e.printStackTrace();
@@ -781,7 +778,7 @@ public class NvHTTP {
             "&remoteControllersBitmap=" + context.streamConfig.getAttachedGamepadMask() +
             "&gcmap=" + context.streamConfig.getAttachedGamepadMask() +
             "&gcpersist="+(context.streamConfig.getPersistGamepadsAfterDisconnect() ? 1 : 0) +
-            MoonBridge.getLaunchUrlQueryParameters());
+            AntBridge.getLaunchUrlQueryParameters());
         if ((verb.equals("launch") && !getXmlString(xmlStr, "gamesession", true).equals("0") ||
                 (verb.equals("resume") && !getXmlString(xmlStr, "resume", true).equals("0")))) {
             // sessionUrl0 will be missing for older GFE versions

@@ -1,8 +1,7 @@
 package com.antcloud.app.nvstream;
 
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 import com.antcloud.app.nvstream.http.NvApp;
-import com.antcloud.app.nvstream.jni.MoonBridge;
 
 public class StreamConfiguration {
     public static final int INVALID_APP_ID = 0;
@@ -22,7 +21,7 @@ public class StreamConfiguration {
     private boolean playLocalAudio;
     private int maxPacketSize;
     private int remote;
-    private MoonBridge.AudioConfiguration audioConfiguration;
+    private AntBridge.AudioConfiguration audioConfiguration;
     private int supportedVideoFormats;
     private int attachedGamepadMask;
     private int encryptionFlags;
@@ -109,7 +108,7 @@ public class StreamConfiguration {
             return this;
         }
 
-        public StreamConfiguration.Builder setAudioConfiguration(MoonBridge.AudioConfiguration audioConfig) {
+        public StreamConfiguration.Builder setAudioConfiguration(AntBridge.AudioConfiguration audioConfig) {
             config.audioConfiguration = audioConfig;
             return this;
         }
@@ -146,8 +145,8 @@ public class StreamConfiguration {
         this.remote = STREAM_CFG_AUTO;
         this.sops = true;
         this.enableAdaptiveResolution = false;
-        this.audioConfiguration = MoonBridge.AUDIO_CONFIGURATION_STEREO;
-        this.supportedVideoFormats = MoonBridge.VIDEO_FORMAT_H264;
+        this.audioConfiguration = AntBridge.AUDIO_CONFIGURATION_STEREO;
+        this.supportedVideoFormats = AntBridge.VIDEO_FORMAT_H264;
         this.attachedGamepadMask = 0;
     }
     
@@ -195,7 +194,7 @@ public class StreamConfiguration {
         return remote;
     }
 
-    public MoonBridge.AudioConfiguration getAudioConfiguration() {
+    public AntBridge.AudioConfiguration getAudioConfiguration() {
         return audioConfiguration;
     }
     

@@ -361,7 +361,7 @@ public class ShortcutTrampoline extends Activity {
                 Service.BIND_AUTO_CREATE);
 
         blockingLoadSpinner = SpinnerDialog.displayDialog(this, getResources().getString(R.string.conn_establishing_title),
-                getResources().getString(R.string.applist_connect_msg), true);
+                "connecting", true);
     }
 
     @Override

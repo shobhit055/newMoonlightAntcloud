@@ -11,7 +11,7 @@ import android.os.Build;
 
 import com.antcloud.app.ui.LimeLog;
 import com.antcloud.app.nvstream.av.audio.AudioRenderer;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 public class AndroidAudioRenderer implements AudioRenderer {
 
@@ -65,7 +65,7 @@ public class AndroidAudioRenderer implements AudioRenderer {
     }
 
     @Override
-    public int setup(MoonBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame) {
+    public int setup(AntBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame) {
         int channelConfig;
         int bytesPerFrame;
 
@@ -188,14 +188,14 @@ public class AndroidAudioRenderer implements AudioRenderer {
     @Override
     public void playDecodedAudio(short[] audioData) {
         // Only queue up to 40 ms of pending audio data in addition to what AudioTrack is buffering for us.
-        if (MoonBridge.getPendingAudioDuration() < 40) {
+        if (AntBridge.getPendingAudioDuration() < 40) {
             // This will block until the write is completed. That can cause a backlog
             // of pending audio data, so we do the above check to be able to bound
             // latency at 40 ms in that situation.
             track.write(audioData, 0, audioData.length);
         }
         else {
-            LimeLog.info("Too much pending audio data: " + MoonBridge.getPendingAudioDuration() +" ms");
+            LimeLog.info("Too much pending audio data: " + AntBridge.getPendingAudioDuration() +" ms");
         }
     }
 

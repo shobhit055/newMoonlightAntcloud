@@ -1,9 +1,9 @@
 package com.antcloud.app.nvstream.av.audio;
 
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 public interface AudioRenderer {
-    int setup(MoonBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame);
+    int setup(AntBridge.AudioConfiguration audioConfiguration, int sampleRate, int samplesPerFrame);
 
     void start();
 

@@ -78,9 +78,9 @@ JNIEnv* GetThreadEnv(void) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_antcloud_app_nvstream_jni_MoonBridge_init(JNIEnv *env, jclass clazz) {
+Java_com_antcloud_app_nvstream_jni_AntBridge_init(JNIEnv *env, jclass clazz) {
     (*env)->GetJavaVM(env, &JVM);
-    GlobalBridgeClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/antcloud/app/nvstream/jni/MoonBridge"));
+    GlobalBridgeClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/antcloud/app/nvstream/jni/AntBridge"));
     BridgeDrSetupMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeDrSetup", "(IIII)I");
     BridgeDrStartMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeDrStart", "()V");
     BridgeDrStopMethod = (*env)->GetStaticMethodID(env, clazz, "bridgeDrStop", "()V");
@@ -452,16 +452,16 @@ hasFastAes() {
 }
 
 JNIEXPORT jint JNICALL
-Java_com_antcloud_app_nvstream_jni_MoonBridge_startConnection(JNIEnv *env, jclass clazz,
-                                                           jstring address, jstring appVersion, jstring gfeVersion,
-                                                           jstring rtspSessionUrl, jint serverCodecModeSupport,
-                                                           jint width, jint height, jint fps,
-                                                           jint bitrate, jint packetSize, jint streamingRemotely,
-                                                           jint audioConfiguration, jint supportedVideoFormats,
-                                                           jint clientRefreshRateX100,
-                                                           jbyteArray riAesKey, jbyteArray riAesIv,
-                                                           jint videoCapabilities,
-                                                           jint colorSpace, jint colorRange) {
+Java_com_antcloud_app_nvstream_jni_AntBridge_startConnection(JNIEnv *env, jclass clazz,
+                                                             jstring address, jstring appVersion, jstring gfeVersion,
+                                                             jstring rtspSessionUrl, jint serverCodecModeSupport,
+                                                             jint width, jint height, jint fps,
+                                                             jint bitrate, jint packetSize, jint streamingRemotely,
+                                                             jint audioConfiguration, jint supportedVideoFormats,
+                                                             jint clientRefreshRateX100,
+                                                             jbyteArray riAesKey, jbyteArray riAesIv,
+                                                             jint videoCapabilities,
+                                                             jint colorSpace, jint colorRange) {
     SERVER_INFORMATION serverInfo = {
             .address = (*env)->GetStringUTFChars(env, address, 0),
             .serverInfoAppVersion = (*env)->GetStringUTFChars(env, appVersion, 0),

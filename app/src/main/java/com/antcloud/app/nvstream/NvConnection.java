@@ -36,7 +36,7 @@ import com.antcloud.app.nvstream.http.NvApp;
 import com.antcloud.app.nvstream.http.NvHTTP;
 import com.antcloud.app.nvstream.http.PairingManager;
 import com.antcloud.app.nvstream.input.MouseButtonPacket;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 public class NvConnection {
     // Context parameters
@@ -86,13 +86,13 @@ public class NvConnection {
 
     public void stop() {
         // Interrupt any pending connection. This is thread-safe.
-        MoonBridge.interruptConnection();
+        AntBridge.interruptConnection();
 
 
         // we must not invoke that functionality in parallel.
-        synchronized (MoonBridge.class) {
-            MoonBridge.stopConnection();
-            MoonBridge.cleanupBridge();
+        synchronized (AntBridge.class) {
+            AntBridge.stopConnection();
+            AntBridge.cleanupBridge();
         }
 
         // Now a pending connection can be processed
@@ -242,7 +242,7 @@ public class NvConnection {
 
         context.serverCodecModeSupport = (int)h.getServerCodecModeSupport(serverInfo);
 
-        context.negotiatedHdr = (context.streamConfig.getSupportedVideoFormats() & MoonBridge.VIDEO_FORMAT_MASK_10BIT) != 0;
+        context.negotiatedHdr = (context.streamConfig.getSupportedVideoFormats() & AntBridge.VIDEO_FORMAT_MASK_10BIT) != 0;
         if ((context.serverCodecModeSupport & 0x20200) == 0 && context.negotiatedHdr) {
             context.connListener.displayTransientMessage("Your PC GPU does not support streaming HDR. The stream will be SDR.");
             context.negotiatedHdr = false;
@@ -259,7 +259,7 @@ public class NvConnection {
             return false;
         }
         else if ((context.streamConfig.getWidth() > 4096 || context.streamConfig.getHeight() > 4096) &&
-                (context.streamConfig.getSupportedVideoFormats() & ~MoonBridge.VIDEO_FORMAT_MASK_H264) == 0) {
+                (context.streamConfig.getSupportedVideoFormats() & ~AntBridge.VIDEO_FORMAT_MASK_H264) == 0) {
             context.connListener.displayMessage("Your streaming device must support HEVC or AV1 to stream at resolutions above 4K.");
             return false;
         }
@@ -402,7 +402,7 @@ public class NvConnection {
                 } catch (XmlPullParserException | IOException e) {
                     e.printStackTrace();
                     context.connListener.displayMessage(e.getMessage());
-                    context.connListener.stageFailed(appName, MoonBridge.ML_PORT_FLAG_TCP_47984 | MoonBridge.ML_PORT_FLAG_TCP_47989, 0);
+                    context.connListener.stageFailed(appName, AntBridge.ML_PORT_FLAG_TCP_47984 | AntBridge.ML_PORT_FLAG_TCP_47989, 0);
                     return;
                 }
 
@@ -420,9 +420,9 @@ public class NvConnection {
                 }
 
 
-                synchronized (MoonBridge.class) {
-                    MoonBridge.setupBridge(videoDecoderRenderer, audioRenderer, connectionListener);
-                    int ret = MoonBridge.startConnection(context.serverAddress.address,
+                synchronized (AntBridge.class) {
+                    AntBridge.setupBridge(videoDecoderRenderer, audioRenderer, connectionListener);
+                    int ret = AntBridge.startConnection(context.serverAddress.address,
                             context.serverAppVersion, context.serverGfeVersion, context.rtspSessionUrl,
                             context.serverCodecModeSupport,
                             context.negotiatedWidth, context.negotiatedHeight,
@@ -450,35 +450,35 @@ public class NvConnection {
     public void sendMouseMove(final short deltaX, final short deltaY)
     {
         if (!isMonkey) {
-            MoonBridge.sendMouseMove(deltaX, deltaY);
+            AntBridge.sendMouseMove(deltaX, deltaY);
         }
     }
 
     public void sendMousePosition(short x, short y, short referenceWidth, short referenceHeight)
     {
         if (!isMonkey) {
-            MoonBridge.sendMousePosition(x, y, referenceWidth, referenceHeight);
+            AntBridge.sendMousePosition(x, y, referenceWidth, referenceHeight);
         }
     }
 
     public void sendMouseMoveAsMousePosition(short deltaX, short deltaY, short referenceWidth, short referenceHeight)
     {
         if (!isMonkey) {
-            MoonBridge.sendMouseMoveAsMousePosition(deltaX, deltaY, referenceWidth, referenceHeight);
+            AntBridge.sendMouseMoveAsMousePosition(deltaX, deltaY, referenceWidth, referenceHeight);
         }
     }
 
     public void sendMouseButtonDown(final byte mouseButton)
     {
         if (!isMonkey) {
-            MoonBridge.sendMouseButton(MouseButtonPacket.PRESS_EVENT, mouseButton);
+            AntBridge.sendMouseButton(MouseButtonPacket.PRESS_EVENT, mouseButton);
         }
     }
     
     public void sendMouseButtonUp(final byte mouseButton)
     {
         if (!isMonkey) {
-            MoonBridge.sendMouseButton(MouseButtonPacket.RELEASE_EVENT, mouseButton);
+            AntBridge.sendMouseButton(MouseButtonPacket.RELEASE_EVENT, mouseButton);
         }
     }
     
@@ -489,49 +489,49 @@ public class NvConnection {
             final short rightStickX, final short rightStickY)
     {
         if (!isMonkey) {
-            MoonBridge.sendMultiControllerInput(controllerNumber, activeGamepadMask, buttonFlags,
+            AntBridge.sendMultiControllerInput(controllerNumber, activeGamepadMask, buttonFlags,
                     leftTrigger, rightTrigger, leftStickX, leftStickY, rightStickX, rightStickY);
         }
     }
 
     public void sendKeyboardInput(final short keyMap, final byte keyDirection, final byte modifier, final byte flags) {
         if (!isMonkey) {
-            MoonBridge.sendKeyboardInput(keyMap, keyDirection, modifier, flags);
+            AntBridge.sendKeyboardInput(keyMap, keyDirection, modifier, flags);
         }
     }
     
     public void sendMouseScroll(final byte scrollClicks) {
         if (!isMonkey) {
-            MoonBridge.sendMouseHighResScroll((short)(scrollClicks * 120)); // WHEEL_DELTA
+            AntBridge.sendMouseHighResScroll((short)(scrollClicks * 120)); // WHEEL_DELTA
         }
     }
 
     public void sendMouseHScroll(final byte scrollClicks) {
         if (!isMonkey) {
-            MoonBridge.sendMouseHighResHScroll((short)(scrollClicks * 120)); // WHEEL_DELTA
+            AntBridge.sendMouseHighResHScroll((short)(scrollClicks * 120)); // WHEEL_DELTA
         }
     }
 
     public void sendMouseHighResScroll(final short scrollAmount) {
         if (!isMonkey) {
-            MoonBridge.sendMouseHighResScroll(scrollAmount);
+            AntBridge.sendMouseHighResScroll(scrollAmount);
         }
     }
 
     public void sendMouseHighResHScroll(final short scrollAmount) {
         if (!isMonkey) {
-            MoonBridge.sendMouseHighResHScroll(scrollAmount);
+            AntBridge.sendMouseHighResHScroll(scrollAmount);
         }
     }
 
     public int sendTouchEvent(byte eventType, int pointerId, float x, float y, float pressureOrDistance,
                               float contactAreaMajor, float contactAreaMinor, short rotation) {
         if (!isMonkey) {
-            return MoonBridge.sendTouchEvent(eventType, pointerId, x, y, pressureOrDistance,
+            return AntBridge.sendTouchEvent(eventType, pointerId, x, y, pressureOrDistance,
                     contactAreaMajor, contactAreaMinor, rotation);
         }
         else {
-            return MoonBridge.LI_ERR_UNSUPPORTED;
+            return AntBridge.LI_ERR_UNSUPPORTED;
         }
     }
 
@@ -539,50 +539,50 @@ public class NvConnection {
                             float pressureOrDistance, float contactAreaMajor, float contactAreaMinor,
                             short rotation, byte tilt) {
         if (!isMonkey) {
-            return MoonBridge.sendPenEvent(eventType, toolType, penButtons, x, y, pressureOrDistance,
+            return AntBridge.sendPenEvent(eventType, toolType, penButtons, x, y, pressureOrDistance,
                     contactAreaMajor, contactAreaMinor, rotation, tilt);
         }
         else {
-            return MoonBridge.LI_ERR_UNSUPPORTED;
+            return AntBridge.LI_ERR_UNSUPPORTED;
         }
     }
 
     public int sendControllerArrivalEvent(byte controllerNumber, short activeGamepadMask, byte type,
                                           int supportedButtonFlags, short capabilities) {
-        return MoonBridge.sendControllerArrivalEvent(controllerNumber, activeGamepadMask, type, supportedButtonFlags, capabilities);
+        return AntBridge.sendControllerArrivalEvent(controllerNumber, activeGamepadMask, type, supportedButtonFlags, capabilities);
     }
 
     public int sendControllerTouchEvent(byte controllerNumber, byte eventType, int pointerId,
                                         float x, float y, float pressure) {
         if (!isMonkey) {
-            return MoonBridge.sendControllerTouchEvent(controllerNumber, eventType, pointerId, x, y, pressure);
+            return AntBridge.sendControllerTouchEvent(controllerNumber, eventType, pointerId, x, y, pressure);
         }
         else {
-            return MoonBridge.LI_ERR_UNSUPPORTED;
+            return AntBridge.LI_ERR_UNSUPPORTED;
         }
     }
 
     public int sendControllerMotionEvent(byte controllerNumber, byte motionType,
                                          float x, float y, float z) {
         if (!isMonkey) {
-            return MoonBridge.sendControllerMotionEvent(controllerNumber, motionType, x, y, z);
+            return AntBridge.sendControllerMotionEvent(controllerNumber, motionType, x, y, z);
         }
         else {
-            return MoonBridge.LI_ERR_UNSUPPORTED;
+            return AntBridge.LI_ERR_UNSUPPORTED;
         }
     }
 
     public void sendControllerBatteryEvent(byte controllerNumber, byte batteryState, byte batteryPercentage) {
-        MoonBridge.sendControllerBatteryEvent(controllerNumber, batteryState, batteryPercentage);
+        AntBridge.sendControllerBatteryEvent(controllerNumber, batteryState, batteryPercentage);
     }
 
     public void sendUtf8Text(final String text) {
         if (!isMonkey) {
-            MoonBridge.sendUtf8Text(text);
+            AntBridge.sendUtf8Text(text);
         }
     }
 
     public static String findExternalAddressForMdns(String stunHostname, int stunPort) {
-        return MoonBridge.findExternalAddressIP4(stunHostname, stunPort);
+        return AntBridge.findExternalAddressIP4(stunHostname, stunPort);
     }
 }

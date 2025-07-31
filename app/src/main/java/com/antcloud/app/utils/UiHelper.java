@@ -126,27 +126,6 @@ public class UiHelper {
         }
     }
 
-    public static void showDecoderCrashDialog(Activity activity) {
-        final SharedPreferences prefs = activity.getSharedPreferences("DecoderTombstone", 0);
-        final int crashCount = prefs.getInt("CrashCount", 0);
-        int lastNotifiedCrashCount = prefs.getInt("LastNotifiedCrashCount", 0);
-        if (crashCount != 0 && crashCount != lastNotifiedCrashCount) {
-            if (crashCount % 3 == 0) {
-                PreferenceConfiguration.resetStreamingSettings(activity);
-                Dialog.displayDialog(activity,
-                        activity.getResources().getString(R.string.title_decoding_reset),
-                        activity.getResources().getString(R.string.message_decoding_reset), () -> {
-                            prefs.edit().putInt("LastNotifiedCrashCount", crashCount).apply();
-                        });
-            }
-            else {
-                Dialog.displayDialog(activity, activity.getResources().getString(R.string.title_decoding_error),
-                           activity.getResources().getString(R.string.message_decoding_error), () -> {
-                            prefs.edit().putInt("LastNotifiedCrashCount", crashCount).apply();
-                        });
-            }
-        }
-    }
 
     public static void displayQuitConfirmationDialog(Activity parent, final Runnable onYes, final Runnable onNo) {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
@@ -166,7 +145,7 @@ public class UiHelper {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-        builder.setMessage(parent.getResources().getString(R.string.applist_quit_confirmation))
+        builder.setMessage("")
                 .setPositiveButton(parent.getResources().getString(R.string.yes), dialogClickListener)
                 .setNegativeButton(parent.getResources().getString(R.string.no), dialogClickListener)
                 .show();
@@ -193,7 +172,7 @@ public class UiHelper {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-        builder.setMessage(parent.getResources().getString(R.string.delete_pc_msg))
+        builder.setMessage("delete pc")
                 .setTitle(computer.name)
                 .setPositiveButton(parent.getResources().getString(R.string.yes), dialogClickListener)
                 .setNegativeButton(parent.getResources().getString(R.string.no), dialogClickListener)

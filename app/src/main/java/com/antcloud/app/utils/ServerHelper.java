@@ -14,7 +14,7 @@ import com.antcloud.app.nvstream.http.ComputerDetails;
 import com.antcloud.app.nvstream.http.HostHttpResponseException;
 import com.antcloud.app.nvstream.http.NvApp;
 import com.antcloud.app.nvstream.http.NvHTTP;
-import com.antcloud.app.nvstream.jni.MoonBridge;
+import com.antcloud.app.nvstream.jni.AntBridge;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -94,11 +94,11 @@ public class ServerHelper {
                         parent.getResources().getString(R.string.nettest_text_waiting),
                         false);
 
-                int ret = MoonBridge.testClientConnectivity(CONNECTION_TEST_SERVER, 443, MoonBridge.ML_PORT_FLAG_ALL);
+                int ret = AntBridge.testClientConnectivity(CONNECTION_TEST_SERVER, 443, AntBridge.ML_PORT_FLAG_ALL);
                 spinnerDialog.dismiss();
 
                 String dialogSummary;
-                if (ret == MoonBridge.ML_TEST_RESULT_INCONCLUSIVE) {
+                if (ret == AntBridge.ML_TEST_RESULT_INCONCLUSIVE) {
                     dialogSummary = parent.getResources().getString(R.string.nettest_text_inconclusive);
                 }
                 else if (ret == 0) {
@@ -106,7 +106,7 @@ public class ServerHelper {
                 }
                 else {
                     dialogSummary = parent.getResources().getString(R.string.nettest_text_failure);
-                    dialogSummary += MoonBridge.stringifyPortFlags(ret, "\n");
+                    dialogSummary += AntBridge.stringifyPortFlags(ret, "\n");
                 }
 
                 Dialog.displayDialog(parent,
@@ -122,7 +122,7 @@ public class ServerHelper {
                               final NvApp app,
                               final ComputerManagerService.ComputerManagerBinder managerBinder,
                               final Runnable onComplete) {
-        Toast.makeText(parent, parent.getResources().getString(R.string.applist_quit_app) + " " + app.getAppName() + "...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(parent, "" + " " + app.getAppName() + "...", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -132,9 +132,9 @@ public class ServerHelper {
                     httpConn = new NvHTTP(ServerHelper.getCurrentAddressFromComputer(computer), computer.httpsPort,
                             managerBinder.getUniqueId(), computer.serverCert, PlatformBinding.getCryptoProvider(parent));
                     if (httpConn.quitApp()) {
-                        message = parent.getResources().getString(R.string.applist_quit_success) + " " + app.getAppName();
+                        message = "" + " " + app.getAppName();
                     } else {
-                        message = parent.getResources().getString(R.string.applist_quit_fail) + " " + app.getAppName();
+                        message = "" + " " + app.getAppName();
                     }
                 } catch (HostHttpResponseException e) {
                     if (e.getErrorCode() == 599) {
