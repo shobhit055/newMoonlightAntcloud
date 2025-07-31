@@ -2954,7 +2954,6 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public boolean hasRgbLed;
         public LightsManager.LightsSession lightsSession;
 
-        // These are BatteryState values, not Moonlight values
         public int lastReportedBatteryStatus;
         public float lastReportedBatteryCapacity;
 

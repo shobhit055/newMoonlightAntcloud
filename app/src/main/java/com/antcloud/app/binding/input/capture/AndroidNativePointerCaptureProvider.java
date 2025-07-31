@@ -28,10 +28,6 @@ public class AndroidNativePointerCaptureProvider extends AndroidPointerIconCaptu
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
     }
 
-    // We only capture the pointer if we have a compatible InputDevice
-    // present. This is a workaround for an Android 12 regression causing
-    // incorrect mouse input when using the SPen.
-    // https://github.com/moonlight-stream/moonlight-android/issues/1030
     private boolean hasCaptureCompatibleInputDevice() {
         for (int id : InputDevice.getDeviceIds()) {
             InputDevice device = InputDevice.getDevice(id);

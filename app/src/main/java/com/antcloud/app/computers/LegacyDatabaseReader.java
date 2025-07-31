@@ -56,7 +56,7 @@ public class LegacyDatabaseReader {
             }
         }
 
-        // On older versions of Moonlight, this is typically where manual addresses got stored,
+
         // so let's initialize it just to be safe.
         details.manualAddress = details.remoteAddress;
 

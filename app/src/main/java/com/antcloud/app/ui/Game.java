@@ -330,12 +330,12 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         // Make sure Wi-Fi is fully powered up
         WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         try {
-            highPerfWifiLock = wifiMgr.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "Moonlight High Perf Lock");
+            highPerfWifiLock = wifiMgr.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "High Perf Lock");
             highPerfWifiLock.setReferenceCounted(false);
             highPerfWifiLock.acquire();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                lowLatencyWifiLock = wifiMgr.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "Moonlight Low Latency Lock");
+                lowLatencyWifiLock = wifiMgr.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "Low Latency Lock");
                 lowLatencyWifiLock.setReferenceCounted(false);
                 lowLatencyWifiLock.acquire();
             }
@@ -506,6 +506,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
         }
 
+        Log.i("test" , "width " + prefConfig.width+ "height"  + prefConfig.height +
+                                  "fps" + prefConfig.fps);
         StreamConfiguration config = new StreamConfiguration.Builder()
                 .setResolution(prefConfig.width, prefConfig.height)
                 .setLaunchRefreshRate(prefConfig.fps)
@@ -1306,7 +1308,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     // and we will need to send the modifier flag ourselves.
     private byte getModifierState(KeyEvent event) {
         // Start with the global modifier state to ensure we cover the case
-        // detailed in https://github.com/moonlight-stream/moonlight-android/issues/840
         byte modifier = getModifierState();
         if (event.isShiftPressed()) {
             modifier |= KeyboardPacket.MODIFIER_SHIFT;
@@ -2242,7 +2243,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
             // Stop may take a few hundred ms to do some network I/O to tell
             // the server we're going away and clean up. Let it run in a separate
-            // thread to keep things smooth for the UI. Inside moonlight-common,
             // we prevent another thread from starting a connection before and
             // during the process of stopping this one.
             new Thread() {

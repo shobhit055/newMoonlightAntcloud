@@ -1,28 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Shortcut strings -->
-    <string name="scut_deleted_pc">PC deleted</string>
     <string name="scut_not_paired">PC not paired</string>
     <string name="scut_pc_not_found">PC not found</string>
     <string name="scut_invalid_uuid">Provided PC is not valid</string>
     <string name="scut_invalid_app_id">Provided App is not valid</string>
 
-    <!-- Help strings -->
-    <string name="help_loading_title">Help Viewer</string>
-    <string name="help_loading_msg">Loading help page…</string>
 
-    <!-- PC view menu entries -->
-    <string name="pcview_menu_header_online">Online</string>
-    <string name="pcview_menu_header_offline">Offline</string>
-    <string name="pcview_menu_header_unknown">Refreshing</string>
-    <string name="pcview_menu_app_list">View All Apps</string>
-    <string name="pcview_menu_pair_pc">Pair with PC</string>
-    <string name="pcview_menu_unpair_pc">Unpair</string>
-    <string name="pcview_menu_send_wol">Send Wake-On-LAN request</string>
-    <string name="pcview_menu_delete_pc">Delete PC</string>
-    <string name="pcview_menu_test_network">Test Network Connection</string>
-    <string name="pcview_menu_details">View Details</string>
-    <string name="pcview_menu_eol">NVIDIA GameStream End-of-Service</string>
 
     <!-- Network test strings -->
     <string name="nettest_title_waiting">Testing Network Connection</string>
@@ -33,13 +17,8 @@
     <string name="nettest_text_failure">Your device\'s current network connection seems to be blocking App. Streaming over the Internet may not work while connected to this network.\n\nThe following network ports were blocked:\n</string>
     <string name="nettest_text_blocked">Your device\'s current network connection is blocking. Streaming over the Internet may not work while connected to this network.</string>
 
-    <!-- Pair messages -->
-    <string name="pairing">Pairing…</string>
-    <string name="pair_pc_offline">Computer is offline</string>
     <string name="pair_pc_ingame">Computer is currently in a game. You must close the game before pairing.</string>
-    <string name="pair_pairing_title">Pairing</string>
-    <string name="pair_pairing_msg">Please enter the following PIN on the target PC:</string>
-    <string name="pair_pairing_help">If your host PC is running , navigate to the web UI to enter the PIN.</string>
+
     <string name="pair_incorrect_pin">Incorrect PIN</string>
     <string name="pair_fail">Pairing failed</string>
     <string name="pair_already_in_progress">Pairing already in progress</string>
@@ -279,18 +258,9 @@
     <string name="fps_90">90 FPS</string>
     <string name="fps_120">120 FPS</string>
 
-    <string name="audioconf_stereo">Stereo</string>
-    <string name="audioconf_51surround">5.1 Surround Sound</string>
-    <string name="audioconf_71surround">7.1 Surround Sound</string>
 
-    <string name="videoformat_auto">Automatic (Recommended)</string>
-    <string name="videoformat_av1always">Prefer AV1 (Experimental)</string>
-    <string name="videoformat_hevcalways">Prefer HEVC</string>
-    <string name="videoformat_h264always">Prefer H.264</string>
 
-    <string name="title_frame_pacing">Video frame pacing</string>
-    <string name="summary_frame_pacing">Specify how to balance video latency and smoothness</string>
-    <string name="pacing_latency">Prefer lowest latency</string>
+
     <string name="pacing_balanced">Balanced</string>
     <string name="pacing_balanced_alt">Balanced with FPS limit</string>
     <string name="pacing_smoothness">Prefer smoothest video (may significantly increase latency)</string>
@@ -321,9 +291,6 @@
     <string name="checkout_plans_button">Buy A Plan Now</string>
     <string name="vm_connection_issue_title">There was an issue starting your PC.\n kindly try the following points to troubleshoot
     your issue </string>
-<!--    <string name="vm_connection_issue_msg1">Please refresh your page, wait for 3-4 mins &amp; try again. Your PC will be reset in that time</string>-->
-<!--    <string name="vm_connection_issue_msg2">Kindly ensure that you are not connected to any VPN services</string>-->
-<!--    <string name="vm_connection_issue_msg3">if the above two point did not help click below for raising a support request</string>-->
     <string name="vm_connection_issue_msg">"• Please refresh your page, wait for 3-4 mins &amp; try again. Your PC will be reset in that time.\n\n• Kindly ensure that you are not connected to any VPN services.\n\n• If the above two points did not help, click below for raising a support request."</string>
     <string name ="contact_support">Contact Support</string>
     <string name ="goback">Go Back</string>

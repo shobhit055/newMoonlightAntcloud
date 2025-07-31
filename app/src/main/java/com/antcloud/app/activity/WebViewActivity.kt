@@ -141,44 +141,13 @@ class WebViewActivity : AppCompatActivity() {
 
                                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-                                    /*if(joyStick.value) {
-                                        viewModel = WebViewModel()
-                                        WebViewScreen(url = url, backPressed = backPressed.value, loading = loading.value, joyStick = joyStick.value, dragEnabled = dragEnabled.value, updateFpsControls = showFpsConfigEditor.value, this@WebViewActivity, webView!!, viewModel!!)
-                                    } else {*/
-                                    // viewModel = WebViewModel()
-
-//                            var xValue =  Math.toDegrees(fusedOrientation[1].toDouble()).toFloat()
-//                            var yValue =  Math.toDegrees(fusedOrientation[2].toDouble()).toFloat()
-//                            var zValue =  Math.toDegrees(fusedOrientation[0].toDouble()).toFloat()
-//
-//                            Log.i("testAxisValue" , "test  value $xValue $yValue $zValue")
-//
-//
-//                                viewModel?.updateXAxis(xValue)
-//                                viewModel?.updateYAxis(yValue)
-//                                viewModel?.updateZAxis(zValue)
 
 
-
-//                            x= viewModel?.xAxis!!
-//                            y= viewModel?.yAxis!!
-//                            z= viewModel?.zAxis!!
 
                                     if (gyroscope){
                                         var xValue = Math.toDegrees(fusedOrientation[1].toDouble()).toFloat()
                                         var yValue = Math.toDegrees(fusedOrientation[2].toDouble()).toFloat()
                                         var zValue = Math.toDegrees(fusedOrientation[0].toDouble()).toFloat()
-//                                if (!originValueFlag) {
-//                                    fSensor = GyroscopeSensor(this@WebViewActivity)
-//                                    fSensor?.register(sensorObserver)
-//                                    fSensor?.start()
-//                                    if (xValue != 0.0F || yValue != 0.0F || zValue != 0.0F) {
-//                                        x = xValue
-//                                        y=  yValue
-//                                        z=  zValue
-//                                        originValueFlag = true
-//                                    }
-//                                }
                                         if (btnClick) {
                                             WASDControl(xValue, yValue, zValue)
                                         }
@@ -197,13 +166,6 @@ class WebViewActivity : AppCompatActivity() {
                                         viewModel)
 
 
-//                            if(btnClick) {
-//                                WASDControl(
-//                                    rotationX = xValue,
-//                                    rotationY = yValue,
-//                                    rotationZ = zValue
-//                                )
-//                            }
 
                                     if(url.contains("desktop")) {
                                         pcStream = true
@@ -393,34 +355,6 @@ class WebViewActivity : AppCompatActivity() {
 
 
 
-//    private fun stopDataLog() {
-//        logData = false
-//        val path = dataLogger.stopDataLog()
-//        Toast.makeText(this, "File Written to: $path", Toast.LENGTH_SHORT).show()
-//    }
-//    private fun readPrefs(): Mode {
-//        meanFilterEnabled = false
-//        val complimentaryFilterEnabled: Boolean = false
-//        val kalmanFilterEnabled: Boolean = false
-//        if (meanFilterEnabled) {
-//            meanFilter.setTimeConstant(0.5f)
-//        }
-//        val mode: Mode
-//        mode = if (!complimentaryFilterEnabled && !kalmanFilterEnabled) {
-//            Mode.GYROSCOPE_ONLY
-//        } else if (complimentaryFilterEnabled) {
-//            Mode.COMPLIMENTARY_FILTER
-//        } else {
-//            Mode.KALMAN_FILTER
-//        }
-//        return mode
-//    }
-//    private enum class Mode {
-//        GYROSCOPE_ONLY,
-//        COMPLIMENTARY_FILTER,
-//        KALMAN_FILTER
-//    }
-//
 private fun WASDControl(rotationX: Float, rotationY: Float, rotationZ: Float) {
 
 //        XRotation...

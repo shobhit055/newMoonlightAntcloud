@@ -128,7 +128,7 @@ public class MoonBridge {
     private static NvConnectionListener connectionListener;
 
     static {
-        System.loadLibrary("moonlight-core");
+        System.loadLibrary("core");
         init();
     }
 
@@ -145,13 +145,13 @@ public class MoonBridge {
             this.channelMask = channelMask;
         }
 
-        // Creates an AudioConfiguration from the integer value returned by moonlight-common-c
+        // Creates an AudioConfiguration from the integer value returned by common-c
         // See CHANNEL_COUNT_FROM_AUDIO_CONFIGURATION() and CHANNEL_MASK_FROM_AUDIO_CONFIGURATION()
         // in Limelight.h
         private AudioConfiguration(int audioConfiguration) {
             // Check the magic byte before decoding to make sure we got something that's actually
             // a MAKE_AUDIO_CONFIGURATION()-based value and not something else like an older version
-            // hardcoded AUDIO_CONFIGURATION value from an earlier version of moonlight-common-c.
+            // hardcoded AUDIO_CONFIGURATION value from an earlier version of common-c.
             if ((audioConfiguration & 0xFF) != 0xCA) {
                 throw new IllegalArgumentException("Audio configuration has invalid magic byte!");
             }
@@ -180,7 +180,7 @@ public class MoonBridge {
             return toInt();
         }
 
-        // Returns the integer value expected by moonlight-common-c
+        // Returns the integer value expected by common-c
         // See MAKE_AUDIO_CONFIGURATION() in Limelight.h
         public int toInt() {
             return ((channelMask) << 16) | (channelCount << 8) | 0xCA;

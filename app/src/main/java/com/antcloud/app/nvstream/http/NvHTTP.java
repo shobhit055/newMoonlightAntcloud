@@ -195,8 +195,6 @@ public class NvHTTP {
     }
     
     public NvHTTP(ComputerDetails.AddressTuple address, int httpsPort, String uniqueId, X509Certificate serverCert, LimelightCryptoProvider cryptoProvider) throws IOException {
-        // Use the same UID for all Moonlight clients so we can quit games
-        // started by other Moonlight clients.
         this.uniqueId = "0123456789ABCDEF";
 
         this.serverCert = serverCert;

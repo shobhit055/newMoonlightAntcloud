@@ -24,7 +24,7 @@ import java.net.UnknownHostException;
 import java.security.cert.CertificateEncodingException;
 
 public class ServerHelper {
-    public static final String CONNECTION_TEST_SERVER = "android.conntest.moonlight-stream.org";
+    public static final String CONNECTION_TEST_SERVER = "android.conntest.stream.org";
 
     public static ComputerDetails.AddressTuple getCurrentAddressFromComputer(ComputerDetails computer) throws IOException {
         if (computer.activeAddress == null) {
@@ -80,7 +80,6 @@ public class ServerHelper {
     public static void doStart(Activity parent, NvApp app, ComputerDetails computer,
                                ComputerManagerService.ComputerManagerBinder managerBinder) {
         if (computer.state == ComputerDetails.State.OFFLINE || computer.activeAddress == null) {
-            Toast.makeText(parent, parent.getResources().getString(R.string.pair_pc_offline), Toast.LENGTH_SHORT).show();
             return;
         }
         parent.startActivity(createStartIntent(parent, app, computer, managerBinder));

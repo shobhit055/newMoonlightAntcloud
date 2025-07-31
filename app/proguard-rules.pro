@@ -4,7 +4,7 @@
 # Our code
 -keep class com.antcloud.app.binding.input.evdev.* {*;}
 
-# Moonlight common
+
 -keep class com.antcloud.app.nvstream.jni.* {*;}
 
 # Okio

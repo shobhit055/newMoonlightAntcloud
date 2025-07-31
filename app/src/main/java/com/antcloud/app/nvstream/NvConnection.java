@@ -88,7 +88,7 @@ public class NvConnection {
         // Interrupt any pending connection. This is thread-safe.
         MoonBridge.interruptConnection();
 
-        // Moonlight-core is not thread-safe with respect to connection start and stop, so
+
         // we must not invoke that functionality in parallel.
         synchronized (MoonBridge.class) {
             MoonBridge.stopConnection();
@@ -213,7 +213,7 @@ public class NvConnection {
             }
         }
 
-        // If we can't determine the connection type, let moonlight-common-c decide.
+        // If we can't determine the connection type, let common-c decide.
         return StreamConfiguration.STREAM_CFG_AUTO;
     }
     
@@ -419,8 +419,7 @@ public class NvConnection {
                     return;
                 }
 
-                // Moonlight-core is not thread-safe with respect to connection start and stop, so
-                // we must not invoke that functionality in parallel.
+
                 synchronized (MoonBridge.class) {
                     MoonBridge.setupBridge(videoDecoderRenderer, audioRenderer, connectionListener);
                     int ret = MoonBridge.startConnection(context.serverAddress.address,

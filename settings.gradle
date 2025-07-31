@@ -15,6 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "moonlight-android"
+rootProject.name = "Antcloud_App"
 include(":app")
  

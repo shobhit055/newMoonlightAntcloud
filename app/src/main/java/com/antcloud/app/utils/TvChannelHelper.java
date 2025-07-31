@@ -56,7 +56,7 @@ public class TvChannelHelper {
                 // ActivityNotFoundException is the only officially documented
                 // exception that can result from this call. However some buggy
                 // devices throw others.
-                // See https://github.com/moonlight-stream/moonlight-android/issues/1302
+
             }
         }
     }
@@ -101,7 +101,7 @@ public class TvChannelHelper {
 
     @TargetApi(Build.VERSION_CODES.O)
     private void updateChannelIcon(long channelId) {
-        Bitmap logo = drawableToBitmap(context.getResources().getDrawable(R.drawable.ic_channel));
+        Bitmap logo = drawableToBitmap(context.getResources().getDrawable(R.drawable.plus));
         try {
             Uri localUri = TvContract.buildChannelLogoUri(channelId);
             try (OutputStream outputStream = context.getContentResolver().openOutputStream(localUri)) {

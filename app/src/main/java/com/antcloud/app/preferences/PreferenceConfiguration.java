@@ -262,8 +262,6 @@ public class PreferenceConfiguration {
         int height = getHeightFromResolutionString(resString);
         int fps = Integer.parseInt(fpsString);
 
-        // This logic is shamelessly stolen from Moonlight Qt:
-        // https://github.com/moonlight-stream/moonlight-qt/blob/master/app/settings/streamingpreferences.cpp
 
         // Don't scale bitrate linearly beyond 60 FPS. It's definitely not a linear
         // bitrate increase for frame rate once we get to values that high.

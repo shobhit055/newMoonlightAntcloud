@@ -13,7 +13,7 @@ public class WakeOnLanSender {
     // These ports will always be tried as-is.
     private static final int[] STATIC_PORTS_TO_TRY = new int[] {
         9, // Standard WOL port (privileged port)
-        47009, // Port opened by Moonlight Internet Hosting Tool for WoL (non-privileged port)
+        47009,
     };
 
     // These ports will be offset by the base port number (47989) to support alternate ports.
