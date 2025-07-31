@@ -254,7 +254,6 @@ public class UsbDriverService extends Service implements UsbDriverListener {
 
     public static boolean kernelSupportsXbox360W() {
         // Check if this kernel is 4.2+ to see if the xpad driver sets Xbox 360 wireless LEDs
-        // https://github.com/torvalds/linux/commit/75b7f05d2798ee3a1cc5bbdd54acd0e318a80396
         String kernelVersion = System.getProperty("os.version");
         if (kernelVersion != null) {
             if (kernelVersion.startsWith("2.") || kernelVersion.startsWith("3.") ||

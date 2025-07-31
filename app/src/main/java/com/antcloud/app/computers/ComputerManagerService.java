@@ -369,7 +369,7 @@ public class ComputerManagerService extends Service {
 
             // Perform the STUN request if we're not on a VPN or if we bound to a network
             if (!activeNetworkIsVpn || boundToNetwork) {
-                String stunResolvedAddress = NvConnection.findExternalAddressForMdns("stun.moonlight-stream.org", 3478);
+                String stunResolvedAddress = NvConnection.findExternalAddressForMdns("stun..org", 3478);
                 if (stunResolvedAddress != null) {
                     // We don't know for sure what the external port is, so we will have to guess.
                     // When we contact the PC (if we haven't already), it will update the port.

@@ -522,8 +522,6 @@ public class MediaCodecHelper {
             //
             // On Fire TV 3, vdec-lowlatency is translated to OMX.amazon.fireos.index.video.lowLatencyDecode.
             //
-            // https://github.com/yuan1617/Framwork/blob/master/frameworks/av/media/libstagefright/ACodec.cpp
-            // https://github.com/iykex/vendor_mediatek_proprietary_hardware/blob/master/libomx/video/MtkOmxVdecEx/MtkOmxVdecEx.h
             videoFormat.setInteger("vdec-lowlatency", 1);
             setNewOption = true;
         }
@@ -583,7 +581,6 @@ public class MediaCodecHelper {
             else if (isDecoderInList(amlogicDecoderPrefixes, decoderInfo.getName())) {
                 if (tryNumber < 4) {
                     // Amlogic low latency vendor extension
-                    // https://github.com/codewalkerster/android_vendor_amlogic_common_prebuilt_libstagefrighthw/commit/41fefc4e035c476d58491324a5fe7666bfc2989e
                     videoFormat.setInteger("vendor.low-latency.enable", 1);
                     setNewOption = true;
                 }

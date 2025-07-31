@@ -822,15 +822,15 @@ class AppView : AppCompatActivity() {
 
     private fun parseRawUserInputToUri(rawUserInput: String): URI? {
         try {
-            val uri = URI("moonlight://$rawUserInput")
-            if (uri.host != null && !uri.host.isEmpty()) {
+            val uri = URI("antcloud://$rawUserInput")
+            if (uri.host != null && uri.host.isNotEmpty()) {
                 return uri
             }
         } catch (ignored: URISyntaxException) {
         }
         try {
-            val uri = URI("moonlight://[$rawUserInput]")
-            if (uri.host != null && !uri.host.isEmpty()) {
+            val uri = URI("antcloud://[$rawUserInput]")
+            if (uri.host != null && uri.host.isNotEmpty()) {
                 return uri
             }
         } catch (ignored: URISyntaxException) {
