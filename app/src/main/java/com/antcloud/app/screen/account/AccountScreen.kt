@@ -236,7 +236,7 @@ fun AccountScreen(
                 when(postPhoneOtpState.errorCode){
                     400 -> {
                         val message  = postPhoneOtpState.error
-                        Log.i("test" , "" +message)
+                       // Log.i("test" , "" +message)
                         if(message.contains("Error 803"))
                             activity.makeToast(message)
                         else if (message.equals("This number already exists!")) {

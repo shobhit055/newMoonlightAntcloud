@@ -87,11 +87,11 @@ public class AndroidAudioRenderer implements AudioRenderer {
                 channelConfig = 0x000018fc; // AudioFormat.CHANNEL_OUT_7POINT1_SURROUND
                 break;
             default:
-                LimeLog.severe("Decoder returned unhandled channel count");
+              //  LimeLog.severe("Decoder returned unhandled channel count");
                 return -1;
         }
 
-        LimeLog.info("Audio channel config: "+String.format("0x%X", channelConfig));
+     //   LimeLog.info("Audio channel config: "+String.format("0x%X", channelConfig));
 
         bytesPerFrame = audioConfiguration.channelCount * samplesPerFrame * 2;
 
@@ -163,7 +163,7 @@ public class AndroidAudioRenderer implements AudioRenderer {
                 track.play();
 
                 // Successfully created working AudioTrack. We're done here.
-                LimeLog.info("Audio track configuration: "+bufferSize+" "+lowLatency);
+            //    LimeLog.info("Audio track configuration: "+bufferSize+" "+lowLatency);
                 break;
             } catch (Exception e) {
                 // Try to release the AudioTrack if we got far enough
@@ -195,7 +195,7 @@ public class AndroidAudioRenderer implements AudioRenderer {
             track.write(audioData, 0, audioData.length);
         }
         else {
-            LimeLog.info("Too much pending audio data: " + AntBridge.getPendingAudioDuration() +" ms");
+           // LimeLog.info("Too much pending audio data: " + AntBridge.getPendingAudioDuration() +" ms");
         }
     }
 

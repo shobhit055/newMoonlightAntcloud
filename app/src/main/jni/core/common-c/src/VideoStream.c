@@ -112,7 +112,7 @@ static void VideoReceiveThreadProc(void* context) {
     if (encrypted) {
         encryptedBuffer = (char*)malloc(receiveSize);
         if (encryptedBuffer == NULL) {
-            Limelog("Video Receive: malloc() failed\n");
+          //  Limelog("Video Receive: malloc() failed\n");
             ListenerCallbacks.connectionTerminated(-1);
             return;
         }
@@ -128,7 +128,7 @@ static void VideoReceiveThreadProc(void* context) {
         if (buffer == NULL) {
             buffer = (char*)malloc(bufferSize);
             if (buffer == NULL) {
-                Limelog("Video Receive: malloc() failed\n");
+             //   Limelog("Video Receive: malloc() failed\n");
                 ListenerCallbacks.connectionTerminated(-1);
                 break;
             }
@@ -139,7 +139,7 @@ static void VideoReceiveThreadProc(void* context) {
                             receiveSize,
                             useSelect);
         if (err < 0) {
-            Limelog("Video Receive: recvUdpSocket() failed: %d\n", (int)LastSocketError());
+          //  Limelog("Video Receive: recvUdpSocket() failed: %d\n", (int)LastSocketError());
             ListenerCallbacks.connectionTerminated(LastSocketFail());
             break;
         }
@@ -149,7 +149,7 @@ static void VideoReceiveThreadProc(void* context) {
                 // assume something is broken and terminate the connection.
                 waitingForVideoMs += UDP_RECV_POLL_TIMEOUT_MS;
                 if (waitingForVideoMs >= FIRST_FRAME_TIMEOUT_SEC * 1000) {
-                    Limelog("Terminating connection due to lack of video traffic\n");
+                  //  Limelog("Terminating connection due to lack of video traffic\n");
                     ListenerCallbacks.connectionTerminated(ML_ERROR_NO_VIDEO_TRAFFIC);
                     break;
                 }
@@ -161,7 +161,7 @@ static void VideoReceiveThreadProc(void* context) {
 
         if (!receivedDataFromPeer) {
             receivedDataFromPeer = true;
-            Limelog("Received first video packet after %d ms\n", waitingForVideoMs);
+          //  Limelog("Received first video packet after %d ms\n", waitingForVideoMs);
 
             firstDataTimeMs = PltGetMillis();
         }
@@ -171,7 +171,7 @@ static void VideoReceiveThreadProc(void* context) {
             uint64_t now = PltGetMillis();
 
             if (now - firstDataTimeMs >= FIRST_FRAME_TIMEOUT_SEC * 1000) {
-                Limelog("Terminating connection due to lack of a successful video frame\n");
+            //    Limelog("Terminating connection due to lack of a successful video frame\n");
                 ListenerCallbacks.connectionTerminated(ML_ERROR_NO_VIDEO_FRAME);
                 break;
             }
@@ -218,7 +218,7 @@ static void VideoReceiveThreadProc(void* context) {
                                    encHeader->tag, sizeof(encHeader->tag),
                                    ((unsigned char*)(encHeader + 1)), err - sizeof(ENC_VIDEO_HEADER), // The ciphertext is after the header
                                    (unsigned char*)buffer, &err)) {
-                Limelog("Failed to decrypt video packet!\n");
+               // Limelog("Failed to decrypt video packet!\n");
                 continue;
             }
         }
@@ -279,7 +279,7 @@ int readFirstFrame(void) {
 // Terminate the video stream
 void stopVideoStream(void) {
     if (!receivedDataFromPeer) {
-        Limelog("No video traffic was ever received from the host!\n");
+       // Limelog("No video traffic was ever received from the host!\n");
     }
 
     VideoCallbacks.stop();

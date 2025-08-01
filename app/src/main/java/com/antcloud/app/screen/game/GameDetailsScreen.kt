@@ -458,12 +458,9 @@ fun GameDetailsScreen(
 fun customListView(activity: NavActivity) {
     val courseList: ArrayList<ListModel> = ArrayList<ListModel>()
     courseList.add(ListModel("", R.drawable.controller))
-    courseList.add(ListModel("", R.drawable.tshirt))
     courseList.add(ListModel("", R.drawable.reload))
+    courseList.add(ListModel("", R.drawable.rtx))
     courseList.add(ListModel("", R.drawable.children))
-    courseList.add(ListModel("", R.drawable.discord))
-    courseList.add(ListModel("", R.drawable.instagram_icon))
-    courseList.add(ListModel("", R.drawable.reload))
 
     LazyRow(modifier = Modifier.fillMaxWidth(.9f)) {
         itemsIndexed(courseList) { index, item ->

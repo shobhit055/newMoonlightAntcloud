@@ -538,7 +538,7 @@ static int fillSdpHeader(char* buffer, size_t length, int rtspClientVersion, cha
     return snprintf(buffer, length,
         "v=0\r\n"
         "o=android 0 %d IN %s %s\r\n"
-        "s=NVIDIA Streaming Client\r\n",
+        "s=Streaming Client\r\n",
         rtspClientVersion,
         RemoteAddr.ss_family == AF_INET ? "IPv4" : "IPv6",
         urlSafeAddr);

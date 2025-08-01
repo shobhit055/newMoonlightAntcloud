@@ -163,14 +163,14 @@ static bool queuePacket(PRTP_VIDEO_QUEUE queue, PRTPV_QUEUE_ENTRY newEntry, PRTP
             // received an out of order packet to disable our speculative RFI recovery logic.
             queue->lastOosFramePresentationTimestamp = newEntry->presentationTimeMs;
             if (!queue->receivedOosData) {
-                Limelog("Leaving speculative RFI mode after OOS video data at frame %u\n",
-                        queue->currentFrameNumber);
+              //  Limelog("Leaving speculative RFI mode after OOS video data at frame %u\n",
+                   //     queue->currentFrameNumber);
                 queue->receivedOosData = true;
             }
         }
         else if (queue->receivedOosData && newEntry->presentationTimeMs > queue->lastOosFramePresentationTimestamp + SPECULATIVE_RFI_COOLDOWN_PERIOD_MS) {
-            Limelog("Entering speculative RFI mode after sequenced video data at frame %u\n",
-                    queue->currentFrameNumber);
+          //  Limelog("Entering speculative RFI mode after sequenced video data at frame %u\n",
+                 //   queue->currentFrameNumber);
             queue->receivedOosData = false;
         }
     }
@@ -182,7 +182,7 @@ static bool queuePacket(PRTP_VIDEO_QUEUE queue, PRTPV_QUEUE_ENTRY newEntry, PRTP
 
 #define PACKET_RECOVERY_FAILURE()                     \
     ret = -1;                                         \
-    Limelog("FEC recovery returned corrupt packet %d" \
+   // Limelog("FEC recovery returned corrupt packet %d" \
             " (frame %d)", rtpPacket->sequenceNumber, \
             queue->currentFrameNumber);               \
     free(packets[i]);                                 \
@@ -235,7 +235,7 @@ static int reconstructFrame(PRTP_VIDEO_QUEUE queue) {
         // If it turns out that we lied to the host, stop further speculative RFI requests for a while.
         queue->receivedOosData = true;
         queue->lastOosFramePresentationTimestamp = queue->pendingFecBlockList.head->presentationTimeMs;
-        Limelog("Leaving speculative RFI mode due to incorrect loss prediction of frame %u\n", queue->currentFrameNumber);
+   //    Limelog("Leaving speculative RFI mode due to incorrect loss prediction of frame %u\n", queue->currentFrameNumber);
     }
 
 #ifdef FEC_VALIDATION_MODE
@@ -251,8 +251,8 @@ static int reconstructFrame(PRTP_VIDEO_QUEUE queue) {
 
     if (AppVersionQuad[0] < 5) {
         // Our FEC recovery code doesn't work properly until Gen 5
-        Limelog("FEC recovery not supported on Gen %d servers\n",
-                AppVersionQuad[0]);
+     //   Limelog("FEC recovery not supported on Gen %d servers\n",
+           //     AppVersionQuad[0]);
         return -1;
     }
 
@@ -335,9 +335,9 @@ static int reconstructFrame(PRTP_VIDEO_QUEUE queue) {
 
     if (queue->bufferDataPackets != queue->receivedDataPackets) {
 #ifdef FEC_VERBOSE
-        Limelog("Recovered %d video data shards from frame %d\n",
-                queue->bufferDataPackets - queue->receivedDataPackets,
-                queue->currentFrameNumber);
+     //   Limelog("Recovered %d video data shards from frame %d\n",
+              //  queue->bufferDataPackets - queue->receivedDataPackets,
+               // queue->currentFrameNumber);
 #endif
         
         // Report the final FEC status if we needed to perform a recovery
@@ -392,8 +392,8 @@ cleanup_packets:
                         unsigned char* expectedData = (unsigned char*)(droppedNvPacket + 1);
                         for (j = 0; j < droppedDataLength; j++) {
                             if (actualData[j] != expectedData[j]) {
-                                Limelog("Recovery error at %d: expected 0x%02x, actual 0x%02x\n",
-                                        j, expectedData[j], actualData[j]);
+                              //  Limelog("Recovery error at %d: expected 0x%02x, actual 0x%02x\n",
+                                   //     j, expectedData[j], actualData[j]);
                                 recoveryErrors++;
                             }
                         }
@@ -403,8 +403,8 @@ cleanup_packets:
                     for (j = droppedDataLength; j < recoveredDataLength; j++) {
                         unsigned char* actualData = (unsigned char*)(nvPacket + 1);
                         if (actualData[j] != 0) {
-                            Limelog("Recovery error at %d: expected 0x00, actual 0x%02x\n",
-                                    j, actualData[j]);
+                         //   Limelog("Recovery error at %d: expected 0x00, actual 0x%02x\n",
+                                //    j, actualData[j]);
                             recoveryErrors++;
                         }
                     }
@@ -596,13 +596,13 @@ int RtpvAddPacket(PRTP_VIDEO_QUEUE queue, PRTP_PACKET packet, int length, PRTPV_
             reportFinalFrameFecStatus(queue);
 
             if (queue->multiFecLastBlockNumber != 0) {
-                Limelog("Unrecoverable frame %d (block %d of %d): %d+%d=%d received < %d needed\n",
-                        queue->currentFrameNumber, queue->multiFecCurrentBlockNumber+1,
-                        queue->multiFecLastBlockNumber+1,
-                        queue->receivedDataPackets,
-                        queue->receivedParityPackets,
-                        queue->pendingFecBlockList.count,
-                        queue->bufferDataPackets);
+             //   Limelog("Unrecoverable frame %d (block %d of %d): %d+%d=%d received < %d needed\n",
+                       // queue->currentFrameNumber, queue->multiFecCurrentBlockNumber+1,
+                       // queue->multiFecLastBlockNumber+1,
+                        //queue->receivedDataPackets,
+                      //  queue->receivedParityPackets,
+                       // queue->pendingFecBlockList.count,
+                       // queue->bufferDataPackets);
 
                 // If we just missed a block of this frame rather than the whole thing,
                 // we must manually advance the queue to the next frame. Parsing this
@@ -624,11 +624,11 @@ int RtpvAddPacket(PRTP_VIDEO_QUEUE queue, PRTP_PACKET packet, int length, PRTPV_
                 }
             }
             else {
-                Limelog("Unrecoverable frame %d: %d+%d=%d received < %d needed\n",
-                        queue->currentFrameNumber, queue->receivedDataPackets,
-                        queue->receivedParityPackets,
-                        queue->pendingFecBlockList.count,
-                        queue->bufferDataPackets);
+              //  Limelog("Unrecoverable frame %d: %d+%d=%d received < %d needed\n",
+                        //queue->currentFrameNumber, queue->receivedDataPackets,
+                        //queue->receivedParityPackets,
+                       // queue->pendingFecBlockList.count,
+                       // queue->bufferDataPackets);
             }
         }
         
@@ -639,10 +639,10 @@ int RtpvAddPacket(PRTP_VIDEO_QUEUE queue, PRTP_PACKET packet, int length, PRTPV_
             // Report the final status of the FEC queue before dropping this frame
             reportFinalFrameFecStatus(queue);
 
-            Limelog("Unrecoverable frame %d: lost FEC blocks %d to %d\n",
-                    nvPacket->frameIndex,
-                    expectedFecBlockNumber + 1,
-                    fecCurrentBlockNumber);
+          //  Limelog("Unrecoverable frame %d: lost FEC blocks %d to %d\n",
+                   // nvPacket->frameIndex,
+                   // expectedFecBlockNumber + 1,
+                   // fecCurrentBlockNumber);
 
             // Discard any unsubmitted buffers from the previous frame
             purgeListEntries(&queue->pendingFecBlockList);

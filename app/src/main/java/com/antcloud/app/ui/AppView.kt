@@ -362,7 +362,6 @@ class AppView : AppCompatActivity() {
                 if(time == "00:00"){
                     viewModel.stopDisconnectTimer()
                     if(errorTimerFlag=="vmip") {
-                        Log.i("test" , "test111")
                         errorText.text = resources.getString(R.string.one_min_issue_msg)
                     }
                     else
@@ -463,14 +462,13 @@ class AppView : AppCompatActivity() {
         bitrateSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val mbps = progress / 1000
-                Log.i("test11" , "$mbps Mbps")
                 bitrateLabel.text  = "$mbps Mbps"
                 setBitratevalue(mbps)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 val snapped = ((seekBar?.progress ?: 1) / 500) * 500
-                Log.i("test" , "" + snapped)
+//                Log.i("test" , "" + snapped)
             }
         })
         startVMButton.setOnClickListener {
@@ -565,10 +563,9 @@ class AppView : AppCompatActivity() {
                     cacheDir, "applist", uuidString
                 )
             )
-            Log.i("test", "test$lastRawApplist")
             val applist: List<NvApp> = NvHTTP.getAppListByReader(StringReader(lastRawApplist))
             updateUiWithAppList(applist)
-            LimeLog.info("Loaded applist from cache")
+//            LimeLog.info("Loaded applist from cache")
         } catch (e: IOException) {
             if (lastRawApplist != null) {
                 e.printStackTrace()
@@ -596,7 +593,6 @@ class AppView : AppCompatActivity() {
 
 
     override fun onResume() {
-        Log.i("test", "onResume")
         super.onResume()
         inForeground = true
     }
@@ -703,7 +699,6 @@ class AppView : AppCompatActivity() {
         var wrongSiteLocal = false
         var invalidInput = false
         var success: Boolean
-        Log.i("test", "test11")
 
         try {
             val details = ComputerDetails()
@@ -714,24 +709,20 @@ class AppView : AppCompatActivity() {
                 if (port == -1) {
                     port = NvHTTP.DEFAULT_HTTP_PORT
                 }
-                Log.i("test", "test12")
                 details.manualAddress = AddressTuple(host, port)
                 success = managerBinder1!!.addComputerBlocking(details)
                 if (!success) {
-                    Log.i("test", "test13")
                     wrongSiteLocal = isWrongSubnetSiteLocalAddress(host)
                 }
             } else {
-                Log.i("test", "test14")
                 success = false
                 invalidInput = true
             }
         } catch (e: InterruptedException) {
-            Log.i("test", "test15")
             //dialog.dismiss()
             throw e
         } catch (e: IllegalArgumentException) {
-            Log.i("test", "test16")
+
             e.printStackTrace()
             success = false
             invalidInput = true
@@ -765,7 +756,7 @@ class AppView : AppCompatActivity() {
             }
         }else if (!success) {
             withContext(Dispatchers.Main) {
-                Log.i("test" , "test1244")
+
                 errorText.text =  resources.getString(R.string.one_min_issue_msg)
                 pcExit()
                 loadingLayout.visibility = View.INVISIBLE
@@ -774,7 +765,6 @@ class AppView : AppCompatActivity() {
                 connection_error_layout.visibility = View.VISIBLE
             }
         } else {
-            Log.i("test", "test17")
             startComputerUpdates1()
         }
     }
@@ -871,7 +861,6 @@ class AppView : AppCompatActivity() {
                    if (pairState == PairState.PAIRED) {
                         message = null
                         success = true
-                        Log.i("test", "qldchnbq")
                         bindService(Intent(this@AppView, ComputerManagerService::class.java), serviceConnection, BIND_AUTO_CREATE
                         )
                         managerBinder1!!.getComputer(computer.uuid).serverCert = pm.pairedCert
@@ -914,7 +903,6 @@ class AppView : AppCompatActivity() {
                     try {
                         val jsonObject = JSONObject(response)
                         val status = jsonObject.getJSONObject("data").getString("status")
-                        Log.i("demo", "wcv3$status")
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }

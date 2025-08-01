@@ -371,7 +371,7 @@ static void queueFrameInvalidationTuple(uint32_t startFrame, uint32_t endFrame) 
             qfit->endFrame = endFrame;
             if (LbqOfferQueueItem(&invalidReferenceFrameTuples, qfit, &qfit->entry) == LBQ_BOUND_EXCEEDED) {
                 // Too many invalidation tuples, so we need an IDR frame now
-                Limelog("RFI range list reached maximum size limit\n");
+                //Limelog("RFI range list reached maximum size limit\n");
                 free(qfit);
                 LiRequestIdrFrame();
             }
@@ -558,13 +558,13 @@ static bool decryptControlMessageToV1(PNVCTL_ENCRYPTED_PACKET_HEADER encPacket, 
     int expectedEncLength = encPacket->length + sizeof(encPacket->encryptedHeaderType) + sizeof(encPacket->length);
     LC_ASSERT(encPacketLength == expectedEncLength);
     if (encPacketLength < expectedEncLength) {
-        Limelog("Length exceeds packet boundary (needed %d, got %d)\n", expectedEncLength, encPacketLength);
+       // Limelog("Length exceeds packet boundary (needed %d, got %d)\n", expectedEncLength, encPacketLength);
         return false;
     }
 
     // Check length first so we don't underflow
     if (encPacket->length < sizeof(encPacket->seq) + AES_GCM_TAG_LENGTH + sizeof(NVCTL_ENET_PACKET_HEADER_V2)) {
-        Limelog("Received runt packet (%d). Unable to decrypt.\n", encPacket->length);
+       // Limelog("Received runt packet (%d). Unable to decrypt.\n", encPacket->length);
         return false;
     }
 
@@ -684,7 +684,7 @@ static bool sendMessageEnet(short ptype, short paylen, const void* payload, uint
 
         // Encrypt the data into the final packet (and byteswap for BE machines)
         if (!encryptControlMessage(encPacket, packet)) {
-            Limelog("Failed to encrypt control stream message\n");
+         //   Limelog("Failed to encrypt control stream message\n");
             enet_packet_destroy(enetPacket);
             PltUnlockMutex(&enetMutex);
             return false;
@@ -747,8 +747,8 @@ static bool sendMessageEnet(short ptype, short paylen, const void* payload, uint
             }
 
             if (err >= 0 && peer->state == ENET_PEER_STATE_CONNECTED && !packetFreed && !isPacketSentWaitingForAck(enetPacket)) {
-                Limelog("Control message took over 10 ms to send (net latency: %u ms | packet loss: %f%%)\n",
-                        peer->roundTripTime, peer->packetLoss / (float)ENET_PEER_PACKET_LOSS_SCALE);
+             //   Limelog("Control message took over 10 ms to send (net latency: %u ms | packet loss: %f%%)\n",
+                   //     peer->roundTripTime, peer->packetLoss / (float)ENET_PEER_PACKET_LOSS_SCALE);
             }
         }
     }
@@ -762,7 +762,7 @@ static bool sendMessageEnet(short ptype, short paylen, const void* payload, uint
     PltUnlockMutex(&enetMutex);
 
     if (err < 0) {
-        Limelog("Failed to send ENet control packet\n");
+      //  Limelog("Failed to send ENet control packet\n");
         if (!packetQueued) {
             enet_packet_destroy(enetPacket);
         }
@@ -846,7 +846,7 @@ static int ignoreDisconnectIntercept(ENetHost* host, ENetEvent* event) {
         ENetProtocolDisconnect* disconnect = (ENetProtocolDisconnect*)(protoHeader + 1);
 
         if ((disconnect->header.command & ENET_PROTOCOL_COMMAND_MASK) == ENET_PROTOCOL_COMMAND_DISCONNECT) {
-            Limelog("ENet disconnect event pending\n");
+        //    Limelog("ENet disconnect event pending\n");
             disconnectPending = true;
             if (event) {
                 event->type = ENET_EVENT_TYPE_NONE;
@@ -1031,7 +1031,7 @@ static void queueAsyncCallback(PNVCTL_ENET_PACKET_HEADER_V1 ctlHdr, int packetLe
 
     err = LbqOfferQueueItem(&asyncCallbackQueue, queuedCb, &queuedCb->entry);
     if (err != LBQ_SUCCESS) {
-        Limelog("Failed to queue async callback: %d\n", err);
+    //    Limelog("Failed to queue async callback: %d\n", err);
         free(queuedCb);
     }
 }
@@ -1097,7 +1097,7 @@ static void controlReceiveThreadFunc(void* context) {
                         // retransmission after the first notification. We can only
                         // assume the server died tragically, so go ahead and tear down.
                         PltUnlockMutex(&enetMutex);
-                        Limelog("Disconnect event timeout expired\n");
+                     //   Limelog("Disconnect event timeout expired\n");
                         ListenerCallbacks.connectionTerminated(-1);
                         return;
                     }
@@ -1119,7 +1119,7 @@ static void controlReceiveThreadFunc(void* context) {
             LC_ASSERT(err == -1);
 
             err = LastSocketFail();
-            Limelog("Control stream connection failed: %d\n", err);
+        //    Limelog("Control stream connection failed: %d\n", err);
             ListenerCallbacks.connectionTerminated(err);
             return;
         }
@@ -1129,7 +1129,7 @@ static void controlReceiveThreadFunc(void* context) {
             int packetLength;
 
             if (event.packet->dataLength < sizeof(*ctlHdr)) {
-                Limelog("Discarding runt control packet: %d < %d\n", event.packet->dataLength, (int)sizeof(*ctlHdr));
+             //   Limelog("Discarding runt control packet: %d < %d\n", event.packet->dataLength, (int)sizeof(*ctlHdr));
                 enet_packet_destroy(event.packet);
                 continue;
             }
@@ -1144,7 +1144,7 @@ static void controlReceiveThreadFunc(void* context) {
                     PNVCTL_ENCRYPTED_PACKET_HEADER encHdr;
 
                     if (event.packet->dataLength < sizeof(NVCTL_ENCRYPTED_PACKET_HEADER)) {
-                        Limelog("Discarding runt encrypted control packet: %d < %d\n", event.packet->dataLength, (int)sizeof(NVCTL_ENCRYPTED_PACKET_HEADER));
+                   //     Limelog("Discarding runt encrypted control packet: %d < %d\n", event.packet->dataLength, (int)sizeof(NVCTL_ENCRYPTED_PACKET_HEADER));
                         enet_packet_destroy(event.packet);
                         continue;
                     }
@@ -1157,7 +1157,7 @@ static void controlReceiveThreadFunc(void* context) {
                     ctlHdr = NULL;
                     packetLength = (int)event.packet->dataLength;
                     if (!decryptControlMessageToV1(encHdr, packetLength, &ctlHdr, &packetLength)) {
-                        Limelog("Failed to decrypt control packet of size %d\n", event.packet->dataLength);
+                      //  Limelog("Failed to decrypt control packet of size %d\n", event.packet->dataLength);
                         enet_packet_destroy(event.packet);
                         continue;
                     }
@@ -1167,7 +1167,7 @@ static void controlReceiveThreadFunc(void* context) {
                 }
                 else {
                     LC_ASSERT_VT(false);
-                    Limelog("Discarding unencrypted packet on encrypted control stream: %04x\n", ctlHdr->type);
+                 //   Limelog("Discarding unencrypted packet on encrypted control stream: %04x\n", ctlHdr->type);
                     enet_packet_destroy(event.packet);
                     continue;
                 }
@@ -1228,7 +1228,7 @@ static void controlReceiveThreadFunc(void* context) {
                     BbInitializeWrappedBuffer(&bb, (char*)ctlHdr, sizeof(*ctlHdr), packetLength - sizeof(*ctlHdr), BYTE_ORDER_BIG);
                     BbGet32(&bb, &terminationErrorCode);
 
-                    Limelog("Server notified termination reason: 0x%08x\n", terminationErrorCode);
+                  //  Limelog("Server notified termination reason: 0x%08x\n", terminationErrorCode);
 
                     // Normalize the termination error codes for specific values we recognize
                     switch (terminationErrorCode) {
@@ -1260,7 +1260,7 @@ static void controlReceiveThreadFunc(void* context) {
                     BbInitializeWrappedBuffer(&bb, (char*)ctlHdr, sizeof(*ctlHdr), packetLength - sizeof(*ctlHdr), BYTE_ORDER_LITTLE);
                     BbGet16(&bb, &terminationReason);
 
-                    Limelog("Server notified termination reason: 0x%04x\n", terminationReason);
+                   // Limelog("Server notified termination reason: 0x%04x\n", terminationReason);
 
                     // SERVER_TERMINATED_INTENDED
                     if (terminationReason == 0x0100) {
@@ -1299,7 +1299,7 @@ static void controlReceiveThreadFunc(void* context) {
             free(ctlHdr);
         }
         else if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
-            Limelog("Control stream received unexpected disconnect event\n");
+           // Limelog("Control stream received unexpected disconnect event\n");
             ListenerCallbacks.connectionTerminated(-1);
             return;
         }
@@ -1330,7 +1330,7 @@ static void lossStatsThreadFunc(void* context) {
                                          CTRL_CHANNEL_GENERIC,
                                          ENET_PACKET_FLAG_UNSEQUENCED,
                                          LbqGetItemCount(&frameFecStatusQueue) > 0)) {
-                        Limelog("Loss Stats: Sending frame FEC status message failed: %d\n", (int)LastSocketError());
+                     //   Limelog("Loss Stats: Sending frame FEC status message failed: %d\n", (int)LastSocketError());
                         ListenerCallbacks.connectionTerminated(LastSocketFail());
                         free(queuedFrameStatus);
                         return;
@@ -1352,7 +1352,7 @@ static void lossStatsThreadFunc(void* context) {
                                       CTRL_CHANNEL_GENERIC,
                                       ENET_PACKET_FLAG_RELIABLE,
                                       false)) {
-                Limelog("Loss Stats: Transaction failed: %d\n", (int)LastSocketError());
+            //    Limelog("Loss Stats: Transaction failed: %d\n", (int)LastSocketError());
                 ListenerCallbacks.connectionTerminated(LastSocketFail());
                 return;
             }
@@ -1368,7 +1368,7 @@ static void lossStatsThreadFunc(void* context) {
 
         lossStatsPayload = malloc(payloadLengths[IDX_LOSS_STATS]);
         if (lossStatsPayload == NULL) {
-            Limelog("Loss Stats: malloc() failed\n");
+          //  Limelog("Loss Stats: malloc() failed\n");
             ListenerCallbacks.connectionTerminated(-1);
             return;
         }
@@ -1392,7 +1392,7 @@ static void lossStatsThreadFunc(void* context) {
                                       0,
                                       false)) {
                 free(lossStatsPayload);
-                Limelog("Loss Stats: Transaction failed: %d\n", (int)LastSocketError());
+              //  Limelog("Loss Stats: Transaction failed: %d\n", (int)LastSocketError());
                 ListenerCallbacks.connectionTerminated(LastSocketFail());
                 return;
             }
@@ -1431,7 +1431,7 @@ static void requestIdrFrame(void) {
                                         CTRL_CHANNEL_URGENT,
                                         ENET_PACKET_FLAG_RELIABLE,
                                         false)) {
-            Limelog("Request IDR Frame: Transaction failed: %d\n", (int)LastSocketError());
+         //   Limelog("Request IDR Frame: Transaction failed: %d\n", (int)LastSocketError());
             ListenerCallbacks.connectionTerminated(LastSocketFail());
             return;
         }
@@ -1444,13 +1444,13 @@ static void requestIdrFrame(void) {
                                         CTRL_CHANNEL_URGENT,
                                         ENET_PACKET_FLAG_RELIABLE,
                                         false)) {
-            Limelog("Request IDR Frame: Transaction failed: %d\n", (int)LastSocketError());
+        //    Limelog("Request IDR Frame: Transaction failed: %d\n", (int)LastSocketError());
             ListenerCallbacks.connectionTerminated(LastSocketFail());
             return;
         }
     }
 
-    Limelog("IDR frame request sent\n");
+  //  Limelog("IDR frame request sent\n");
 }
 
 static void requestInvalidateReferenceFrames(uint32_t startFrame, uint32_t endFrame) {
@@ -1469,12 +1469,12 @@ static void requestInvalidateReferenceFrames(uint32_t startFrame, uint32_t endFr
                                     payload, CTRL_CHANNEL_URGENT,
                                     ENET_PACKET_FLAG_RELIABLE,
                                     false)) {
-        Limelog("Request Invaldiate Reference Frames: Transaction failed: %d\n", (int)LastSocketError());
+       // Limelog("Request Invaldiate Reference Frames: Transaction failed: %d\n", (int)LastSocketError());
         ListenerCallbacks.connectionTerminated(LastSocketFail());
         return;
     }
 
-    Limelog("Invalidate reference frame request sent (%d to %d)\n", startFrame, endFrame);
+   // Limelog("Invalidate reference frame request sent (%d to %d)\n", startFrame, endFrame);
 }
 
 static void invalidateRefFramesFunc(void* context) {
@@ -1680,13 +1680,13 @@ int startControlStream(void) {
         err = serviceEnetHost(client, &event, CONTROL_STREAM_TIMEOUT_SEC * 1000);
         if (err <= 0 || event.type != ENET_EVENT_TYPE_CONNECT) {
             if (err < 0) {
-                Limelog("Failed to establish ENet connection on UDP port %u: error %d\n", ControlPortNumber, LastSocketFail());
+             //   Limelog("Failed to establish ENet connection on UDP port %u: error %d\n", ControlPortNumber, LastSocketFail());
             }
             else if (err == 0) {
-                Limelog("Failed to establish ENet connection on UDP port %u: timed out\n", ControlPortNumber);
+              //  Limelog("Failed to establish ENet connection on UDP port %u: timed out\n", ControlPortNumber);
             }
             else {
-                Limelog("Failed to establish ENet connection on UDP port %u: unexpected event %d (error: %d)\n", ControlPortNumber, (int)event.type, LastSocketError());
+            //    Limelog("Failed to establish ENet connection on UDP port %u: unexpected event %d (error: %d)\n", ControlPortNumber, (int)event.type, LastSocketError());
             }
 
             stopping = true;
@@ -1756,7 +1756,7 @@ int startControlStream(void) {
                                     CTRL_CHANNEL_GENERIC,
                                     ENET_PACKET_FLAG_RELIABLE,
                                     false)) {
-        Limelog("Start A failed: %d\n", (int)LastSocketError());
+     //   Limelog("Start A failed: %d\n", (int)LastSocketError());
         err = LastSocketFail();
         stopping = true;
 
@@ -1790,7 +1790,7 @@ int startControlStream(void) {
                                     CTRL_CHANNEL_GENERIC,
                                     ENET_PACKET_FLAG_RELIABLE,
                                     false)) {
-        Limelog("Start B failed: %d\n", (int)LastSocketError());
+      //  Limelog("Start B failed: %d\n", (int)LastSocketError());
         err = LastSocketFail();
         stopping = true;
 

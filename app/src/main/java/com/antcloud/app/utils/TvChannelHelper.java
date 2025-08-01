@@ -250,9 +250,9 @@ public class TvChannelHelper {
                     } else {
                         int countDeleted = context.getContentResolver().delete(TvContract.buildPreviewProgramUri(id), null, null);
                         if (countDeleted > 0) {
-                            LimeLog.info("Preview program has been deleted");
+                       //    LimeLog.info("Preview program has been deleted");
                         } else {
-                            LimeLog.warning("Preview program has not been deleted");
+                          //  LimeLog.warning("Preview program has not been deleted");
                         }
                     }
                 }

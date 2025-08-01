@@ -97,7 +97,6 @@ public class AppGridAdapter extends GenericGridAdapter<AppView.AppObject> {
             // We don't want to make them bigger before draw-time
             scalingDivisor = 1.0;
         }
-        LimeLog.info("Art scaling divisor: " + scalingDivisor);
 
         if (loader != null) {
             // Cancel operations on the old loader
@@ -108,7 +107,7 @@ public class AppGridAdapter extends GenericGridAdapter<AppView.AppObject> {
                 new NetworkAssetLoader(context, uniqueId),
                 new MemoryAssetLoader(),
                 new DiskAssetLoader(context),
-                BitmapFactory.decodeResource(context.getResources(), R.drawable.no_app_image));
+                BitmapFactory.decodeResource(context.getResources(), R.drawable.btn_bg));
 
         // This will trigger the view to reload with the new layout
         setLayoutId(getLayoutIdForPreferences(prefs));
@@ -159,7 +158,7 @@ public class AppGridAdapter extends GenericGridAdapter<AppView.AppObject> {
     }
 
     @Override
-    public void populateView(View parentView, ImageView imgView, ProgressBar prgView, TextView txtView, ImageView overlayView, AppView.AppObject obj) {
+    public void populateView(View parentView, ImageView imgView, TextView txtView, ImageView overlayView, AppView.AppObject obj) {
         // Let the cached asset loader handle it
         loader.populateImageView(obj.app, imgView, txtView);
 

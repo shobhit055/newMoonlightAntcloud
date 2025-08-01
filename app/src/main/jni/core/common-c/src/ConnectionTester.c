@@ -128,7 +128,7 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
 
     err = initializePlatformSockets();
     if (err != 0) {
-        Limelog("Failed to initialize sockets: %d\n", err);
+        //Limelog("Failed to initialize sockets: %d\n", err);
         return ML_TEST_RESULT_INCONCLUSIVE;
     }
 
@@ -146,7 +146,7 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
                                       true);
             if (sockets[i] == INVALID_SOCKET) {
                 err = LastSocketFail();
-                Limelog("Failed to create socket: %d\n", err);
+               // Limelog("Failed to create socket: %d\n", err);
                 failingPortFlags = ML_TEST_RESULT_INCONCLUSIVE;
                 goto Exit;
             }
@@ -158,7 +158,7 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
                 if (err < 0) {
                     err = (int)LastSocketError();
                     if (err != EWOULDBLOCK && err != EAGAIN && err != EINPROGRESS) {
-                        Limelog("Failed to start async connect to TCP %u: %d\n", LiGetPortFromPortFlagIndex(i), err);
+                       // Limelog("Failed to start async connect to TCP %u: %d\n", LiGetPortFromPortFlagIndex(i), err);
 
                         // Mask off this bit so we don't try to include it in pollSockets() below
                         testPortFlags &= ~(1U << i);
@@ -174,7 +174,7 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
                     err = sendto(sockets[i], buf, sizeof(buf), 0, (struct sockaddr*)&address, address_length);
                     if (err < 0) {
                         err = (int)LastSocketError();
-                        Limelog("Failed to send test packet to UDP %u: %d\n", LiGetPortFromPortFlagIndex(i), err);
+                      //  Limelog("Failed to send test packet to UDP %u: %d\n", LiGetPortFromPortFlagIndex(i), err);
 
                         // Mask off this bit so we don't try to include it in pollSockets() below
                         testPortFlags &= ~(1U << i);
@@ -221,13 +221,13 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
         if (err < 0) {
             // pollSockets() failed
             err = LastSocketError();
-            Limelog("pollSockets() failed: %d\n", err);
+           // Limelog("pollSockets() failed: %d\n", err);
             failingPortFlags = ML_TEST_RESULT_INCONCLUSIVE;
             goto Exit;
         }
         else if (err == 0) {
             // pollSockets() timed out
-            Limelog("Connection timed out after %d seconds\n", TEST_PORT_TIMEOUT_SEC);
+          //  Limelog("Connection timed out after %d seconds\n", TEST_PORT_TIMEOUT_SEC);
             break;
         }
 
@@ -261,11 +261,11 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
                         // The UDP test was a success.
                         failingPortFlags &= ~(1U << portIndex);
 
-                        Limelog("UDP port %u test successful\n", LiGetPortFromPortFlagIndex(portIndex));
+                       // Limelog("UDP port %u test successful\n", LiGetPortFromPortFlagIndex(portIndex));
                     }
                     else {
                         err = LastSocketError();
-                        Limelog("UDP port %u test failed: %d\n", LiGetPortFromPortFlagIndex(portIndex), err);
+                       // Limelog("UDP port %u test failed: %d\n", LiGetPortFromPortFlagIndex(portIndex), err);
                     }
                 }
                 else {
@@ -283,10 +283,10 @@ unsigned int LiTestClientConnectivity(const char* testServer, unsigned short ref
                         // The TCP test was a success
                         failingPortFlags &= ~(1U << portIndex);
 
-                        Limelog("TCP port %u test successful\n", LiGetPortFromPortFlagIndex(portIndex));
+                      //  Limelog("TCP port %u test successful\n", LiGetPortFromPortFlagIndex(portIndex));
                     }
                     else {
-                        Limelog("TCP port %u test failed: %d\n", LiGetPortFromPortFlagIndex(portIndex), err);
+                      //  Limelog("TCP port %u test failed: %d\n", LiGetPortFromPortFlagIndex(portIndex), err);
                     }
                 }
             }

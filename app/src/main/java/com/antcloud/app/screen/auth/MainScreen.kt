@@ -99,7 +99,6 @@ fun MainScreen(activity: SplashActivity, initialState : Int, apiResp: Boolean) {
     if(pagerState==1 || apiResp)
         isScrollEnabled =  false
 
-    Log.i("test" ,"wefwf")
     Box(modifier = Modifier.fillMaxSize()) {
         VerticalPager(count = screenList.size, state = pagerState1 , userScrollEnabled = isScrollEnabled) {
             PagerScreen(it , activity,apiResp ,viewModel)

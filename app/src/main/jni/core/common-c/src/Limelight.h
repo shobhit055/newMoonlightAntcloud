@@ -879,7 +879,7 @@ void LiStringifyPortFlags(unsigned int portFlags, const char* separator, char* o
 // the ports you'd like to test. On return, it returns ML_TEST_RESULT_INCONCLUSIVE on catastrophic error,
 // or the set of port flags that failed to validate. If all ports validate successfully, it returns 0.
 //
-// It's encouraged to not use the port flags explicitly (because GameStream ports may change in the future),
+// It's encouraged to not use the port flags explicitly (because ports may change in the future),
 // but to instead use ML_PORT_FLAG_ALL or LiGetPortFlagsFromStage() on connection failure.
 //
 

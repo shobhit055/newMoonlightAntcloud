@@ -23,7 +23,7 @@ object AppModule {
     @Provides
     fun injectBackendRetrofitApi() : ApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.NONE
         val httpClient = OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor)
         return Retrofit.Builder().baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

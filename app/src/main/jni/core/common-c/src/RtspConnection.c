@@ -171,7 +171,7 @@ static bool unsealRtspMessage(char* rawMessage, int rawMessageLen, PRTSP_MESSAGE
         uint8_t iv[12] = { 0 };
 
         if (rawMessageLen <= (int)sizeof(ENC_RTSP_HEADER)) {
-            Limelog("RTSP encrypted header too small\n");
+           // Limelog("RTSP encrypted header too small\n");
             return false;
         }
 
@@ -179,17 +179,17 @@ static bool unsealRtspMessage(char* rawMessage, int rawMessageLen, PRTSP_MESSAGE
         typeAndLen = BE32(encryptedMessage->typeAndLength);
 
         if (!(typeAndLen & ENCRYPTED_RTSP_BIT)) {
-            Limelog("Rejecting unencrypted RTSP message\n");
+         //   Limelog("Rejecting unencrypted RTSP message\n");
             return false;
         }
 
         len = typeAndLen & ~ENCRYPTED_RTSP_BIT;
         if (len + sizeof(ENC_RTSP_HEADER) > (uint32_t)rawMessageLen) {
-            Limelog("Rejecting partial encrypted RTSP message\n");
+          //  Limelog("Rejecting partial encrypted RTSP message\n");
             return false;
         }
         else if (len + sizeof(ENC_RTSP_HEADER) < (uint32_t)rawMessageLen) {
-            Limelog("Rejecting encrypted RTSP message with excess data\n");
+        //    Limelog("Rejecting encrypted RTSP message with excess data\n");
             return false;
         }
 
@@ -217,7 +217,7 @@ static bool unsealRtspMessage(char* rawMessage, int rawMessageLen, PRTSP_MESSAGE
                                     (uint8_t*)(encryptedMessage + 1), decryptedMessageLen,
                                     (uint8_t*)decryptedMessage, &decryptedMessageLen);
         if (!success) {
-            Limelog("Failed to decrypt RTSP response\n");
+           // Limelog("Failed to decrypt RTSP response\n");
             free(decryptedMessage);
             return false;
         }
@@ -231,7 +231,7 @@ static bool unsealRtspMessage(char* rawMessage, int rawMessageLen, PRTSP_MESSAGE
         success = true;
     }
     else {
-        Limelog("Failed to parse RTSP response\n");
+       // Limelog("Failed to parse RTSP response\n");
         success = false;
     }
 
@@ -306,13 +306,13 @@ static bool transactRtspMessageEnet(PRTSP_MESSAGE request, PRTSP_MESSAGE respons
     // Wait for a reply
     if (serviceEnetHost(client, &event, RTSP_RECEIVE_TIMEOUT_SEC * 1000) <= 0 ||
         event.type != ENET_EVENT_TYPE_RECEIVE) {
-        Limelog("Failed to receive RTSP reply: %d\n", LastSocketFail());
+       // Limelog("Failed to receive RTSP reply: %d\n", LastSocketFail());
         goto Exit;
     }
 
     responseBuffer = malloc(event.packet->dataLength);
     if (responseBuffer == NULL) {
-        Limelog("Failed to allocate RTSP response buffer\n");
+       // Limelog("Failed to allocate RTSP response buffer\n");
         enet_packet_destroy(event.packet);
         goto Exit;
     }
@@ -327,13 +327,13 @@ static bool transactRtspMessageEnet(PRTSP_MESSAGE request, PRTSP_MESSAGE respons
         // The payload comes in a second packet
         if (serviceEnetHost(client, &event, RTSP_RECEIVE_TIMEOUT_SEC * 1000) <= 0 ||
             event.type != ENET_EVENT_TYPE_RECEIVE) {
-            Limelog("Failed to receive RTSP reply payload: %d\n", LastSocketFail());
+         //   Limelog("Failed to receive RTSP reply payload: %d\n", LastSocketFail());
             goto Exit;
         }
 
         responseBuffer = extendBuffer(responseBuffer, event.packet->dataLength + offset);
         if (responseBuffer == NULL) {
-            Limelog("Failed to extend RTSP response buffer\n");
+          //  Limelog("Failed to extend RTSP response buffer\n");
             enet_packet_destroy(event.packet);
             goto Exit;
         }
@@ -349,7 +349,7 @@ static bool transactRtspMessageEnet(PRTSP_MESSAGE request, PRTSP_MESSAGE respons
         ret = true;
     }
     else {
-        Limelog("Failed to parse RTSP response\n");
+      //  Limelog("Failed to parse RTSP response\n");
     }
 
 Exit:
@@ -425,7 +425,7 @@ static bool transactRtspMessageTcp(PRTSP_MESSAGE request, PRTSP_MESSAGE response
     err = sendMtuSafe(sock, serializedMessage, messageLen);
     if (err == SOCKET_ERROR) {
         *error = LastSocketError();
-        Limelog("Failed to send RTSP message: %d\n", *error);
+     //   Limelog("Failed to send RTSP message: %d\n", *error);
         goto Exit;
     }
 
@@ -439,7 +439,7 @@ static bool transactRtspMessageTcp(PRTSP_MESSAGE request, PRTSP_MESSAGE response
             responseBufferSize = offset + 16384;
             responseBuffer = extendBuffer(responseBuffer, responseBufferSize);
             if (responseBuffer == NULL) {
-                Limelog("Failed to allocate RTSP response buffer\n");
+              //  Limelog("Failed to allocate RTSP response buffer\n");
                 goto Exit;
             }
         }
@@ -449,12 +449,12 @@ static bool transactRtspMessageTcp(PRTSP_MESSAGE request, PRTSP_MESSAGE response
         err = pollSockets(&pfd, 1, RTSP_RECEIVE_TIMEOUT_SEC * 1000);
         if (err == 0) {
             *error = ETIMEDOUT;
-            Limelog("RTSP request timed out\n");
+         //   Limelog("RTSP request timed out\n");
             goto Exit;
         }
         else if (err < 0) {
             *error = LastSocketError();
-            Limelog("Failed to wait for RTSP response: %d\n", *error);
+          //  Limelog("Failed to wait for RTSP response: %d\n", *error);
             goto Exit;
         }
 
@@ -462,7 +462,7 @@ static bool transactRtspMessageTcp(PRTSP_MESSAGE request, PRTSP_MESSAGE response
         if (err < 0) {
             // Error reading
             *error = LastSocketError();
-            Limelog("Failed to read RTSP response: %d\n", *error);
+          //  Limelog("Failed to read RTSP response: %d\n", *error);
             goto Exit;
         }
         else if (err == 0) {
@@ -481,7 +481,7 @@ static bool transactRtspMessageTcp(PRTSP_MESSAGE request, PRTSP_MESSAGE response
     if (LocalAddr.ss_family == 0) {
         SOCKADDR_LEN addrLen = (SOCKADDR_LEN)sizeof(LocalAddr);
         if (getsockname(sock, (struct sockaddr*)&LocalAddr, &addrLen) < 0) {
-            Limelog("Failed to get local address: %d\n", LastSocketError());
+         //   Limelog("Failed to get local address: %d\n", LastSocketError());
             memset(&LocalAddr, 0, sizeof(LocalAddr));
         }
         else {
@@ -669,14 +669,14 @@ static int parseOpusConfigFromParamString(char* paramStr, int channelCount, POPU
 
     // Parse the remaining data from the surround-params value
     if (!CHAR_IS_DIGIT(*paramStr)) {
-        Limelog("Invalid stream count: %c\n", *paramStr);
+      //  Limelog("Invalid stream count: %c\n", *paramStr);
         return -1;
     }
     opusConfig->streams = CHAR_TO_INT(*paramStr);
     paramStr++;
 
     if (!CHAR_IS_DIGIT(*paramStr)) {
-        Limelog("Invalid coupled stream count: %c\n", *paramStr);
+     //   Limelog("Invalid coupled stream count: %c\n", *paramStr);
         return -2;
     }
     opusConfig->coupledStreams = CHAR_TO_INT(*paramStr);
@@ -684,7 +684,7 @@ static int parseOpusConfigFromParamString(char* paramStr, int channelCount, POPU
 
     for (i = 0; i < opusConfig->channelCount; i++) {
         if (!CHAR_IS_DIGIT(*paramStr)) {
-            Limelog("Invalid mapping value at %d: %c\n", i, *paramStr);
+         //   Limelog("Invalid mapping value at %d: %c\n", i, *paramStr);
             return -3;
         }
 
@@ -796,7 +796,7 @@ static int parseOpusConfigurations(PRTSP_MESSAGE response) {
             }
         }
         else {
-            Limelog("No surround parameters found for channel count: %d\n", channelCount);
+         //   Limelog("No surround parameters found for channel count: %d\n", channelCount);
 
             // It's unknown whether all GFE versions that supported surround sound included these
             // surround sound parameters. In case they didn't, we'll specifically handle 5.1 surround
@@ -1011,7 +1011,7 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         // Wait for the connect to complete
         if (serviceEnetHost(client, &event, RTSP_CONNECT_TIMEOUT_SEC * 1000) <= 0 ||
             event.type != ENET_EVENT_TYPE_CONNECT) {
-            Limelog("RTSP: Failed to connect to UDP port %u: error %d\n", RtspPortNumber, LastSocketFail());
+         //   Limelog("RTSP: Failed to connect to UDP port %u: error %d\n", RtspPortNumber, LastSocketFail());
             enet_peer_reset(peer);
             peer = NULL;
             enet_host_destroy(client);
@@ -1028,14 +1028,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         int error = -1;
 
         if (!requestOptions(&response, &error)) {
-            Limelog("RTSP OPTIONS request failed: %d\n", error);
+          //  Limelog("RTSP OPTIONS request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP OPTIONS request failed: %d\n",
-                response.message.response.statusCode);
+         //   Limelog("RTSP OPTIONS request failed: %d\n",
+              //  response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1048,14 +1048,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         int error = -1;
 
         if (!requestDescribe(&response, &error)) {
-            Limelog("RTSP DESCRIBE request failed: %d\n", error);
+        //    Limelog("RTSP DESCRIBE request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP DESCRIBE request failed: %d\n",
-                response.message.response.statusCode);
+          //  Limelog("RTSP DESCRIBE request failed: %d\n",
+               // response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1087,14 +1087,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
 
             // Dimensions over 4096 are only supported with HEVC on NVENC
             if (StreamConfig.width > 4096 || StreamConfig.height > 4096) {
-                Limelog("WARNING: Host PC doesn't support HEVC. Streaming at resolutions above 4K using H.264 will likely fail!\n");
+              //  Limelog("WARNING: Host PC doesn't support HEVC. Streaming at resolutions above 4K using H.264 will likely fail!\n");
             }
         }
 
         // Look for the SDP attribute that indicates we're dealing with a server that supports RFI
         ReferenceFrameInvalidationSupported = strstr(response.payload, "x-nv-video[0].refPicInvalidation") != NULL;
         if (!ReferenceFrameInvalidationSupported) {
-            Limelog("Reference frame invalidation is not supported by this host\n");
+           // Limelog("Reference frame invalidation is not supported by this host\n");
         }
 
         if (!parseSdpAttributeToUInt(response.payload, "x-ss-general.featureFlags", &FeatureFlags)) {
@@ -1128,14 +1128,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         if (!setupStream(&response,
                          AppVersionQuad[0] >= 5 ? "streamid=audio/0/0" : "streamid=audio",
                          &error)) {
-            Limelog("RTSP SETUP streamid=audio request failed: %d\n", error);
+          //  Limelog("RTSP SETUP streamid=audio request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP SETUP streamid=audio request failed: %d\n",
-                response.message.response.statusCode);
+          //  Limelog("RTSP SETUP streamid=audio request failed: %d\n",
+               //response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1146,10 +1146,10 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             // Use the well known port if parsing fails
             AudioPortNumber = 48000;
 
-            Limelog("Audio port: %u (RTSP parsing failed)\n", AudioPortNumber);
+        //    Limelog("Audio port: %u (RTSP parsing failed)\n", AudioPortNumber);
         }
         else {
-            Limelog("Audio port: %u\n", AudioPortNumber);
+         //   Limelog("Audio port: %u\n", AudioPortNumber);
         }
 
 
@@ -1167,7 +1167,7 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         sessionId = getOptionContent(response.options, "Session");
 
         if (sessionId == NULL) {
-            Limelog("RTSP SETUP streamid=audio is missing session attribute\n");
+           // Limelog("RTSP SETUP streamid=audio is missing session attribute\n");
             ret = -1;
             goto Exit;
         }
@@ -1179,7 +1179,7 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         // (i.e - sessionId = "DEADBEEFCAFE;timeout = 90") 
         sessionIdString = strdup(strtok_r(sessionId, ";", &strtokCtx));
         if (sessionIdString == NULL) {
-            Limelog("Failed to duplicate session ID string\n");
+           // Limelog("Failed to duplicate session ID string\n");
             ret = -1;
             goto Exit;
         }
@@ -1197,14 +1197,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         if (!setupStream(&response,
                          AppVersionQuad[0] >= 5 ? "streamid=video/0/0" : "streamid=video",
                          &error)) {
-            Limelog("RTSP SETUP streamid=video request failed: %d\n", error);
+           // Limelog("RTSP SETUP streamid=video request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP SETUP streamid=video request failed: %d\n",
-                response.message.response.statusCode);
+         //   Limelog("RTSP SETUP streamid=video request failed: %d\n",
+            //    response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1222,10 +1222,10 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             // Use the well known port if parsing fails
             VideoPortNumber = 47998;
 
-            Limelog("Video port: %u (RTSP parsing failed)\n", VideoPortNumber);
+         //   Limelog("Video port: %u (RTSP parsing failed)\n", VideoPortNumber);
         }
         else {
-            Limelog("Video port: %u\n", VideoPortNumber);
+         //   Limelog("Video port: %u\n", VideoPortNumber);
         }
 
         freeMessage(&response);
@@ -1239,14 +1239,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         if (!setupStream(&response,
                          controlStreamId,
                          &error)) {
-            Limelog("RTSP SETUP streamid=control request failed: %d\n", error);
+         //   Limelog("RTSP SETUP streamid=control request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP SETUP streamid=control request failed: %d\n",
-                response.message.response.statusCode);
+       //     Limelog("RTSP SETUP streamid=control request failed: %d\n",
+             //   response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1266,10 +1266,10 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             // Use the well known port if parsing fails
             ControlPortNumber = 47999;
 
-            Limelog("Control port: %u (RTSP parsing failed)\n", ControlPortNumber);
+          //  Limelog("Control port: %u (RTSP parsing failed)\n", ControlPortNumber);
         }
         else {
-            Limelog("Control port: %u\n", ControlPortNumber);
+          //  Limelog("Control port: %u\n", ControlPortNumber);
         }
 
         freeMessage(&response);
@@ -1280,14 +1280,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         int error = -1;
 
         if (!sendVideoAnnounce(&response, &error)) {
-            Limelog("RTSP ANNOUNCE request failed: %d\n", error);
+          //  Limelog("RTSP ANNOUNCE request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP ANNOUNCE request failed: %d\n",
-                response.message.response.statusCode);
+          //  Limelog("RTSP ANNOUNCE request failed: %d\n",
+              //  response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1301,14 +1301,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
         int error = -1;
 
         if (!playStream(&response, "/", &error)) {
-            Limelog("RTSP PLAY request failed: %d\n", error);
+          //  Limelog("RTSP PLAY request failed: %d\n", error);
             ret = error;
             goto Exit;
         }
 
         if (response.message.response.statusCode != 200) {
-            Limelog("RTSP PLAY failed: %d\n",
-                response.message.response.statusCode);
+        //    Limelog("RTSP PLAY failed: %d\n",
+           //     response.message.response.statusCode);
             ret = response.message.response.statusCode;
             goto Exit;
         }
@@ -1321,14 +1321,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             int error = -1;
 
             if (!playStream(&response, "streamid=video", &error)) {
-                Limelog("RTSP PLAY streamid=video request failed: %d\n", error);
+            //   Limelog("RTSP PLAY streamid=video request failed: %d\n", error);
                 ret = error;
                 goto Exit;
             }
 
             if (response.message.response.statusCode != 200) {
-                Limelog("RTSP PLAY streamid=video failed: %d\n",
-                    response.message.response.statusCode);
+            //    Limelog("RTSP PLAY streamid=video failed: %d\n",
+                //    response.message.response.statusCode);
                 ret = response.message.response.statusCode;
                 goto Exit;
             }
@@ -1341,14 +1341,14 @@ int performRtspHandshake(PSERVER_INFORMATION serverInfo) {
             int error = -1;
 
             if (!playStream(&response, "streamid=audio", &error)) {
-                Limelog("RTSP PLAY streamid=audio request failed: %d\n", error);
+            //    Limelog("RTSP PLAY streamid=audio request failed: %d\n", error);
                 ret = error;
                 goto Exit;
             }
 
             if (response.message.response.statusCode != 200) {
-                Limelog("RTSP PLAY streamid=audio failed: %d\n",
-                    response.message.response.statusCode);
+            //    Limelog("RTSP PLAY streamid=audio failed: %d\n",
+                  //  response.message.response.statusCode);
                 ret = response.message.response.statusCode;
                 goto Exit;
             }

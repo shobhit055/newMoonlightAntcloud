@@ -85,7 +85,7 @@ public class AndroidCryptoProvider implements LimelightCryptoProvider {
 
         // If either file was missing, we definitely can't succeed
         if (certBytes == null || keyBytes == null) {
-            LimeLog.info("Missing cert or key; need to generate a new one");
+           // LimeLog.info("Missing cert or key; need to generate a new one");
             return false;
         }
 
@@ -135,7 +135,7 @@ public class AndroidCryptoProvider implements LimelightCryptoProvider {
         BigInteger serial = new BigInteger(snBytes).abs();
 
         X500NameBuilder nameBuilder = new X500NameBuilder(BCStyle.INSTANCE);
-        nameBuilder.addRDN(BCStyle.CN, "NVIDIA GameStream Client");
+        nameBuilder.addRDN(BCStyle.CN, "Client");
         X500Name name = nameBuilder.build();
 
         X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(name, serial, now, expirationDate, Locale.ENGLISH, name,
@@ -149,7 +149,7 @@ public class AndroidCryptoProvider implements LimelightCryptoProvider {
             throw new RuntimeException(e);
         }
 
-        LimeLog.info("Generated a new key pair");
+       // LimeLog.info("Generated a new key pair");
 
         // Save the resulting pair
         saveCertKeyPair();
@@ -180,7 +180,7 @@ public class AndroidCryptoProvider implements LimelightCryptoProvider {
             // Write the private out in PKCS8 format
             keyOut.write(key.getEncoded());
 
-            LimeLog.info("Saved generated key pair to disk");
+         //   LimeLog.info("Saved generated key pair to disk");
         } catch (IOException e) {
             // This isn't good because it means we'll have
             // to re-pair next time

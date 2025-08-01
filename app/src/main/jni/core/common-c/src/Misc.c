@@ -19,7 +19,7 @@ static int serviceEnetHostInternal(ENetHost* client, ENetEvent* event, enet_uint
 
         // We want to report an interrupt event if we are able to read data
         if (!ignoreInterrupts && ConnectionInterrupted) {
-            Limelog("ENet wait interrupted\n");
+           // Limelog("ENet wait interrupted\n");
             SetLastSocketError(EINTR);
             ret = -1;
             break;
@@ -60,7 +60,7 @@ int gracefullyDisconnectEnetPeer(ENetHost* host, ENetPeer* peer, enet_uint32 lin
                 enet_packet_destroy(event.packet);
                 break;
             case ENET_EVENT_TYPE_DISCONNECT:
-                Limelog("ENet peer acknowledged disconnection\n");
+              //  Limelog ("ENet peer acknowledged disconnection\n");
                 return 0;
             default:
                 LC_ASSERT(false);
@@ -69,16 +69,16 @@ int gracefullyDisconnectEnetPeer(ENetHost* host, ENetPeer* peer, enet_uint32 lin
         }
 
         if (err == 0) {
-            Limelog("Timed out waiting for ENet peer to acknowledge disconnection\n");
+         //   Limelog("Timed out waiting for ENet peer to acknowledge disconnection\n");
         }
         else {
-            Limelog("Failed to receive ENet peer disconnection acknowledgement: %d\n", LastSocketFail());
+            //Limelog("Failed to receive ENet peer disconnection acknowledgement: %d\n", LastSocketFail());
         }
 
         return -1;
     }
     else {
-        Limelog("ENet peer is already disconnected\n");
+       // Limelog("ENet peer is already disconnected\n");
         enet_peer_disconnect_now(peer, 0);
         return 0;
     }

@@ -234,7 +234,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     public void onInputDeviceRemoved(int deviceId) {
         InputDeviceContext context = inputDeviceContexts.get(deviceId);
         if (context != null) {
-            LimeLog.info("Removed controller: "+context.name+" ("+deviceId+")");
+          //  LimeLog.info("Removed controller: "+context.name+" ("+deviceId+")");
             releaseControllerNumber(context);
             context.destroy();
             inputDeviceContexts.remove(deviceId);
@@ -256,7 +256,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             return;
         }
 
-        LimeLog.info("Device changed: "+existingContext.name+" ("+deviceId+")");
+     //   LimeLog.info("Device changed: "+existingContext.name+" ("+deviceId+")");
 
         // Migrate the existing context into this new one by moving any stateful elements
         InputDeviceContext newContext = createInputDeviceContextForDevice(device);
@@ -374,7 +374,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             }
 
             if (hasJoystickAxes(dev)) {
-                LimeLog.info("Counting InputDevice: "+dev.getName());
+               // LimeLog.info("Counting InputDevice: "+dev.getName());
                 mask |= 1 << count++;
             }
         }
@@ -388,7 +388,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     // otherwise we will double count them.
                     if (UsbDriverService.shouldClaimDevice(dev, false) &&
                             !UsbDriverService.isRecognizedInputDevice(dev)) {
-                        LimeLog.info("Counting UsbDevice: "+dev.getDeviceName());
+                       // LimeLog.info("Counting UsbDevice: "+dev.getDeviceName());
                         mask |= 1 << count++;
                     }
                 }
@@ -396,18 +396,18 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         }
 
         if (PreferenceConfiguration.readPreferences(context).onscreenController) {
-            LimeLog.info("Counting OSC gamepad");
+           // LimeLog.info("Counting OSC gamepad");
             mask |= 1;
         }
 
-        LimeLog.info("Enumerated "+count+" gamepads");
+      //  LimeLog.info("Enumerated "+count+" gamepads");
         return mask;
     }
 
     private void releaseControllerNumber(GenericControllerContext context) {
         // If we reserved a controller number, remove that reservation
         if (context.reservedControllerNumber) {
-            LimeLog.info("Controller number "+context.controllerNumber+" is now available");
+         //   LimeLog.info("Controller number "+context.controllerNumber+" is now available");
             currentControllers &= ~(1 << context.controllerNumber);
         }
 
@@ -458,15 +458,15 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         if (context instanceof InputDeviceContext) {
             InputDeviceContext devContext = (InputDeviceContext) context;
 
-            LimeLog.info(devContext.name+" ("+context.id+") needs a controller number assigned");
+          //  LimeLog.info(devContext.name+" ("+context.id+") needs a controller number assigned");
             if (!devContext.external) {
-                LimeLog.info("Built-in buttons hardcoded as controller 0");
+          //      LimeLog.info("Built-in buttons hardcoded as controller 0");
                 context.controllerNumber = 0;
             }
             else if (prefConfig.multiController && devContext.hasJoystickAxes) {
                 context.controllerNumber = 0;
 
-                LimeLog.info("Reserving the next available controller number");
+             //   LimeLog.info("Reserving the next available controller number");
                 for (short i = 0; i < MAX_GAMEPADS; i++) {
                     if ((currentControllers & (1 << i)) == 0) {
                         // Found an unused controller value
@@ -494,7 +494,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 if (!isAssociatedJoystick(devContext.inputDevice, associatedDevice)) {
                     associatedDevice = InputDevice.getDevice(devContext.id - 1);
                     if (!isAssociatedJoystick(devContext.inputDevice, associatedDevice)) {
-                        LimeLog.info("No associated joystick device found");
+                    //    LimeLog.info("No associated joystick device found");
                         associatedDevice = null;
                     }
                 }
@@ -516,11 +516,11 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                     // Propagate the associated controller number
                     context.controllerNumber = associatedDeviceContext.controllerNumber;
 
-                    LimeLog.info("Propagated controller number from "+associatedDeviceContext.name);
+                 //   LimeLog.info("Propagated controller number from "+associatedDeviceContext.name);
                 }
             }
             else {
-                LimeLog.info("Not reserving a controller number");
+              //  LimeLog.info("Not reserving a controller number");
                 context.controllerNumber = 0;
             }
 
@@ -533,7 +533,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             if (prefConfig.multiController) {
                 context.controllerNumber = 0;
 
-                LimeLog.info("Reserving the next available controller number");
+              //  LimeLog.info("Reserving the next available controller number");
                 for (short i = 0; i < MAX_GAMEPADS; i++) {
                     if ((currentControllers & (1 << i)) == 0) {
                         // Found an unused controller value
@@ -549,12 +549,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 }
             }
             else {
-                LimeLog.info("Not reserving a controller number");
+              //  LimeLog.info("Not reserving a controller number");
                 context.controllerNumber = 0;
             }
         }
 
-        LimeLog.info("Assigned as controller "+context.controllerNumber);
+      //  LimeLog.info("Assigned as controller "+context.controllerNumber);
         context.assignedControllerNumber = true;
 
         // Report attributes of this new controller to the host
@@ -621,7 +621,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
                 deviceName.equalsIgnoreCase("GR0006") // Gamepad on Logitech G Cloud
         )
         {
-            LimeLog.info(dev.getName()+" is internal by hardcoded mapping");
+           // LimeLog.info(dev.getName()+" is internal by hardcoded mapping");
             return false;
         }
 
@@ -711,10 +711,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         InputDeviceContext context = new InputDeviceContext();
         String devName = dev.getName();
 
-        LimeLog.info("Creating controller context for device: "+devName);
-        LimeLog.info("Vendor ID: " + dev.getVendorId());
-        LimeLog.info("Product ID: "+dev.getProductId());
-        LimeLog.info(dev.toString());
+      //  LimeLog.info("Creating controller context for device: "+devName);
+       // LimeLog.info("Vendor ID: " + dev.getVendorId());
+      //  LimeLog.info("Product ID: "+dev.getProductId());
+      //  LimeLog.info(dev.toString());
 
         context.inputDevice = dev;
         context.name = devName;
@@ -840,10 +840,10 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             if (rxRange != null && ryRange != null && devName != null) {
                 if (dev.getVendorId() == 0x054c) { // Sony
                     if (dev.hasKeys(KeyEvent.KEYCODE_BUTTON_C)[0]) {
-                        LimeLog.info("Detected non-standard DualShock 4 mapping");
+                     //   LimeLog.info("Detected non-standard DualShock 4 mapping");
                         context.isNonStandardDualShock4 = true;
                     } else {
-                        LimeLog.info("Detected DualShock 4 (Linux standard mapping)");
+                     //   LimeLog.info("Detected DualShock 4 (Linux standard mapping)");
                         context.usesLinuxGamepadStandardFaceButtons = true;
                     }
                 }
@@ -999,8 +999,8 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             context.hasMode = false;
         }
 
-        LimeLog.info("Analog stick deadzone: "+context.leftStickDeadzoneRadius+" "+context.rightStickDeadzoneRadius);
-        LimeLog.info("Trigger deadzone: "+context.triggerDeadzone);
+      //  LimeLog.info("Analog stick deadzone: "+context.leftStickDeadzoneRadius+" "+context.rightStickDeadzoneRadius);
+      //  LimeLog.info("Trigger deadzone: "+context.triggerDeadzone);
 
         return context;
     }
@@ -2847,7 +2847,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
     public void deviceRemoved(AbstractController controller) {
         UsbDeviceContext context = usbDeviceContexts.get(controller.getControllerId());
         if (context != null) {
-            LimeLog.info("Removed controller: "+controller.getControllerId());
+          //  LimeLog.info("Removed controller: "+controller.getControllerId());
             releaseControllerNumber(context);
             context.destroy();
             usbDeviceContexts.remove(controller.getControllerId());

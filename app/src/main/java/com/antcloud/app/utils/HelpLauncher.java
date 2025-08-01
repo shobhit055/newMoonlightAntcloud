@@ -43,7 +43,4 @@ public class HelpLauncher {
 
     }
 
-    public static void launchGameStreamEolFaq(Context context) {
-
-    }
 }

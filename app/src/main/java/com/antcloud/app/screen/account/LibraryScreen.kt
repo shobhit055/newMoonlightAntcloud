@@ -196,7 +196,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
                 GlobalData.getInstance().accountData = checkUserState.userData!!
                 GlobalData.getInstance().accountData.token = checkUserState.token!!
                 userViewModel.updateUserInfo(GlobalData.getInstance().accountData)
-                Log.i("test ", "userdata" + checkUserState.userData)
+              //  Log.i("test ", "userdata" + checkUserState.userData)
 
             }
         }
@@ -221,7 +221,7 @@ fun libraryScreen(navigate: (String) -> Unit, activity: NavActivity, userViewMod
                     }
 
                     else -> {
-                        Log.i("test", "qefqe" + checkUserState.errorCode)
+                     //   Log.i("test", "qefqe" + checkUserState.errorCode)
                         if (checkUserState.error != "")
                             activity.makeToast(checkUserState.error)
                         signOut(activity, userViewModel)

@@ -149,7 +149,7 @@ static bool queuePacketToLbq(PQUEUED_AUDIO_PACKET* packet) {
             *packet = NULL;
         }
         else if (err == LBQ_BOUND_EXCEEDED) {
-            Limelog("Audio packet queue overflow\n");
+         //   Limelog("Audio packet queue overflow\n");
 
             // The audio queue is full, so free all existing items and try again
             freePacketList(LbqFlushQueueItems(&packetQueue));
@@ -170,7 +170,7 @@ static void decodeInputData(PQUEUED_AUDIO_PACKET packet) {
 
     PRTP_PACKET rtp = (PRTP_PACKET)&packet->data[0];
     if (lastSeq != 0 && (unsigned short)(lastSeq + 1) != rtp->sequenceNumber) {
-        Limelog("Network dropped audio data (expected %d, but received %d)\n", lastSeq + 1, rtp->sequenceNumber);
+       // Limelog("Network dropped audio data (expected %d, but received %d)\n", lastSeq + 1, rtp->sequenceNumber);
     }
 
     lastSeq = rtp->sequenceNumber;
@@ -195,7 +195,7 @@ static void decodeInputData(PQUEUED_AUDIO_PACKET packet) {
                                NULL, 0,
                                (unsigned char*)(rtp + 1), dataLength,
                                decryptedOpusData, &dataLength)) {
-            Limelog("Failed to decrypt audio packet (sequence number: %u)\n", rtp->sequenceNumber);
+          //  Limelog("Failed to decrypt audio packet (sequence number: %u)\n", rtp->sequenceNumber);
             LC_ASSERT_VT(false);
             return;
         }
@@ -260,7 +260,7 @@ static void AudioReceiveThreadProc(void* context) {
         if (packet == NULL) {
             packet = (PQUEUED_AUDIO_PACKET)malloc(sizeof(*packet));
             if (packet == NULL) {
-                Limelog("Audio Receive: malloc() failed\n");
+            //    Limelog("Audio Receive: malloc() failed\n");
                 ListenerCallbacks.connectionTerminated(-1);
                 break;
             }
@@ -268,7 +268,7 @@ static void AudioReceiveThreadProc(void* context) {
 
         packet->header.size = recvUdpSocket(rtpSocket, &packet->data[0], MAX_PACKET_SIZE, useSelect);
         if (packet->header.size < 0) {
-            Limelog("Audio Receive: recvUdpSocket() failed: %d\n", (int)LastSocketError());
+          //  Limelog("Audio Receive: recvUdpSocket() failed: %d\n", (int)LastSocketError());
             ListenerCallbacks.connectionTerminated(LastSocketFail());
             break;
         }
@@ -295,13 +295,13 @@ static void AudioReceiveThreadProc(void* context) {
 
         if (!receivedDataFromPeer) {
             receivedDataFromPeer = true;
-            Limelog("Received first audio packet after %d ms\n", waitingForAudioMs);
+         //   Limelog("Received first audio packet after %d ms\n", waitingForAudioMs);
 
             if (firstReceiveTime != 0) {
                 packetsToDrop += (uint32_t)(PltGetMillis() - firstReceiveTime) / AudioPacketDuration;
             }
 
-            Limelog("Initial audio resync period: %d milliseconds\n", packetsToDrop * AudioPacketDuration);
+           // Limelog("Initial audio resync period: %d milliseconds\n", packetsToDrop * AudioPacketDuration);
         }
 
         // GFE accumulates audio samples before we are ready to receive them, so
@@ -398,7 +398,7 @@ static void AudioDecoderThreadProc(void* context) {
 
 void stopAudioStream(void) {
     if (!receivedDataFromPeer) {
-        Limelog("No audio traffic was ever received from the host!\n");
+    //    Limelog("No audio traffic was ever received from the host!\n");
     }
 
     AudioCallbacks.stop();
