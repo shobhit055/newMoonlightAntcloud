@@ -268,6 +268,7 @@ fun SignupScreen(activity: SignupActivity, viewModel: AuthenticateViewModel, ema
                     viewModel.emailState.trim(), viewModel.passwordState.trim(),
                     "+91${user.phone}", user.firstName, user.lastName, user.location, user.source
                 )
+
                 viewModel.getSignUpData(dataModel)
             }
         }

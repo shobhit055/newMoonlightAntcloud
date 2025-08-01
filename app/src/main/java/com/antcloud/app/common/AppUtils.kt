@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.compose.runtime.Composable
@@ -172,21 +174,6 @@ class AppUtils {
             GlobalData.getInstance().accountData.refreshToken = refreshToken
         }
 
-//        fun setBitrate(resolution : String , viewModel : AppViewModel){
-//            if(resolution=="360p")
-//                viewModel.updateBitrate(2000f)
-//            else if(resolution=="480p")
-//                viewModel.updateBitrate(4000f)
-//            else if(resolution=="720p")
-//                viewModel.updateBitrate(6000f)
-//            else if(resolution=="1080p" )
-//                viewModel.updateBitrate(10000f)
-//            else if(resolution=="1440p")
-//                viewModel.updateBitrate(30000f)
-//            else if(resolution=="4K" )
-//                viewModel.updateBitrate(50000f)
-//        }
-
         fun setBitrate(resolution : String) : Int{
             var value : Int = 0
             if(resolution=="360p")
@@ -202,6 +189,15 @@ class AppUtils {
             else if(resolution=="2160" )
                 value = 50000
             return value
+        }
+
+        fun isInternetAvailable(context: Context): Boolean {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val network = connectivityManager.activeNetwork ?: return false
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+            return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         }
     }
 }

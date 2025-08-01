@@ -38,6 +38,7 @@ import com.google.firebase.messaging.messaging
 import com.google.firebase.perf.FirebasePerformance
 import com.antcloud.app.common.AnalyticsManager.Companion.removeAnalyticsUserId
 import com.antcloud.app.common.AnalyticsManager.Companion.setAnalyticsUserId
+
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.FileInputStream
@@ -143,26 +144,17 @@ class SplashActivity : ComponentActivity(){
                             activityResultLauncher!!,
                             AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
                         )
-                    }/* else if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
-
-            }*/
+                    }
                 }
             }
             viewModel = hiltViewModel()
             if (!updateAvailable) {
                 if (globalInstance.accountData.token != "") {
                     LaunchedEffect(Unit) {
-                        globalInstance.appStartToken = true
-                        globalInstance.traceAppStartToken =
-                            FirebasePerformance.getInstance().newTrace("app_start_with_token")
-                        globalInstance.traceAppStartToken.start()
-
-                        globalInstance.checkUserApi = true
-                        globalInstance.traceCheckUserApi = FirebasePerformance.getInstance().newTrace("check_user_api")
-                        globalInstance.traceCheckUserApi.start()
-                        viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+                        callCheckUserApi()
                     }
-                } else {
+                }
+                else {
                     globalInstance.appStartWithoutToken = true
                     globalInstance.traceAppStartWithoutToken =
                         FirebasePerformance.getInstance().newTrace("app_start_without_token")
@@ -207,7 +199,11 @@ class SplashActivity : ComponentActivity(){
                             val msg = checkUserState.error
                             if (msg == "Token Expired" && !calledRefresh) {
                                 LaunchedEffect(Unit) {
-                                    viewModel.getRefreshTokenData("JWT " + globalInstance.accountData.refreshToken)
+//                                    if(isInternetAvailable(this@SplashActivity))
+                                        viewModel.getRefreshTokenData("JWT " + globalInstance.accountData.refreshToken)
+
+//                                    else
+//                                        activity.makeToast("No internet connection. Please check your network.")
                                 }
                             } else {
                                 LaunchedEffect(Unit) {
@@ -247,12 +243,8 @@ class SplashActivity : ComponentActivity(){
                     LaunchedEffect(Unit) {
                         calledRefresh = true
                         if ((refreshTokenState.accessToken != "") && (refreshTokenState.refreshToken != "")) {
-                            saveRefreshTokenData(
-                                activity,
-                                refreshTokenState.accessToken,
-                                refreshTokenState.refreshToken
-                            )
-                            viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+                            saveRefreshTokenData(activity, refreshTokenState.accessToken, refreshTokenState.refreshToken)
+                            callCheckUserApi()
                         }
                     }
                 }
@@ -284,6 +276,22 @@ class SplashActivity : ComponentActivity(){
                 }
             }
         }
+    }
+
+    private fun callCheckUserApi() {
+      //  if(isInternetAvailable(this@SplashActivity)) {
+            globalInstance.appStartToken = true
+            globalInstance.traceAppStartToken = FirebasePerformance.getInstance().newTrace("app_start_with_token")
+            globalInstance.traceAppStartToken.start()
+
+            globalInstance.checkUserApi = true
+            globalInstance.traceCheckUserApi = FirebasePerformance.getInstance().newTrace("check_user_api")
+            globalInstance.traceCheckUserApi.start()
+            viewModel.getCheckUserData("JWT " + globalInstance.accountData.token)
+     //   }
+//        else{
+//            activity.makeToast("No internet connection. Please check your network.")
+//        }
     }
 
     @Composable
@@ -343,12 +351,5 @@ class SplashActivity : ComponentActivity(){
         encryptedDataSize = fis.read(encryptedData)
         return encryptedDataSize
     }
-
-
-    override fun onResume() {
-        super.onResume()
-
-    }
-
 
 }
