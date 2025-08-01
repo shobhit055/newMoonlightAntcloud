@@ -69,6 +69,9 @@
     <string name="fps_90">90 FPS</string>
     <string name="fps_120">120 FPS</string>
 
+    <string name="default_notification_channel_id">ant</string>
+    <string name="default_notification_channel_name">antcloud</string>
+
     <string name="loading_error_button">Retry Loading Data</string>
     <string name="loading_error_text">An error occurred. Please try again by pressing the button below.\n\nIn case the issue persists, kindly get in touch with us at support@antcloud.co</string>
     <string name="logo_description">Logo</string>
@@ -102,5 +105,8 @@
     <string name="exit_stream">Are you sure you want to exit?</string>
     <string name="email_sent">Password reset email sent</string>
     <string name="incorrect_email_pass">The email or password provided is incorrect</string>
+    <string name="launch_pc">Launch PC</string>
+    <string name="shutdown_pc">Shutdown PC</string>
+
 
 </resources>

@@ -227,20 +227,22 @@
             android:paddingHorizontal="10dp">
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/start_vm_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.42"
-                android:text="Launch PC"
+                android:text="@string/launch_pc"
                 android:textColor="@android:color/black"
                 android:backgroundTint="@android:color/white"/>
 
             <Button
+                android:textAllCaps="false"
                 android:id="@+id/shutdown_vm_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.42"
-                android:text="Shutdown VM"
+                android:text="@string/shutdown_pc"
                 android:textColor="@android:color/white"
                 android:layout_marginStart="10dp"
                 android:backgroundTint="@color/pink_gradient"/>

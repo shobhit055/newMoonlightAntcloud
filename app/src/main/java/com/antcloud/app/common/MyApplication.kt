@@ -75,7 +75,7 @@ class MyApplication: Application() {
             if(key.contains("appMessage")) {
                 globalInstance.remoteAppMessage = listOf()
                 val appMessage: Array<AppMessage> = Gson().fromJson(dataJson, Array<AppMessage>::class.java)
-//                Log.d("webView", "remote App Message $appMessage")
+                Log.d("webView", "remote App Message $appMessage")
                 for (message in appMessage) {
                     globalInstance.remoteAppMessage += listOf(message)
                 }

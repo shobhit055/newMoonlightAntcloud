@@ -604,14 +604,14 @@ private fun WelcomeScreen(activity: SplashActivity, viewModel: AuthenticateViewM
 
                         } else {
                             if (emailMobile.isEmailValid()) {
-                                if (isInternetAvailable(activity)) {
+//                                if (isInternetAvailable(activity)) {
                                     viewModel.updateLoginLoadingText("please wait ....")
                                     progressBarVisible = true
                                     val dataModel = CheckUserInDB(emailMobile.trim(), "")
                                     viewModel.checkUserInDB(dataModel)
-                                }
-                                else
-                                    activity.makeToast("No internet connection. Please check your network.")
+//                                }
+//                                else
+//                                    activity.makeToast("No internet connection. Please check your network.")
                             } else
                                 activity.makeToast("Please enter a valid Email")
 

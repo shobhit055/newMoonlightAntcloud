@@ -501,6 +501,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                                 },
                                 textStyle = TextStyle(color = White, fontSize = 14.sp),
                                 cursorBrush = SolidColor(BlueGradient),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                                 modifier = Modifier
                                     .fillMaxWidth(0.8f)
                                     .border(1.dp, passColor, RoundedCornerShape(16.dp))
@@ -915,6 +916,7 @@ fun LoginScreen(activity: LoginActivity, emailMobileValue: String, viewModel: Au
                             },
                             textStyle = TextStyle(color = White, fontSize = 14.sp),
                             cursorBrush = SolidColor(BlueGradient),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .border(1.dp, passColor, RoundedCornerShape(16.dp))
