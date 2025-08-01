@@ -16,7 +16,7 @@ android {
     namespace 'com.antcloud.app'
 
     defaultConfig {
-        minSdk 24
+        minSdk 26
         targetSdk 35
         versionName "1.26"
         versionCode 31
